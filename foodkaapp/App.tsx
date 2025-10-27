@@ -15,7 +15,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-
+import './global.css'
 import {
   Colors,
   DebugInstructions,
@@ -90,7 +90,7 @@ function App(): React.JSX.Element {
             paddingBottom: safePadding,
           }}>
           <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
+            Edit <Text className='text-red-500' >App.tsx</Text> t là khang to change this
             screen and then come back to see your edits.
           </Section>
           <Section title="See Your Changes">
