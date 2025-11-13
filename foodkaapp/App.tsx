@@ -1,15 +1,18 @@
-import React, { Component } from 'react'
-import { Text, View } from 'react-native'
-import './global.css'
+import 'react-native-reanimated';
+import React from 'react';
+// import {Text, View} from 'react-native';
+import './global.css';
+import './src/utils/nativewind-setup'; // Cấu hình NativeWind
+import {navigationRef, setIsNavigationReady} from './src/navigation/Navigation';
+import {NavigationContainer} from '@react-navigation/native';
+import RootNavigator from './src/navigation/navigators/RootNavigator';
 
-export class App extends Component {
-  render() {
-    return (
-      <View>
-        <Text className='text-teal-400'> textInComponent </Text>
-      </View>
-    )
-  }
+export default function App() {
+  return (
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={setIsNavigationReady}>
+        <RootNavigator />
+      </NavigationContainer>
+  );
 }
-
-export default App
