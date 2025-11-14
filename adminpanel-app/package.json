@@ -4,7 +4,11 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
+    "start:clear": "expo start --clear",
     "android": "expo start --android",
+    "android:clear": "expo start --android --clear",
+    "android:tunnel": "expo start --android --tunnel",
+    "android:no-auto": "expo start --clear --no-dev-client",
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
