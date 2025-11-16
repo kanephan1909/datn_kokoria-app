@@ -1,0 +1,29 @@
+import { StyleSheet, Text, View } from 'react-native'
+import React from 'react'
+import CategoriesScreen from '../screens/CategoriesScreen'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import AddCategoryScreen from '../screens/AddCategoryScreen'
+
+const Stack = createNativeStackNavigator();
+
+const CategoriesStack = () => {
+  return (
+    <Stack.Navigator
+    screenOptions={{
+        headerStyle: {
+            backgroundColor: 'tomato'
+        },
+        headerTintColor: 'white',
+        headerTitleStyle: { fontWeight: 'bold' },
+        headerTitleAlign: 'center',
+    }}
+    >
+      <Stack.Screen name="Categories" component={CategoriesScreen} options={{title: 'Danh Mục Sản Phẩm'}}/>
+      <Stack.Screen name="AddCategory" component={AddCategoryScreen} options={{title: 'Thêm Danh Mục Sản Phẩm'}}/>
+    </Stack.Navigator>
+  )
+}
+
+export default CategoriesStack
+
+const styles = StyleSheet.create({})
