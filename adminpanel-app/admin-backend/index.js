@@ -1,0 +1,70 @@
+require('dotenv').config(); 
+const express = require('express');
+const cors = require('cors');
+const logger = require('./utils/logger');
+const helmet = require('helmet');
+const bodyParser = require('body-parser');
+const rateLimit = require('express-rate-limit');
+const crypto = require('crypto');
+const errorHandler = require('./middlesware/errorHandler.js');
+
+const categoriesRoutes = require('./routes/categories');
+const productsRoutes = require('./routes/products');
+
+const app = express();
+
+/**
+ * CORS - Chỉ cho phép frontend truy cập API
+ * FRONTEND_URL được khai báo trong .env (VD: http://localhost:5173)
+ */
+app.use(cors({ origin: process.env.FRONTEND_URL }));
+
+/**
+ * Helmet - bảo vệ API trước các vấn đề bảo mật phổ biến
+ * (XSS, clickjacking, MIME sniffing, ...)
+ */
+app.use(helmet());
+
+/**
+ * Rate Limit - Giới hạn số lượng request để chống DDOS / spam API
+ * - 100 requests / 15 phút / mỗi IP
+ */
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100,
+    message: 'Quá nhiều yêu cầu, vui lòng thử lại sau.',
+  })
+);
+
+/**
+ * Middleware parse JSON body
+ * express.json() giúp parse JSON incoming request
+ */
+app.use(express.json());
+
+/**
+ * Parse form-data kiểu application/x-www-form-urlencoded
+ */
+app.use(express.urlencoded({ extended: true }));
+
+/**
+ * bodyParser.raw() — chỉ dùng nếu bạn nhận JSON dưới dạng raw buffer,
+ * thường dùng để verify webhook (Stripe, PayPal,...)
+ * -> Nếu project không cần thì có thể bỏ.
+ */
+app.use(bodyParser.raw({ type: 'application/json' }));
+
+app.use(errorHandler);
+
+// Routes with API VERSIONING
+app.use('/api/v1/categories', categoriesRoutes);
+app.use('/api/v1/products', productsRoutes);
+
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  logger.info(`Server is running on port ${PORT}`);
+});
+
+module.exports = app;
