@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "kokoria-app.app"
-               BlueprintName = "kokoria-app"
-               ReferencedContainer = "container:kokoria-app.xcodeproj">
+               BuildableName = "kokoriaapp.app"
+               BlueprintName = "kokoriaapp"
+               ReferencedContainer = "container:kokoriaapp.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "kokoria-appTests.xctest"
-               BlueprintName = "kokoria-appTests"
-               ReferencedContainer = "container:kokoria-app.xcodeproj">
+               BuildableName = "kokoriaappTests.xctest"
+               BlueprintName = "kokoriaappTests"
+               ReferencedContainer = "container:kokoriaapp.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "kokoria-app.app"
-            BlueprintName = "kokoria-app"
-            ReferencedContainer = "container:kokoria-app.xcodeproj">
+            BuildableName = "kokoriaapp.app"
+            BlueprintName = "kokoriaapp"
+            ReferencedContainer = "container:kokoriaapp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "kokoria-app.app"
-            BlueprintName = "kokoria-app"
-            ReferencedContainer = "container:kokoria-app.xcodeproj">
+            BuildableName = "kokoriaapp.app"
+            BlueprintName = "kokoriaapp"
+            ReferencedContainer = "container:kokoriaapp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
