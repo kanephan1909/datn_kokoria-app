@@ -1,4 +1,4 @@
-package com.kokoria-app
+package com.kokoriaapp
 
 import android.app.Application
 import com.facebook.react.PackageList
