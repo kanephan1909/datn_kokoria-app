@@ -7,7 +7,7 @@ import BannerCarousel from '../components/dashboard/BannerCarousel';
 import Categories from '../components/dashboard/Categories';
 import FlashSale from '../components/dashboard/FlashSale';
 import PopularItems from '../components/dashboard/PopularItems';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@react-native-vector-icons/ionicons';
 
 const HomeScreen = () => {
   const [query, setQuery] = useState('');
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   scrollViewContent: {
-    paddingBottom: 24,
+    paddingBottom: 0,
   },
   scrollViewContainer: {
     flex: 1,
@@ -100,9 +100,9 @@ const styles = StyleSheet.create({
   },
   whiteContainer: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    marginTop: -20, // ✅ overlap nhẹ để dính liền
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: 5, // ✅ overlap nhẹ để dính liền
     paddingBottom: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },

@@ -5,6 +5,7 @@ import {MainRoutes} from '../Routes';
 import HomeScreen from '../../screens/HomeScreen';
 import StoreScreen from '../../screens/StoreSreen';
 import {FontAwesome} from '@react-native-vector-icons/fontawesome';
+import UserScreen from '../../screens/UserScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -38,12 +39,16 @@ const MainTabNavigator = () => {
         tabBarIcon: ({color}: {color: string}) => (
           <FontAwesome name="cart" color={color} size={24} />
         ),
-      }}/>
-      <Tab.Screen name={MainRoutes.Profile} component={ProfileScreen} options={{
-        tabBarIcon: ({color}: {color: string}) => (
-          <FontAwesome name="user" color={color} size={24} />
-        ),
       }}/> */}
+      <Tab.Screen
+        name={MainRoutes.Profile}
+        component={UserScreen}
+        options={{
+          tabBarIcon: ({color}: {color: string}) => (
+            <FontAwesome name="user" color={color} size={24} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 };

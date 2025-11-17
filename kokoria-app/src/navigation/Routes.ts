@@ -18,19 +18,19 @@ export enum AuthRoutes {
 
 // Enum for the main routes
 export enum MainRoutes {
-    Home = 'Home',
-    Store = 'Store',
-    ProductDetails = 'ProductDetails',
+    Home = 'Trang chủ',
+    Store = 'Cửa hàng',
+    ProductDetails = 'Chi tiết sản phẩm',
     Category = 'Category',
-    Cart = 'Cart',
-    Checkout = 'Checkout',
-    OrderDetails = 'OrderDetails',
-    OrderHistory = 'OrderHistory',
-    Profile = 'Profile',
-    Settings = 'Settings',
-    Notifications = 'Notifications',
-    AddAddress = 'AddAddress',
-    EditAddress = 'EditAddress'
+    Cart = 'Giỏ hàng',
+    Checkout = 'Thanh toán',
+    OrderDetails = 'Chi tiết đơn hàng',
+    OrderHistory = 'Lịch sử đơn hàng',
+    Profile = 'Tôi',
+    Settings = 'Cài đặt',
+    Notifications = 'Thông báo',
+    AddAddress = 'Thêm địa chỉ',
+    EditAddress = 'Sửa địa chỉ'
 }
 
 // Type for the root stack param list
