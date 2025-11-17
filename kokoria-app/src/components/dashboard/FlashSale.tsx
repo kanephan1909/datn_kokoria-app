@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, FlatList, Image} from 'react-native';
+import {View, Text, TouchableOpacity, FlatList} from 'react-native';
 import React from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
 

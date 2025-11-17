@@ -10,7 +10,7 @@ export default function SearchBar({
   onChange: (text: string) => void;
 }) {
   return (
-    <View className="flex-row items-center bg-white rounded-xl px-4 py-3 shadow-md" style={{elevation: 3}}>
+    <View className="flex-row items-center bg-white rounded-xl px-4 py-1 shadow-md" style={{elevation: 3}}>
       <Ionicons name="search-outline" size={22} color="#9CA3AF" />
       <TextInput
         value={value}
