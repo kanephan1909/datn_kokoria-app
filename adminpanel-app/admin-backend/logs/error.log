@@ -1,0 +1,4 @@
+{"level":"error","message":"Error creating category: TypeError: Cannot read properties of undefined (reading 'create')","timestamp":"2025-11-17T04:20:34.035Z"}
+{"level":"error","message":"Error creating category: TypeError: Cannot read properties of undefined (reading 'create')","timestamp":"2025-11-17T04:22:06.321Z"}
+{"level":"error","message":"Cloudinary upload error: Unknown API key your_api_key","timestamp":"2025-11-18T13:17:22.475Z"}
+{"level":"error","message":"Cloudinary upload error: Unknown API key your_api_key","timestamp":"2025-11-18T13:19:11.988Z"}

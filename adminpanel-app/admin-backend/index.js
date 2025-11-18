@@ -8,8 +8,19 @@ const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 const errorHandler = require('./middlesware/errorHandler.js');
 
+const authRoutes = require('./routes/auth');
 const categoriesRoutes = require('./routes/categories');
 const productsRoutes = require('./routes/products');
+const usersRoutes = require('./routes/users');
+const addressesRoutes = require('./routes/addresses');
+const restaurantsRoutes = require('./routes/restaurants');
+const driversRoutes = require('./routes/drivers');
+const ordersRoutes = require('./routes/orders');
+const vouchersRoutes = require('./routes/vouchers');
+const cartsRoutes = require('./routes/carts');
+const messagesRoutes = require('./routes/messages');
+const dashboardRoutes = require('./routes/dashboard');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 
@@ -58,8 +69,19 @@ app.use(bodyParser.raw({ type: 'application/json' }));
 app.use(errorHandler);
 
 // Routes with API VERSIONING
+app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/categories', categoriesRoutes);
 app.use('/api/v1/products', productsRoutes);
+app.use('/api/v1/users', usersRoutes);
+app.use('/api/v1/addresses', addressesRoutes);
+app.use('/api/v1/restaurants', restaurantsRoutes);
+app.use('/api/v1/drivers', driversRoutes);
+app.use('/api/v1/orders', ordersRoutes);
+app.use('/api/v1/vouchers', vouchersRoutes);
+app.use('/api/v1/carts', cartsRoutes);
+app.use('/api/v1/messages', messagesRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/upload', uploadRoutes);
 
 
 const PORT = process.env.PORT || 3000;
