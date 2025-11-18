@@ -1,12 +1,12 @@
 import { StyleSheet } from 'react-native';
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import OrdersScreen from '../screens/OrdersScreen';
-import OrderDetailScreen from '../screens/OrderDetailScreen';
+import DriversScreen from '../screens/DriversScreen';
+import AddDriverScreen from '../screens/AddDriverScreen';
 
 const Stack = createNativeStackNavigator();
 
-const OrdersStack = () => {
+const DriversStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -19,19 +19,23 @@ const OrdersStack = () => {
       }}
     >
       <Stack.Screen
-        name="OrdersList"
-        component={OrdersScreen}
-        options={{ title: 'Đơn Hàng'}}
+        name="Drivers"
+        component={DriversScreen}
+        options={{ title: 'Tài Xế' }}
       />
       <Stack.Screen
-        name="OrderDetail"
-        component={OrderDetailScreen}
-        options={{ title: 'Chi Tiết Đơn Hàng' }}
+        name="AddDriver"
+        component={AddDriverScreen}
+        options={{ title: 'Thêm Tài Xế' }}
+      />
+      <Stack.Screen
+        name="EditDriver"
+        component={AddDriverScreen}
+        options={{ title: 'Chỉnh Sửa Tài Xế' }}
       />
     </Stack.Navigator>
   );
 };
 
-export default OrdersStack;
+export default DriversStack;
 
-const styles = StyleSheet.create({});
