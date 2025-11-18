@@ -17,7 +17,7 @@ async function getCategories(req, res) {
 
     try {
         // Lấy danh sách category, kèm products liên quan
-        const categories = await prisma?.categories.findMany({
+        const categories = await prisma?.category.findMany({
             include: { products: true }, // Load quan hệ category → products
             skip: +skip, // convert từ string sang number
             take: +limit,
@@ -45,7 +45,7 @@ async function getProductsByCategory(req, res) {
 
     try {
         // Lấy danh sách sản phẩm theo categoryId
-        const products = await prisma.products.findMany({
+        const products = await prisma.product.findMany({
             where: { categoryId: id },
             skip: +skip,
             take: +limit,
@@ -70,7 +70,7 @@ async function createCategory(req, res) {
 
     try {
         // Tạo category mới
-        const category = await prisma.categories.create({
+        const category = await prisma.category.create({
             data: { name, imageUrl },
         });
 
@@ -94,7 +94,7 @@ async function updateCategory(req, res) {
 
     try {
         // Cập nhật category theo id
-        const category = await prisma.categories.update({
+        const category = await prisma.category.update({
             where: { id },
             data: { name, imageUrl },
         });
@@ -118,12 +118,12 @@ async function deleteCategory(req, res) {
 
     try {
         // Xóa toàn bộ sản phẩm thuộc category này trước
-        await prisma.products.deleteMany({
+        await prisma.product.deleteMany({
             where: { categoryId: id },
         });
 
         // Sau đó xóa category
-        await prisma.categories.delete({
+        await prisma.category.delete({
             where: { id },
         });
 
