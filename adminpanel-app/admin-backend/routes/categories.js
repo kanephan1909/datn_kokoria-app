@@ -7,7 +7,9 @@ const {
   deleteCategory 
 } = require('../controllers/categories');
 
-const validate = require('../middlesware/validation'); 
+const validate = require('../middlesware/validation');
+const authMiddleware = require('../middlesware/authMiddleware');
+const authorize = require('../middlesware/authorizeMiddleware');
 const z = require('zod');
 
 const router = express.Router();
@@ -34,32 +36,32 @@ const deleteCategorySchema = z.object({
 
 /**
  * GET /categories?page=1&limit=10
- * Lấy danh sách category (pagination)
+ * Lấy danh sách category (pagination) - Public
  */
 router.get('/', getCategories);
 
 /**
  * GET /categories/:id/products
- * Lấy danh sách sản phẩm theo category
+ * Lấy danh sách sản phẩm theo category - Public
  */
 router.get('/:id/products', getProductsByCategory);
 
 /**
  * POST /categories
- * Tạo category mới
+ * Tạo category mới - Chỉ ADMIN
  */
-router.post('/', validate(categorySchema), createCategory);
+router.post('/', authMiddleware, authorize(['ADMIN']), validate(categorySchema), createCategory);
 
 /**
  * PUT /categories/:id
- * Cập nhật category theo id
+ * Cập nhật category theo id - Chỉ ADMIN
  */
-router.put('/:id', validate(categorySchema), updateCategory);
+router.put('/:id', authMiddleware, authorize(['ADMIN']), validate(categorySchema), updateCategory);
 
 /**
  * DELETE /categories/:id
- * Xóa category + toàn bộ sản phẩm thuộc category
+ * Xóa category + toàn bộ sản phẩm thuộc category - Chỉ ADMIN
  */
-router.delete('/:id', validate(deleteCategorySchema), deleteCategory);
+router.delete('/:id', authMiddleware, authorize(['ADMIN']), validate(deleteCategorySchema, { source: 'params' }), deleteCategory);
 
 module.exports = router;
