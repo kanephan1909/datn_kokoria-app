@@ -9,16 +9,19 @@ import {
   ActivityIndicator,
   Image
 } from 'react-native'
-import React, { useState } from 'react'
-import { useNavigation } from '@react-navigation/native'
+import React, { useState, useEffect } from 'react'
+import { useNavigation, useRoute } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
-import { createCategory, uploadImage } from '../api/apiClient'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { createCategory, updateCategory, fetchCategory, uploadImage } from '../api/apiClient'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 const AddCategoryScreen = () => {
   const navigation = useNavigation()
+  const route = useRoute()
   const queryClient = useQueryClient()
+  const categoryId = (route.params as any)?.categoryId
+  const isEdit = !!categoryId
   const [formData, setFormData] = useState({
     name: '',
     status: 'active', // active hoặc inactive
@@ -27,6 +30,26 @@ const AddCategoryScreen = () => {
   })
   const [errors, setErrors] = useState<{ name?: string; image?: string }>({})
   const [uploading, setUploading] = useState(false)
+
+  // Fetch category nếu đang edit
+  const { data: categoryData, isLoading: isLoadingCategory } = useQuery({
+    queryKey: ['category', categoryId],
+    queryFn: () => fetchCategory(categoryId),
+    enabled: isEdit,
+  })
+
+  // Xử lý data khi fetch thành công
+  useEffect(() => {
+    if (categoryData?.success && categoryData?.data) {
+      const category = categoryData.data
+      setFormData({
+        name: category.name || '',
+        status: category.status || 'active',
+        image: category.imageUrl || null,
+        imageUri: null,
+      })
+    }
+  }, [categoryData])
 
   const pickImage = async () => {
     // Yêu cầu quyền truy cập
@@ -107,7 +130,8 @@ const AddCategoryScreen = () => {
       newErrors.name = 'Tên danh mục sản phẩm phải có ít nhất 2 ký tự'
     }
 
-    if (!formData.imageUri && !formData.image) {
+    // Chỉ validate ảnh khi tạo mới, không bắt buộc khi edit (có thể giữ ảnh cũ)
+    if (!isEdit && !formData.imageUri && !formData.image) {
       newErrors.image = 'Vui lòng chọn ảnh hoặc nhập URL ảnh'
     }
 
@@ -142,6 +166,32 @@ const AddCategoryScreen = () => {
     }
   })
 
+  // Sử dụng useMutation để cập nhật category
+  const updateCategoryMutation = useMutation({
+    mutationFn: (data: { name: string; imageUrl: string }) => updateCategory(categoryId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      queryClient.invalidateQueries({ queryKey: ['category', categoryId] })
+      Alert.alert(
+        'Thành công',
+        'Danh mục đã được cập nhật thành công',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.goBack()
+          }
+        ]
+      )
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || error?.message || 'Có lỗi xảy ra khi cập nhật danh mục. Vui lòng thử lại.'
+      Alert.alert(
+        'Lỗi',
+        errorMessage
+      )
+    }
+  })
+
   const handleSubmit = async () => {
     if (!validateForm()) {
       return
@@ -155,11 +205,27 @@ const AddCategoryScreen = () => {
         imageUrl = await uploadImageToCloudinary(formData.imageUri)
       }
 
-      // Gọi mutation để tạo category
-      createCategoryMutation.mutate({
-        name: formData.name.trim(),
-        imageUrl: imageUrl
-      })
+      // Gọi mutation để tạo hoặc cập nhật category
+      if (isEdit) {
+        // Khi edit, chỉ gửi imageUrl nếu có ảnh mới, nếu không thì giữ nguyên ảnh cũ
+        if (imageUrl) {
+          updateCategoryMutation.mutate({
+            name: formData.name.trim(),
+            imageUrl: imageUrl
+          })
+        } else {
+          // Nếu không có ảnh mới, chỉ cập nhật tên (giữ nguyên ảnh cũ)
+          updateCategoryMutation.mutate({
+            name: formData.name.trim(),
+            imageUrl: formData.image || '' // Giữ nguyên ảnh cũ
+          })
+        }
+      } else {
+        createCategoryMutation.mutate({
+          name: formData.name.trim(),
+          imageUrl: imageUrl
+        })
+      }
     } catch (error: any) {
       Alert.alert('Lỗi', error?.message || 'Không thể upload ảnh')
     }
@@ -167,6 +233,14 @@ const AddCategoryScreen = () => {
 
   const handleCancel = () => {
     navigation.goBack()
+  }
+
+  if (isEdit && isLoadingCategory) {
+    return (
+      <View className="flex-1 bg-gray-50 items-center justify-center">
+        <ActivityIndicator size="large" color="#3B82F6" />
+      </View>
+    )
   }
 
   return (
@@ -325,7 +399,7 @@ const AddCategoryScreen = () => {
           <TouchableOpacity
             className='flex-1 bg-gray-200 rounded-lg py-3 items-center justify-center'
             onPress={handleCancel}
-            disabled={createCategoryMutation.isPending}
+            disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending}
           >
             <Text className='text-gray-700 font-semibold text-base'>Hủy</Text>
           </TouchableOpacity>
@@ -333,14 +407,16 @@ const AddCategoryScreen = () => {
           <TouchableOpacity
             className='flex-1 bg-blue-500 rounded-lg py-3 items-center justify-center flex-row'
             onPress={handleSubmit}
-            disabled={createCategoryMutation.isPending || uploading}
+            disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending || uploading}
           >
-            {(createCategoryMutation.isPending || uploading) ? (
+            {(createCategoryMutation.isPending || updateCategoryMutation.isPending || uploading) ? (
               <ActivityIndicator color='white' />
             ) : (
               <>
                 <Ionicons name='checkmark-circle' size={20} color='white' />
-                <Text className='text-white font-semibold ml-2 text-base'>Lưu</Text>
+                <Text className='text-white font-semibold ml-2 text-base'>
+                  {isEdit ? 'Cập nhật' : 'Lưu'}
+                </Text>
               </>
             )}
           </TouchableOpacity>
