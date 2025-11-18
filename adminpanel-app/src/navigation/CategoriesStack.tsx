@@ -20,6 +20,7 @@ const CategoriesStack = () => {
     >
       <Stack.Screen name="Categories" component={CategoriesScreen} options={{title: 'Danh Mục Sản Phẩm'}}/>
       <Stack.Screen name="AddCategory" component={AddCategoryScreen} options={{title: 'Thêm Danh Mục Sản Phẩm'}}/>
+      <Stack.Screen name="EditCategory" component={AddCategoryScreen} options={{title: 'Chỉnh Sửa Danh Mục'}}/>
     </Stack.Navigator>
   )
 }
