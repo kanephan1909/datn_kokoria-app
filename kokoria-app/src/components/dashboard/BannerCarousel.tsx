@@ -2,9 +2,9 @@ import {Image, View, FlatList, NativeScrollEvent, NativeSyntheticEvent, LayoutCh
 import React, {useRef, useState, useEffect} from 'react';
 
 const banners = [
-  {id: '1', image: require('../../assets/images/banner4.jpg')},
+  {id: '1', image: require('../../assets/images/banner3.jpg')},
   {id: '2', image: require('../../assets/images/banner2.jpg')},
-  {id: '3', image: require('../../assets/images/banner3.jpg')}, // Placeholder - thay bằng banner3.jpg
+  {id: '3', image: require('../../assets/images/banner4.jpg')}, 
 ];
 
 const BannerCarousel = () => {

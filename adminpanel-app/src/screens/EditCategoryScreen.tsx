@@ -13,40 +13,40 @@ import React, { useState, useEffect } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
-import { createCategory, updateCategory, fetchCategory, uploadImage } from '../api/apiClient'
+import { updateCategory, fetchCategory, uploadImage } from '../api/apiClient'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-const AddCategoryScreen = () => {
+const EditCategoryScreen = () => {
   const navigation = useNavigation()
   const route = useRoute()
   const queryClient = useQueryClient()
   const categoryId = (route.params as any)?.categoryId
-  const isEdit = !!categoryId
+
   const [formData, setFormData] = useState({
     name: '',
-    isActive: true,
     image: null as string | null,
     imageUri: null as string | null, // Local URI từ image picker
+    isActive: true,
   })
   const [errors, setErrors] = useState<{ name?: string; image?: string }>({})
   const [uploading, setUploading] = useState(false)
 
-  // Fetch category nếu đang edit
+  // Fetch category data
   const { data: categoryData, isLoading: isLoadingCategory } = useQuery({
     queryKey: ['category', categoryId],
     queryFn: () => fetchCategory(categoryId),
-    enabled: isEdit,
+    enabled: !!categoryId,
   })
 
-  // Xử lý data khi fetch thành công
+  // Load data khi fetch thành công
   useEffect(() => {
     if (categoryData?.success && categoryData?.data) {
       const category = categoryData.data
       setFormData({
         name: category.name || '',
-        status: category.status || 'active',
         image: category.imageUrl || null,
         imageUri: null,
+        isActive: category.isActive !== undefined ? category.isActive : true,
       })
     }
   }, [categoryData])
@@ -130,46 +130,18 @@ const AddCategoryScreen = () => {
       newErrors.name = 'Tên danh mục sản phẩm phải có ít nhất 2 ký tự'
     }
 
-    // Chỉ validate ảnh khi tạo mới, không bắt buộc khi edit (có thể giữ ảnh cũ)
-    if (!isEdit && !formData.imageUri && !formData.image) {
-      newErrors.image = 'Vui lòng chọn ảnh hoặc nhập URL ảnh'
-    }
+    // Khi edit, ảnh không bắt buộc (có thể giữ nguyên ảnh cũ)
+    // Chỉ validate nếu user muốn thay đổi ảnh nhưng chưa chọn
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-
-  // Sử dụng useMutation để tạo category
-  const createCategoryMutation = useMutation({
-    mutationFn: (data: { name: string; imageUrl: string }) => createCategory(data),
-    onSuccess: () => {
-      // Invalidate cache để refetch danh sách categories
-      queryClient.invalidateQueries({ queryKey: ['categories'] })
-      Alert.alert(
-        'Thành công',
-        'Danh mục đã được thêm thành công',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack()
-          }
-        ]
-      )
-    },
-    onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || error?.message || 'Có lỗi xảy ra khi thêm danh mục. Vui lòng thử lại.'
-      Alert.alert(
-        'Lỗi',
-        errorMessage
-      )
-    }
-  })
-
   // Sử dụng useMutation để cập nhật category
   const updateCategoryMutation = useMutation({
-    mutationFn: (data: { name: string; imageUrl: string }) => updateCategory(categoryId, data),
+    mutationFn: (data: { name?: string; imageUrl?: string; isActive?: boolean }) => updateCategory(categoryId, data),
     onSuccess: () => {
+      // Invalidate cache để refetch danh sách categories
       queryClient.invalidateQueries({ queryKey: ['categories'] })
       queryClient.invalidateQueries({ queryKey: ['category', categoryId] })
       Alert.alert(
@@ -198,43 +170,19 @@ const AddCategoryScreen = () => {
     }
 
     try {
-      let imageUrl = formData.image?.trim() || ''
+      let imageUrl: string | undefined = formData.image?.trim() || undefined
 
-      // Nếu có ảnh từ image picker, upload lên Cloudinary
+      // Nếu có ảnh mới từ image picker, upload lên Cloudinary
       if (formData.imageUri) {
         imageUrl = await uploadImageToCloudinary(formData.imageUri)
       }
 
-<<<<<<< Updated upstream
-      // Gọi mutation để tạo hoặc cập nhật category
-      if (isEdit) {
-        // Khi edit, chỉ gửi imageUrl nếu có ảnh mới, nếu không thì giữ nguyên ảnh cũ
-        if (imageUrl) {
-          updateCategoryMutation.mutate({
-            name: formData.name.trim(),
-            imageUrl: imageUrl
-          })
-        } else {
-          // Nếu không có ảnh mới, chỉ cập nhật tên (giữ nguyên ảnh cũ)
-          updateCategoryMutation.mutate({
-            name: formData.name.trim(),
-            imageUrl: formData.image || '' // Giữ nguyên ảnh cũ
-          })
-        }
-      } else {
-        createCategoryMutation.mutate({
-          name: formData.name.trim(),
-          imageUrl: imageUrl
-        })
-      }
-=======
-      // Gọi mutation để tạo category
-      createCategoryMutation.mutate({
+      // Gọi mutation để cập nhật category
+      updateCategoryMutation.mutate({
         name: formData.name.trim(),
         imageUrl: imageUrl,
         isActive: formData.isActive,
       })
->>>>>>> Stashed changes
     } catch (error: any) {
       Alert.alert('Lỗi', error?.message || 'Không thể upload ảnh')
     }
@@ -244,7 +192,7 @@ const AddCategoryScreen = () => {
     navigation.goBack()
   }
 
-  if (isEdit && isLoadingCategory) {
+  if (isLoadingCategory) {
     return (
       <View className="flex-1 bg-gray-50 items-center justify-center">
         <ActivityIndicator size="large" color="#3B82F6" />
@@ -258,7 +206,7 @@ const AddCategoryScreen = () => {
         {/* Ảnh danh mục */}
         <View className='mb-4'>
           <Text className='text-gray-700 font-semibold mb-2 text-base'>
-            Ảnh danh mục <Text className='text-red-500'>*</Text>
+            Ảnh danh mục
           </Text>
           
           {formData.imageUri ? (
@@ -408,7 +356,7 @@ const AddCategoryScreen = () => {
           <TouchableOpacity
             className='flex-1 bg-gray-200 rounded-lg py-3 items-center justify-center'
             onPress={handleCancel}
-            disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending}
+            disabled={updateCategoryMutation.isPending}
           >
             <Text className='text-gray-700 font-semibold text-base'>Hủy</Text>
           </TouchableOpacity>
@@ -416,16 +364,14 @@ const AddCategoryScreen = () => {
           <TouchableOpacity
             className='flex-1 bg-blue-500 rounded-lg py-3 items-center justify-center flex-row'
             onPress={handleSubmit}
-            disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending || uploading}
+            disabled={updateCategoryMutation.isPending || uploading}
           >
-            {(createCategoryMutation.isPending || updateCategoryMutation.isPending || uploading) ? (
+            {(updateCategoryMutation.isPending || uploading) ? (
               <ActivityIndicator color='white' />
             ) : (
               <>
                 <Ionicons name='checkmark-circle' size={20} color='white' />
-                <Text className='text-white font-semibold ml-2 text-base'>
-                  {isEdit ? 'Cập nhật' : 'Lưu'}
-                </Text>
+                <Text className='text-white font-semibold ml-2 text-base'>Cập nhật</Text>
               </>
             )}
           </TouchableOpacity>
@@ -435,6 +381,7 @@ const AddCategoryScreen = () => {
   )
 }
 
-export default AddCategoryScreen
+export default EditCategoryScreen
 
 const styles = StyleSheet.create({})
+

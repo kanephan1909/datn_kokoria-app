@@ -1,25 +1,34 @@
 // import { Text, View } from 'react-native'
-import React from 'react'
-import { RootRoutes } from '../Routes';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
+import {RootRoutes} from '../Routes';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import MainNavigator from './MainNavigator';
 import AuthNavigator from './AuthNavigator';
+import {useAuth} from '../../context/AuthContext';
+import {View, ActivityIndicator} from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
 const RootNavigator = () => {
-    const isAuthenticated = true;
+  const {isAuthenticated, isLoading} = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color="#F97316" />
+      </View>
+    );
+  }
+
   return (
-    <Stack.Navigator screenOptions={{headerShown:false}}>
-        {isAuthenticated ? (
-            <Stack.Screen name={RootRoutes.MainTabs} component={MainNavigator}/>
-        ) : (
-            <Stack.Screen name={RootRoutes.AuthStack} component={AuthNavigator}/>
-        )}
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      {isAuthenticated ? (
+        <Stack.Screen name={RootRoutes.MainTabs} component={MainNavigator} />
+      ) : (
+        <Stack.Screen name={RootRoutes.AuthStack} component={AuthNavigator} />
+      )}
     </Stack.Navigator>
-  )
-}
+  );
+};
 
-export default RootNavigator
-
-// const styles = StyleSheet.create({})
+export default RootNavigator;
