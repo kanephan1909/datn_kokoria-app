@@ -71,7 +71,7 @@ model Restaurant {
   isOpen    Boolean @default(true)
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 //
@@ -83,7 +83,7 @@ model Category {
   imageUrl  String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   products Product[]
 }
@@ -99,9 +99,9 @@ model Product {
   price       Float
   stock       Int
   isActive    Boolean  @default(true)
-  variants    Json?    // Lưu variants dưới dạng JSON
+  variants    Json? // Lưu variants dưới dạng JSON
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now()) @updatedAt
 
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String   @db.ObjectId
@@ -118,7 +118,7 @@ model Driver {
   isOnline    Boolean  @default(false)
   deviceToken String?
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now()) @updatedAt
 
   currentLat Float?
   currentLng Float?
@@ -164,43 +164,19 @@ model Order {
   deliveredAt  DateTime?
   canceledAt   DateTime?
 
+  // Trạng thái thanh toán tổng quát cho đơn
   paymentStatus PaymentStatus @default(PAYMENT_PENDING)
+  paymentMethod PaymentMethod @default(ONLINE)
 
-  address Json
-  user    User @relation(fields: [userId], references: [id])
+  address   Json
+  createdAt DateTime @default(now())
 
-  // shipper
+  user     User    @relation(fields: [userId], references: [id])
   driver   Driver? @relation(fields: [driverId], references: [id])
   driverId String? @db.ObjectId
 
-  createdAt DateTime @default(now())
-
-  // PAYMENT — giữ nguyên theo schema của bạn
-  paymentMethod String  @default("ONLINE")
-  paymentId     String?
-
-  zalopayOrderId                       String?
-  zalopayPaymentId                     String?
-  zalopayPaymentStatus                 String?
-  zalopayPaymentDate                   DateTime?
-  zalopayPaymentAmount                 Float?
-  zalopayPaymentCurrency               String?
-  zalopayPaymentGateway                String?
-  zalopayPaymentGatewayResponse        Json?
-  zalopayPaymentGatewayResponseMessage String?
-  zalopayPaymentGatewayResponseCode    String?
-
-  momopayOrderId                       String?
-  momopayPaymentId                     String?
-  momopayPaymentStatus                 String?
-  momopayPaymentDate                   DateTime?
-  momopayPaymentAmount                 Float?
-  momopayPaymentCurrency               String?
-  momopayPaymentGateway                String?
-  momopayPaymentGatewayResponse        Json?
-  momopayPaymentGatewayResponseMessage String?
-  momopayPaymentGatewayResponseCode    String?
-
+  // Quan hệ tới các bản ghi thanh toán chi tiết
+  payments Payment[]
   logs     OrderLog[]
   messages Message[]
 }
@@ -221,6 +197,44 @@ enum PaymentStatus {
   PAYMENT_SUCCESS
   PAYMENT_FAILED
   PAYMENT_REFUNDED
+}
+
+enum PaymentMethod {
+  ONLINE // thanh toán qua cổng (MoMo, ZaloPay,…)
+  COD // thanh toán khi nhận hàng
+}
+
+enum PaymentProvider {
+  MOMO
+  ZALOPAY
+  CASH // cho COD / thanh toán trực tiếp
+  OTHER
+}
+
+//
+// ========== PAYMENT (chi tiết thanh toán từng lần) ==========
+model Payment {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId String @db.ObjectId
+
+  provider PaymentProvider // MOMO / ZALOPAY / CASH / OTHER
+  method   PaymentMethod // ONLINE / COD
+  status   PaymentStatus   @default(PAYMENT_PENDING)
+
+  amount   Float
+  currency String? @default("VND")
+
+  // Thông tin từ cổng thanh toán
+  gatewayOrderId  String? // orderId phía gateway (MoMo/ZaloPay)
+  gatewayTransId  String? // transaction/payment id
+  gatewayCode     String? // mã lỗi / mã trạng thái
+  gatewayMessage  String? // message mô tả
+  gatewayResponse Json? // full JSON response để debug/log
+
+  paidAt    DateTime? // thời điểm thanh toán thành công
+  createdAt DateTime  @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
 }
 
 //
