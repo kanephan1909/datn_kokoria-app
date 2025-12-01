@@ -6,8 +6,26 @@ import HomeScreen from '../../screens/HomeScreen';
 import StoreScreen from '../../screens/StoreSreen';
 import {FontAwesome} from '@react-native-vector-icons/fontawesome';
 import UserScreen from '../../screens/UserScreen';
+import MenuScreen from '../../screens/MenuScreen';
 
 const Tab = createBottomTabNavigator();
+
+// Icon components defined outside to avoid recreation on each render
+const HomeIcon = ({color}: {color: string}) => (
+  <FontAwesome name="home" color={color} size={24} />
+);
+
+const MenuIcon = ({color}: {color: string}) => (
+  <FontAwesome name="cutlery" color={color} size={24} />
+);
+
+const OrderIcon = ({color}: {color: string}) => (
+  <FontAwesome name="list" color={color} size={24} />
+);
+
+const ProfileIcon = ({color}: {color: string}) => (
+  <FontAwesome name="user" color={color} size={24} />
+);
 
 // Bottom Tab Navigator
 const MainTabNavigator = () => {
@@ -21,18 +39,21 @@ const MainTabNavigator = () => {
         name={MainRoutes.Home}
         component={HomeScreen}
         options={{
-          tabBarIcon: ({color}: {color: string}) => (
-            <FontAwesome name="home" color={color} size={24} />
-          ),
+          tabBarIcon: HomeIcon,
         }}
       />
       <Tab.Screen
-        name={MainRoutes.Store}
+        name={MainRoutes.Menu}
+        component={MenuScreen}
+        options={{
+          tabBarIcon: MenuIcon,
+        }}
+      />
+      <Tab.Screen
+        name={MainRoutes.Order}
         component={StoreScreen}
         options={{
-          tabBarIcon: ({color}: {color: string}) => (
-            <FontAwesome name="shopping-cart" color={color} size={24} />
-          ),
+          tabBarIcon: OrderIcon,
         }}
       />
       {/* <Tab.Screen name={MainRoutes.Cart} component={CartScreen} options={{
@@ -44,9 +65,7 @@ const MainTabNavigator = () => {
         name={MainRoutes.Profile}
         component={UserScreen}
         options={{
-          tabBarIcon: ({color}: {color: string}) => (
-            <FontAwesome name="user" color={color} size={24} />
-          ),
+          tabBarIcon: ProfileIcon,
         }}
       />
     </Tab.Navigator>
@@ -54,5 +73,5 @@ const MainTabNavigator = () => {
 };
 
 export default MainTabNavigator;
-
 // const styles = StyleSheet.create({});
+

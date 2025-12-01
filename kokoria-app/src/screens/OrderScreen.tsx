@@ -1,0 +1,620 @@
+import {
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+} from 'react-native';
+import React, {useState, useCallback} from 'react';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import Ionicons from '@react-native-vector-icons/ionicons';
+import {useCart} from '../store/useCartStore';
+import {useAuth} from '../context/AuthContext';
+import {fetchAddresses, createOrder} from '../../api/apiClient';
+import {MainRoutes} from '../navigation/Routes';
+
+interface Address {
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  ward: string;
+  district: string;
+  city: string;
+  isDefault: boolean;
+}
+
+const OrderScreen = () => {
+  const navigation = useNavigation();
+  const {cartItems, totalPrice, clear, loadCart, updateItem} = useCart();
+  const {user} = useAuth();
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
+
+  const loadAddresses = useCallback(async () => {
+    try {
+      setIsLoadingAddresses(true);
+      const response = await fetchAddresses();
+      if (response.success && response.data) {
+        const addressesList = Array.isArray(response.data)
+          ? response.data
+          : response.data.addresses || response.data.data || [];
+        setAddresses(addressesList);
+        const defaultAddress = addressesList.find((addr: Address) => addr.isDefault);
+        if (defaultAddress) {
+          setSelectedAddressId(defaultAddress.id);
+        } else if (addressesList.length > 0) {
+          setSelectedAddressId(addressesList[0].id);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading addresses:', error);
+    } finally {
+      setIsLoadingAddresses(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadAddresses();
+    }, [loadAddresses]),
+  );
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(price);
+  };
+
+  const handleQuantityChange = async (itemId: string, newQuantity: number) => {
+    if (newQuantity < 1) {
+      return;
+    }
+    await updateItem(itemId, newQuantity);
+  };
+
+  const handlePlaceOrder = async () => {
+    if (!selectedAddressId) {
+      Alert.alert('Lỗi', 'Vui lòng chọn địa chỉ giao hàng');
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      Alert.alert('Lỗi', 'Giỏ hàng trống');
+      return;
+    }
+
+    if (!user || !user.id) {
+      Alert.alert('Lỗi', 'Vui lòng đăng nhập để đặt hàng');
+      return;
+    }
+
+    Alert.alert(
+      'Xác nhận đặt hàng',
+      `Bạn có chắc chắn muốn đặt hàng với tổng tiền ${formatPrice(totalPrice)}?`,
+      [
+        {
+          text: 'Hủy',
+          style: 'cancel',
+        },
+        {
+          text: 'Đặt hàng',
+          onPress: async () => {
+            setIsLoading(true);
+            try {
+              // Tìm address object từ selectedAddressId
+              const selectedAddress = addresses.find(
+                (addr) => addr.id === selectedAddressId,
+              );
+
+              if (!selectedAddress) {
+                Alert.alert('Lỗi', 'Địa chỉ không hợp lệ');
+                setIsLoading(false);
+                return;
+              }
+
+              // Tạo address object theo format backend yêu cầu
+              const addressObject = {
+                name: selectedAddress.name,
+                phone: selectedAddress.phone,
+                address: selectedAddress.address,
+                ward: selectedAddress.ward,
+                district: selectedAddress.district,
+                city: selectedAddress.city,
+              };
+
+              const orderData = {
+                userId: user.id,
+                items: cartItems.map((item) => ({
+                  productId: item.productId,
+                  quantity: item.quantity,
+                  price: item.price,
+                })),
+                totalAmount: totalPrice,
+                address: addressObject,
+                paymentMethod: 'COD',
+              };
+
+              console.log('Creating order with data:', orderData);
+
+              const response = await createOrder(orderData);
+              if (response.success) {
+                Alert.alert('Thành công', 'Đơn hàng đã được tạo thành công', [
+                  {
+                    text: 'OK',
+                    onPress: async () => {
+                      await clear();
+                      await loadCart();
+                      (navigation as any).navigate(MainRoutes.OrderDetails, {
+                        orderId: response.data.id,
+                      });
+                    },
+                  },
+                ]);
+              } else {
+                console.error('Order creation failed:', response);
+                Alert.alert('Lỗi', response.message || 'Không thể tạo đơn hàng');
+              }
+            } catch (error: any) {
+              console.error('Error creating order:', error);
+              console.error('Error response:', error.response?.data);
+              Alert.alert(
+                'Lỗi',
+                error.response?.data?.message || 'Không thể tạo đơn hàng',
+              );
+            } finally {
+              setIsLoading(false);
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  if (isLoadingAddresses) {
+    return (
+      <SafeAreaView edges={['top']} style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#EA580C" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (cartItems.length === 0) {
+    return (
+      <SafeAreaView edges={['top']} style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Order Summary</Text>
+          <View style={styles.placeholder} />
+        </View>
+        <View style={styles.emptyContainer}>
+          <Ionicons name="cart-outline" size={80} color="#D1D5DB" />
+          <Text style={styles.emptyText}>Giỏ hàng trống</Text>
+          <Text style={styles.emptySubtext}>
+            Vui lòng thêm sản phẩm vào giỏ hàng để đặt hàng
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView edges={['top']} style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Order Summary</Text>
+        <TouchableOpacity style={styles.searchButton} activeOpacity={0.7}>
+          <Ionicons name="search" size={24} color="#000" />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}>
+        {/* Order Summary Card */}
+        <View style={styles.summaryCard}>
+          {cartItems.map((item) => (
+            <View key={item.id} style={styles.orderItem}>
+              <View style={styles.itemImageContainer}>
+                {item.product.imageUrl ? (
+                  <Image
+                    source={{uri: item.product.imageUrl}}
+                    style={styles.itemImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.placeholderImage}>
+                    <Ionicons name="restaurant" size={24} color="#9CA3AF" />
+                  </View>
+                )}
+              </View>
+              <View style={styles.itemInfo}>
+                <View style={styles.itemHeader}>
+                  <Text style={styles.itemName} numberOfLines={1}>
+                    {item.product.name}
+                  </Text>
+                  <Text style={styles.itemPrice}>{formatPrice(item.price)}</Text>
+                </View>
+                {item.product.description && (
+                  <Text style={styles.itemDescription} numberOfLines={1}>
+                    {item.product.description}
+                  </Text>
+                )}
+                <View style={styles.quantitySelector}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleQuantityChange(item.id, item.quantity - 1)
+                    }
+                    style={styles.quantityButton}>
+                    <Ionicons name="remove" size={16} color="#000" />
+                  </TouchableOpacity>
+                  <Text style={styles.quantityText}>{item.quantity}</Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleQuantityChange(item.id, item.quantity + 1)
+                    }
+                    style={styles.quantityButton}>
+                    <Ionicons name="add" size={16} color="#000" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          ))}
+
+          {/* Total */}
+          <View style={styles.summaryTotal}>
+            <Text style={styles.totalItemsText}>Total {totalItems} items</Text>
+            <Text style={styles.totalPriceText}>{formatPrice(totalPrice)}</Text>
+          </View>
+        </View>
+
+        {/* Address Selection */}
+        {addresses.length > 0 && (
+          <View style={styles.addressSection}>
+            <Text style={styles.addressTitle}>Delivery Address</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {addresses.map((address) => (
+                <TouchableOpacity
+                  key={address.id}
+                  onPress={() => setSelectedAddressId(address.id)}
+                  style={[
+                    styles.addressCard,
+                    selectedAddressId === address.id && styles.addressCardSelected,
+                  ]}>
+                  <Text style={styles.addressName}>{address.name}</Text>
+                  <Text style={styles.addressText}>{address.phone}</Text>
+                  <Text style={styles.addressText} numberOfLines={2}>
+                    {address.address}, {address.ward}, {address.district}, {address.city}
+                  </Text>
+                  {address.isDefault && (
+                    <View style={styles.defaultBadge}>
+                      <Text style={styles.defaultBadgeText}>Default</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity
+              style={styles.changeAddressButton}
+              onPress={() => {
+                (navigation as any).navigate(MainRoutes.AddressList);
+              }}>
+              <Text style={styles.changeAddressText}>Change Address</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {addresses.length === 0 && (
+          <TouchableOpacity
+            style={styles.addAddressButton}
+            onPress={() => {
+              (navigation as any).navigate(MainRoutes.AddAddress);
+            }}>
+            <Ionicons name="add-circle-outline" size={24} color="#EA580C" />
+            <Text style={styles.addAddressText}>Add Delivery Address</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Place Order Button */}
+        <View style={styles.placeOrderContainer}>
+          <TouchableOpacity
+            style={[
+              styles.placeOrderButton,
+              (!selectedAddressId || isLoading) && styles.placeOrderButtonDisabled,
+            ]}
+            onPress={handlePlaceOrder}
+            disabled={!selectedAddressId || isLoading}>
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={styles.placeOrderText}>Place Order</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#FFFFFF',
+  },
+  backButton: {
+    marginRight: 12,
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  placeholder: {
+    width: 40,
+  },
+  searchButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  summaryCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 24,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  orderItem: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    alignItems: 'flex-start',
+  },
+  itemImageContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    backgroundColor: '#F3F4F6',
+    overflow: 'hidden',
+    marginRight: 12,
+  },
+  itemImage: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholderImage: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemInfo: {
+    flex: 1,
+  },
+  itemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  itemName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000000',
+    flex: 1,
+    marginRight: 8,
+  },
+  itemPrice: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  itemDescription: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginBottom: 8,
+  },
+  quantitySelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    alignSelf: 'flex-start',
+  },
+  quantityButton: {
+    padding: 4,
+  },
+  quantityText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#000000',
+    marginHorizontal: 12,
+    minWidth: 20,
+    textAlign: 'center',
+  },
+  summaryTotal: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  totalItemsText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+  },
+  totalPriceText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  placeOrderContainer: {
+    marginTop: 24,
+    paddingHorizontal: 0,
+  },
+  placeOrderButton: {
+    backgroundColor: '#EA580C',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  placeOrderButtonDisabled: {
+    backgroundColor: '#D1D5DB',
+  },
+  placeOrderText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  addressSection: {
+    marginTop: 24,
+  },
+  addressTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 12,
+  },
+  addressCard: {
+    width: 280,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 16,
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+  },
+  addressCardSelected: {
+    borderColor: '#EA580C',
+    backgroundColor: '#FFF7ED',
+  },
+  addressName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 4,
+  },
+  addressText: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  defaultBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#EA580C',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  defaultBadgeText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  changeAddressButton: {
+    marginTop: 12,
+    alignSelf: 'flex-start',
+  },
+  changeAddressText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#EA580C',
+  },
+  addAddressButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF7ED',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 24,
+    borderWidth: 2,
+    borderColor: '#EA580C',
+    borderStyle: 'dashed',
+  },
+  addAddressText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#EA580C',
+    marginLeft: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#6B7280',
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+});
+
+export default OrderScreen;
