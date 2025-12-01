@@ -3,6 +3,33 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+/**
+ * Helper: Tạo hoặc cập nhật Payment record
+ */
+async function createOrUpdatePayment(orderId, paymentData) {
+    // Tìm payment hiện tại của order
+    const existingPayment = await prisma.payment.findFirst({
+        where: { orderId },
+        orderBy: { createdAt: 'desc' },
+    });
+
+    if (existingPayment) {
+        // Cập nhật payment hiện tại
+        return await prisma.payment.update({
+            where: { id: existingPayment.id },
+            data: paymentData,
+        });
+    } else {
+        // Tạo payment mới
+        return await prisma.payment.create({
+            data: {
+                orderId,
+                ...paymentData,
+            },
+        });
+    }
+}
+
 // GET /orders - Lấy danh sách orders
 async function getOrders(req, res) {
     const { page = 1, limit = 10, status, paymentStatus, userId, driverId } = req.query;
@@ -104,6 +131,10 @@ async function getOrders(req, res) {
                         phone: true,
                     },
                 },
+                payments: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 5, // Lấy 5 payment gần nhất
+                },
                 logs: {
                     orderBy: { createdAt: 'desc' },
                     take: 5,
@@ -191,6 +222,9 @@ async function getOrder(req, res) {
             include: {
                 user: true,
                 driver: true,
+                payments: {
+                    orderBy: { createdAt: 'desc' },
+                },
                 logs: {
                     orderBy: { createdAt: 'desc' },
                 },
@@ -298,6 +332,9 @@ async function createOrder(req, res) {
             });
         }
 
+        // Map paymentMethod từ string sang enum
+        const mappedPaymentMethod = paymentMethod === 'COD' ? 'COD' : 'ONLINE';
+
         const order = await prisma.order.create({
             data: {
                 userId: targetUserId,
@@ -309,11 +346,25 @@ async function createOrder(req, res) {
                 shippingFee,
                 restaurantLat,
                 restaurantLng,
-                paymentMethod: paymentMethod || 'ONLINE',
+                paymentMethod: mappedPaymentMethod,
                 status: 'PENDING',
                 paymentStatus: 'PAYMENT_PENDING',
             },
         });
+
+        // Tạo Payment record mặc định nếu cần
+        if (mappedPaymentMethod === 'COD') {
+            await prisma.payment.create({
+                data: {
+                    orderId: order.id,
+                    provider: 'CASH',
+                    method: 'COD',
+                    status: 'PAYMENT_PENDING',
+                    amount: totalAmount,
+                    currency: 'VND',
+                },
+            });
+        }
 
         // Tạo log đầu tiên
         await prisma.orderLog.create({
@@ -433,6 +484,19 @@ async function updateOrder(req, res) {
     const { driverId, note, paymentStatus } = req.body;
 
     try {
+        // Lấy order hiện tại để lấy totalAmount
+        const currentOrder = await prisma.order.findUnique({
+            where: { id },
+        });
+
+        if (!currentOrder) {
+            return res.status(404).json({
+                success: false,
+                message: 'Order not found',
+            });
+        }
+
+        // Cập nhật order
         const order = await prisma.order.update({
             where: { id },
             data: {
@@ -441,6 +505,14 @@ async function updateOrder(req, res) {
                 ...(paymentStatus && { paymentStatus }),
             },
         });
+
+        // Nếu cập nhật paymentStatus, cập nhật Payment record tương ứng
+        if (paymentStatus) {
+            await createOrUpdatePayment(id, {
+                status: paymentStatus,
+                amount: currentOrder.totalAmount,
+            });
+        }
 
         res.json({
             success: true,

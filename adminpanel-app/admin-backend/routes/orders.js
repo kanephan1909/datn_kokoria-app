@@ -28,7 +28,7 @@ const createOrderSchema = z.object({
     shippingFee: z.number().optional(),
     restaurantLat: z.number().optional(),
     restaurantLng: z.number().optional(),
-    paymentMethod: z.string().optional(),
+    paymentMethod: z.enum(['ONLINE', 'COD']).optional(),
 });
 
 const updateOrderStatusSchema = z.object({
