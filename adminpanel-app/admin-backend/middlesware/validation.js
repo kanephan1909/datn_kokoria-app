@@ -72,6 +72,12 @@ function validate(schema, options = {}) {
             ? formattedErrors.map((e) => `${e.field}: ${e.message}`).join(", ")
             : "Validation failed";
 
+        // Log validation error để debug
+        logger.error(`Validation failed for ${req.method} ${req.url}:`, {
+          errors: formattedErrors,
+          body: req.body,
+        });
+
         return res.status(400).json({
           success: false,
           message: errorMessage,
