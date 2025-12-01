@@ -95,7 +95,7 @@ const OrdersScreen = () => {
         }}
       >
         <View className="mb-4">
-          <Text className="text-2xl font-bold text-gray-900 mb-1">Đơn Hàng</Text>
+          <Text className="text-2xl font-bold text-gray-900 mb-1">Danh sách đơn hàng</Text>
           <Text className="text-sm text-gray-500">
             {filteredOrders.length} đơn hàng
           </Text>

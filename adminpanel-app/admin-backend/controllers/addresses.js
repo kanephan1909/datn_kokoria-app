@@ -142,8 +142,16 @@ async function getUserAddresses(req, res) {
 async function createAddress(req, res) {
     const {
         userId,
-        type,
+        // Format mới từ frontend (Việt Nam)
         name,
+        phone,
+        address: addressLine,
+        ward,
+        district,
+        city,
+        isDefault,
+        // Format cũ (quốc tế)
+        type,
         mobile,
         flatNo,
         street,
@@ -178,18 +186,25 @@ async function createAddress(req, res) {
             });
         }
 
+        // Map từ format frontend sang format database
+        // Frontend gửi "phone", database lưu "mobile" (do schema database dùng "mobile")
+        const finalMobile = phone || mobile;
+        const finalType = type || 'HOME'; // Mặc định là HOME nếu không có
+        const finalStreet = street || addressLine || '';
+        const finalLocality = locality || [ward, district, city].filter(Boolean).join(', ') || '';
+
         const address = await prisma.address.create({
             data: {
                 userId: targetUserId,
-                type,
+                type: finalType,
                 name,
-                mobile,
+                mobile: finalMobile,
                 flatNo,
-                street,
+                street: finalStreet,
                 landmark,
                 buildingName,
                 pincode,
-                locality,
+                locality: finalLocality,
                 latitude,
                 longitude,
             },

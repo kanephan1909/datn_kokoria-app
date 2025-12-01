@@ -232,7 +232,7 @@ const OrderDetailScreen = () => {
                 { text: 'Hủy', style: 'cancel' },
                 {
                   text: 'Xác nhận',
-                  onPress: () => confirmMutation.mutate(),
+                  onPress: () => confirmMutation.mutate(undefined as any),
                 },
               ]);
             }}

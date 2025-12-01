@@ -156,32 +156,49 @@ const CategoriesScreen = () => {
                       </Text>
                     </View>
                   </View>
-                  <TouchableOpacity
-                    className="bg-red-50 rounded-xl p-2.5 border border-red-200 ml-3"
-                    onPress={() => {
-                      Alert.alert(
-                        'Xác nhận',
-                        'Bạn có chắc muốn xóa danh mục này?',
-                        [
-                          { text: 'Hủy', style: 'cancel' },
-                          {
-                            text: 'Xóa',
-                            style: 'destructive',
-                            onPress: () => handleDeleteCategory(category.id),
-                          },
-                        ]
-                      );
-                    }}
-                    style={{
-                      shadowColor: '#EF4444',
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 2,
-                      elevation: 2,
-                    }}
-                  >
-                    <Ionicons name="trash-outline" size={20} color="#EF4444" />
-                  </TouchableOpacity>
+                  <View className="flex-row items-center ml-3">
+                    <TouchableOpacity
+                      className="bg-blue-50 rounded-xl p-2.5 border border-blue-200 mr-2"
+                      onPress={() => {
+                        (navigation as any).navigate('EditCategory', { categoryId: category.id });
+                      }}
+                      style={{
+                        shadowColor: '#3B82F6',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 2,
+                        elevation: 2,
+                      }}
+                    >
+                      <Ionicons name="pencil" size={20} color="#3B82F6" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className="bg-red-50 rounded-xl p-2.5 border border-red-200"
+                      onPress={() => {
+                        Alert.alert(
+                          'Xác nhận',
+                          'Bạn có chắc muốn xóa danh mục này?',
+                          [
+                            { text: 'Hủy', style: 'cancel' },
+                            {
+                              text: 'Xóa',
+                              style: 'destructive',
+                              onPress: () => handleDeleteCategory(category.id),
+                            },
+                          ]
+                        );
+                      }}
+                      style={{
+                        shadowColor: '#EF4444',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 2,
+                        elevation: 2,
+                      }}
+                    >
+                      <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             ))}

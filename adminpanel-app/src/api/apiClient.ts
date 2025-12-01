@@ -62,8 +62,8 @@ api.interceptors.response.use(
 // Categories API
 export const fetchCategories = async () => (await api.get('/categories')).data;
 export const fetchCategory = async (id:string) => (await api.get(`/categories/${id}`)).data;
-export const createCategory = async (data:{name:string,imageUrl?:string}) => (await api.post('/categories', data)).data;
-export const updateCategory = async (id:string, data:{name:string,imageUrl?:string}) => (await api.put(`/categories/${id}`, data)).data;
+export const createCategory = async (data:{name:string,imageUrl?:string,isActive?:boolean}) => (await api.post('/categories', data)).data;
+export const updateCategory = async (id:string, data:{name?:string,imageUrl?:string,isActive?:boolean}) => (await api.put(`/categories/${id}`, data)).data;
 export const deleteCategory = async (id:string) => (await api.delete(`/categories/${id}`)).data;
 
 // Auth API

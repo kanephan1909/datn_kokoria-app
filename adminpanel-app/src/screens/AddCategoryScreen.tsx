@@ -21,7 +21,7 @@ const AddCategoryScreen = () => {
   const queryClient = useQueryClient()
   const [formData, setFormData] = useState({
     name: '',
-    status: 'active', // active hoặc inactive
+    isActive: true,
     image: null as string | null,
     imageUri: null as string | null, // Local URI từ image picker
   })
@@ -38,7 +38,7 @@ const AddCategoryScreen = () => {
 
     // Mở image picker
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images' as const,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
@@ -158,7 +158,8 @@ const AddCategoryScreen = () => {
       // Gọi mutation để tạo category
       createCategoryMutation.mutate({
         name: formData.name.trim(),
-        imageUrl: imageUrl
+        imageUrl: imageUrl,
+        isActive: formData.isActive,
       })
     } catch (error: any) {
       Alert.alert('Lỗi', error?.message || 'Không thể upload ảnh')
@@ -276,20 +277,20 @@ const AddCategoryScreen = () => {
           <View className='flex-row gap-3'>
             <TouchableOpacity
               className={`flex-1 flex-row items-center justify-center py-3 rounded-lg border-2 ${
-                formData.status === 'active'
+                formData.isActive
                   ? 'bg-green-50 border-green-500'
                   : 'bg-white border-gray-300'
               }`}
-              onPress={() => setFormData({ ...formData, status: 'active' })}
+              onPress={() => setFormData({ ...formData, isActive: true })}
             >
               <Ionicons
-                name={formData.status === 'active' ? 'checkmark-circle' : 'ellipse-outline'}
+                name={formData.isActive ? 'checkmark-circle' : 'ellipse-outline'}
                 size={20}
-                color={formData.status === 'active' ? '#10B981' : '#9CA3AF'}
+                color={formData.isActive ? '#10B981' : '#9CA3AF'}
               />
               <Text
                 className={`ml-2 font-semibold ${
-                  formData.status === 'active' ? 'text-green-700' : 'text-gray-600'
+                  formData.isActive ? 'text-green-700' : 'text-gray-600'
                 }`}
               >
                 Hoạt động
@@ -298,20 +299,20 @@ const AddCategoryScreen = () => {
 
             <TouchableOpacity
               className={`flex-1 flex-row items-center justify-center py-3 rounded-lg border-2 ${
-                formData.status === 'inactive'
+                !formData.isActive
                   ? 'bg-red-50 border-red-500'
                   : 'bg-white border-gray-300'
               }`}
-              onPress={() => setFormData({ ...formData, status: 'inactive' })}
+              onPress={() => setFormData({ ...formData, isActive: false })}
             >
               <Ionicons
-                name={formData.status === 'inactive' ? 'checkmark-circle' : 'ellipse-outline'}
+                name={!formData.isActive ? 'checkmark-circle' : 'ellipse-outline'}
                 size={20}
-                color={formData.status === 'inactive' ? '#EF4444' : '#9CA3AF'}
+                color={!formData.isActive ? '#EF4444' : '#9CA3AF'}
               />
               <Text
                 className={`ml-2 font-semibold ${
-                  formData.status === 'inactive' ? 'text-red-700' : 'text-gray-600'
+                  !formData.isActive ? 'text-red-700' : 'text-gray-600'
                 }`}
               >
                 Tạm khóa

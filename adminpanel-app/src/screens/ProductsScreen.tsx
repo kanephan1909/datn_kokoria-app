@@ -79,7 +79,7 @@ const ProductsScreen = () => {
       <View className="bg-white px-4 pt-4 pb-4 border-b border-gray-200 shadow-sm">
         <View className="flex-row items-center justify-between mb-3">
           <View>
-            <Text className="text-2xl font-bold text-gray-900">Sản Phẩm</Text>
+            <Text className="text-2xl font-bold text-gray-900">Danh sách sản phẩm</Text>
             <Text className="text-sm text-gray-500 mt-1">
               {filteredProducts.length} sản phẩm
             </Text>
