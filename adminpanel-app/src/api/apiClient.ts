@@ -29,6 +29,15 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
         
+        // Xử lý lỗi rate limiting (429) - không retry
+        if (error.response?.status === 429) {
+            // Trả về error với message rõ ràng
+            const rateLimitMessage = error.response?.data?.message || 
+                'Quá nhiều yêu cầu. Vui lòng đợi vài phút trước khi thử lại.';
+            error.message = rateLimitMessage;
+            return Promise.reject(error);
+        }
+        
         // Nếu token hết hạn (401) và chưa retry
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
@@ -62,8 +71,8 @@ api.interceptors.response.use(
 // Categories API
 export const fetchCategories = async () => (await api.get('/categories')).data;
 export const fetchCategory = async (id:string) => (await api.get(`/categories/${id}`)).data;
-export const createCategory = async (data:{name:string,imageUrl?:string}) => (await api.post('/categories', data)).data;
-export const updateCategory = async (id:string, data:{name:string,imageUrl?:string}) => (await api.put(`/categories/${id}`, data)).data;
+export const createCategory = async (data:{name:string,imageUrl?:string,isActive?:boolean}) => (await api.post('/categories', data)).data;
+export const updateCategory = async (id:string, data:{name?:string,imageUrl?:string,isActive?:boolean}) => (await api.put(`/categories/${id}`, data)).data;
 export const deleteCategory = async (id:string) => (await api.delete(`/categories/${id}`)).data;
 
 // Auth API

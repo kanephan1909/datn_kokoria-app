@@ -1,6 +1,7 @@
 const express = require('express');
 const { 
-  getCategories, 
+  getCategories,
+  getCategory,
   getProductsByCategory, 
   createCategory, 
   updateCategory, 
@@ -43,8 +44,15 @@ router.get('/', getCategories);
 /**
  * GET /categories/:id/products
  * Lấy danh sách sản phẩm theo category - Public
+ * Phải đặt trước route /:id để tránh conflict
  */
 router.get('/:id/products', getProductsByCategory);
+
+/**
+ * GET /categories/:id
+ * Lấy thông tin chi tiết category theo id - Public
+ */
+router.get('/:id', getCategory);
 
 /**
  * POST /categories

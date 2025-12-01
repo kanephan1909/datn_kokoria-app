@@ -1,65 +1,128 @@
-import {View, Text, TouchableOpacity, FlatList} from 'react-native';
-import React from 'react';
+import {View, Text, TouchableOpacity, FlatList, ActivityIndicator, Alert} from 'react-native';
+import React, {useMemo} from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import {useQuery} from '@tanstack/react-query';
+import {fetchProducts, fetchCategories} from '../../../api/apiClient';
+import {useCart} from '../../context/CartContext';
+import {useNavigation} from '@react-navigation/native';
+import {MainRoutes} from '../../navigation/Routes';
 
-interface PopularItem {
+interface Product {
   id: string;
   name: string;
   price: number;
   description?: string;
-  badge?: string;
-  icon: string;
+  imageUrl?: string;
+  categoryId?: string;
 }
 
-const popularItems: PopularItem[] = [
-  {
-    id: '1',
-    name: 'Mix 3 vị',
-    price: 380000,
-    description: 'Đùi rút xương - Boneless chicken',
-    badge: 'BEST',
-    icon: 'layers',
-  },
-  {
-    id: '2',
-    name: 'Chảo sườn phô mai',
-    price: 320000,
-    description: 'Sốt BBQ/Cay - One Size',
-    badge: 'HOT',
-    icon: 'flame',
-  },
-  {
-    id: '3',
-    name: 'Hot Plate',
-    price: 209000,
-    description: 'Vừa - Sốt Koko/Cay',
-    icon: 'flame',
-  },
-  {
-    id: '4',
-    name: 'Gà rút xương - M',
-    price: 129000,
-    description: 'Sốt Koko (Ngọt, cay)',
-    icon: 'restaurant',
-  },
-  {
-    id: '5',
-    name: 'Combo Mix 2 vị',
-    price: 345000,
-    description: '3-4 người',
-    badge: 'HOT',
-    icon: 'basket',
-  },
-  {
-    id: '6',
-    name: 'Tokbokki',
-    price: 59000,
-    description: 'Bánh gạo cay Hàn Quốc',
-    icon: 'disc',
-  },
-];
+interface Category {
+  id: string;
+  name: string;
+  imageUrl?: string;
+}
 
-const PopularItems = () => {
+interface PopularItemsProps {
+  searchQuery?: string;
+}
+
+const PopularItems = ({searchQuery = ''}: PopularItemsProps) => {
+  const {addItem} = useCart();
+  const navigation = useNavigation();
+
+  // Lấy danh sách categories để tìm category "Gà"
+  const {data: categoriesData} = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await fetchCategories();
+      if (response.success && response.data) {
+        return response.data as Category[];
+      }
+      throw new Error(response.message || 'Failed to fetch categories');
+    },
+  });
+
+  // Tìm category "Gà" hoặc "Gà rán"
+  const chickenCategoryId = useMemo(() => {
+    if (!categoriesData) {
+      return null;
+    }
+    const chickenCategory = categoriesData.find(
+      cat =>
+        cat.name.toLowerCase().includes('gà') ||
+        cat.name.toLowerCase().includes('ga') ||
+        cat.name.toLowerCase().includes('chicken') ||
+        cat.name.toLowerCase().includes('gà rán') ||
+        cat.name.toLowerCase().includes('ga ran')
+    );
+    return chickenCategory?.id || null;
+  }, [categoriesData]);
+
+  const {
+    data: productsData,
+    isLoading,
+  } = useQuery({
+    queryKey: ['popularProducts', searchQuery, chickenCategoryId],
+    queryFn: async () => {
+      // Nếu có search query, search bình thường
+      if (searchQuery) {
+        const response = await fetchProducts({
+          limit: 20,
+          page: 1,
+          search: searchQuery,
+        });
+        if (response.success && response.data) {
+          const productsList = Array.isArray(response.data)
+            ? response.data
+            : response.data.products || response.data.data || [];
+          return productsList as Product[];
+        }
+        throw new Error(response.message || 'Failed to fetch products');
+      }
+
+      // Nếu không có search query, lấy sản phẩm từ category "Gà"
+      if (chickenCategoryId) {
+        const response = await fetchProducts({
+          categoryId: chickenCategoryId,
+          limit: 6,
+          page: 1,
+        });
+        if (response.success && response.data) {
+          const productsList = Array.isArray(response.data)
+            ? response.data
+            : response.data.products || response.data.data || [];
+          return productsList as Product[];
+        }
+        throw new Error(response.message || 'Failed to fetch products');
+      }
+
+      // Nếu không tìm thấy category gà, lấy tất cả và filter theo tên
+      const response = await fetchProducts({
+        limit: 50,
+        page: 1,
+      });
+      if (response.success && response.data) {
+        const productsList = Array.isArray(response.data)
+          ? response.data
+          : response.data.products || response.data.data || [];
+        // Filter các sản phẩm có tên chứa "gà" hoặc "chicken"
+        const filteredProducts = productsList.filter((product: Product) => {
+          const nameLower = product.name.toLowerCase();
+          return (
+            nameLower.includes('gà') ||
+            nameLower.includes('ga') ||
+            nameLower.includes('chicken')
+          );
+        });
+        return filteredProducts.slice(0, 6) as Product[];
+      }
+      throw new Error(response.message || 'Failed to fetch products');
+    },
+    enabled: searchQuery ? true : categoriesData !== undefined,
+  });
+
+  const products = productsData || [];
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -67,10 +130,41 @@ const PopularItems = () => {
     }).format(price);
   };
 
-  const renderItem = ({item}: {item: PopularItem}) => {
+  const getProductIcon = (name: string): string => {
+    const nameLower = name.toLowerCase();
+    if (nameLower.includes('combo')) {
+      return 'basket';
+    }
+    if (nameLower.includes('hot') || nameLower.includes('plate')) {
+      return 'flame';
+    }
+    if (nameLower.includes('tokbokki')) {
+      return 'disc';
+    }
+    if (nameLower.includes('gà') || nameLower.includes('chicken')) {
+      return 'restaurant';
+    }
+    return 'layers';
+  };
+
+  const handleAddToCart = async (product: Product) => {
+    try {
+      await addItem(product.id, 1);
+      Alert.alert('Thành công', 'Đã thêm sản phẩm vào giỏ hàng');
+    } catch (error: any) {
+      Alert.alert('Lỗi', error.response?.data?.message || 'Không thể thêm vào giỏ hàng');
+    }
+  };
+
+  const renderItem = ({item}: {item: Product}) => {
+    const icon = getProductIcon(item.name);
+
     return (
       <TouchableOpacity
         activeOpacity={0.8}
+        onPress={() => {
+          (navigation as any).navigate(MainRoutes.ProductDetails, {productId: item.id});
+        }}
         className="bg-white rounded-xl mb-3 overflow-hidden shadow-sm"
         style={{
           elevation: 2,
@@ -84,7 +178,7 @@ const PopularItems = () => {
               height: 60,
               backgroundColor: '#F9731620',
             }}>
-            <Ionicons name={item.icon as any} size={28} color="#F97316" />
+            <Ionicons name={icon as any} size={28} color="#F97316" />
           </View>
 
           {/* Content */}
@@ -93,18 +187,6 @@ const PopularItems = () => {
               <Text className="text-base font-bold text-gray-800 flex-1" numberOfLines={1}>
                 {item.name}
               </Text>
-              {item.badge && (
-                <View
-                  className={`px-2 py-0.5 rounded-full ml-2 ${
-                    item.badge === 'BEST'
-                      ? 'bg-orange-500'
-                      : item.badge === 'HOT'
-                      ? 'bg-red-500'
-                      : 'bg-blue-500'
-                  }`}>
-                  <Text className="text-white text-xs font-bold">{item.badge}</Text>
-                </View>
-              )}
             </View>
             {item.description && (
               <Text className="text-xs text-gray-500 mb-2" numberOfLines={1}>
@@ -119,7 +201,8 @@ const PopularItems = () => {
           {/* Add button */}
           <TouchableOpacity
             activeOpacity={0.7}
-            className="bg-orange-500 rounded-full w-10 h-10 items-center justify-center ml-2">
+            className="bg-orange-500 rounded-full w-10 h-10 items-center justify-center ml-2"
+            onPress={() => handleAddToCart(item)}>
             <Ionicons name="add" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -127,10 +210,30 @@ const PopularItems = () => {
     );
   };
 
+  if (isLoading) {
+    return (
+      <View className="pt-2">
+        <View className="flex-row items-center justify-center py-8">
+          <ActivityIndicator size="small" color="#F97316" />
+        </View>
+      </View>
+    );
+  }
+
+  if (products.length === 0 && !isLoading) {
+    return (
+      <View className="pt-2">
+        <Text className="text-center text-gray-500 py-4">
+          {searchQuery ? 'Không tìm thấy sản phẩm nào' : 'Chưa có sản phẩm nào'}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View className="pt-2">
       <FlatList
-        data={popularItems}
+        data={products}
         renderItem={renderItem}
         keyExtractor={item => item.id}
         scrollEnabled={false}
@@ -140,4 +243,3 @@ const PopularItems = () => {
 };
 
 export default PopularItems;
-

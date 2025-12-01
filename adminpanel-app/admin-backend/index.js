@@ -38,15 +38,31 @@ app.use(helmet());
 
 /**
  * Rate Limit - Giới hạn số lượng request để chống DDOS / spam API
- * - 100 requests / 15 phút / mỗi IP
+ * - Development: 1000 requests / 15 phút / mỗi IP
+ * - Production: 100 requests / 15 phút / mỗi IP
  */
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// Rate limit chung cho tất cả routes
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100,
+    max: isDevelopment ? 1000 : 100, // Tăng limit cho development
     message: 'Quá nhiều yêu cầu, vui lòng thử lại sau.',
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   })
 );
+
+// Rate limit riêng cho auth routes (register/login) - chặt hơn để chống spam
+const authRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: isDevelopment ? 50 : 5, // Development: 50 requests (tăng từ 20), Production: 5 requests
+  message: 'Quá nhiều yêu cầu đăng ký/đăng nhập, vui lòng đợi vài phút trước khi thử lại.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // Không đếm các request thành công
+});
 
 /**
  * Middleware parse JSON body
@@ -69,7 +85,7 @@ app.use(bodyParser.raw({ type: 'application/json' }));
 app.use(errorHandler);
 
 // Routes with API VERSIONING
-app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', authRateLimit, authRoutes);
 app.use('/api/v1/categories', categoriesRoutes);
 app.use('/api/v1/products', productsRoutes);
 app.use('/api/v1/users', usersRoutes);

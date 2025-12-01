@@ -3,7 +3,7 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {MainRoutes} from '../Routes';
 import HomeScreen from '../../screens/HomeScreen';
-import StoreScreen from '../../screens/StoreSreen';
+import OrderHistoryScreen from '../../screens/OrderHistoryScreen';
 import {FontAwesome} from '@react-native-vector-icons/fontawesome';
 import UserScreen from '../../screens/UserScreen';
 
@@ -14,8 +14,17 @@ const MainTabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#1E88E5',
+        tabBarActiveTintColor: '#F97316',
+        tabBarInactiveTintColor: '#9CA3AF',
         headerShown: false,
+        tabBarStyle: {
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: '#E5E7EB',
+          paddingBottom: 5,
+          paddingTop: 5,
+          height: 70,
+        },
       }}>
       <Tab.Screen
         name={MainRoutes.Home}
@@ -27,11 +36,11 @@ const MainTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name={MainRoutes.Store}
-        component={StoreScreen}
+        name={MainRoutes.Order}
+        component={OrderHistoryScreen}
         options={{
           tabBarIcon: ({color}: {color: string}) => (
-            <FontAwesome name="shopping-cart" color={color} size={24} />
+            <FontAwesome name="list" color={color} size={24} />
           ),
         }}
       />

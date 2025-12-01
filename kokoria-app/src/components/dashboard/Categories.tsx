@@ -1,50 +1,66 @@
-import {View, Text, TouchableOpacity, FlatList} from 'react-native';
+import {
+  View,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
 import React from 'react';
-import Ionicons from '@react-native-vector-icons/ionicons';
+import {useQuery} from '@tanstack/react-query';
+import {fetchCategories} from '../../../api/apiClient';
+import CategoryCard from './CategoryCard';
+import {MainStackParamList, MainRoutes} from '../../navigation/Routes';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {useNavigation} from '@react-navigation/native';
 
 interface Category {
   id: string;
   name: string;
-  icon: string;
-  color: string;
+  imageUrl?: string;
 }
 
-const categories: Category[] = [
-  {id: '1', name: 'Gà rán', icon: 'restaurant', color: '#F97316'},
-  {id: '2', name: 'Món ăn kèm', icon: 'layers', color: '#EF4444'},
-  {id: '3', name: 'Đồ uống', icon: 'cafe', color: '#3B82F6'},
-  {id: '4', name: 'Combo', icon: 'basket', color: '#10B981'},
-  {id: '5', name: 'Hot Plate', icon: 'flame', color: '#F59E0B'},
-  {id: '6', name: 'Lẩu', icon: 'nutrition', color: '#8B5CF6'},
-  {id: '7', name: 'Tokbokki', icon: 'disc', color: '#EC4899'},
-  {id: '8', name: 'Mì & Cơm', icon: 'fast-food', color: '#14B8A6'},
-];
-
 const Categories = () => {
-  const renderCategory = ({item}: {item: Category}) => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+
+  const {data: categoriesData, isLoading} = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await fetchCategories();
+      if (response.success && response.data) {
+        return response.data as Category[];
+      }
+      throw new Error(response.message || 'Failed to fetch categories');
+    },
+  });
+
+  const categories = categoriesData || [];
+
+  if (isLoading) {
     return (
-      <TouchableOpacity
-        activeOpacity={0.7}
-        className="items-center mr-4 w-[70px]">
-        <View
-          className="rounded-full items-center justify-center mb-2 w-[60px] h-[60px]"
-          style={{
-            backgroundColor: `${item.color}20`,
-          }}>
-          <Ionicons name={item.icon as any} size={28} color={item.color} />
+      <View className="pt-4 px-4">
+        <View className="flex-row items-center justify-center py-4">
+          <ActivityIndicator size="small" color="#F97316" />
         </View>
-        <Text className="text-xs text-gray-700 text-center" numberOfLines={2}>
-          {item.name}
-        </Text>
-      </TouchableOpacity>
+      </View>
     );
-  };
+  }
+
+  if (categories.length === 0) {
+    return null;
+  }
 
   return (
     <View className="pt-4 px-4">
       <FlatList
         data={categories}
-        renderItem={renderCategory}
+        renderItem={({item}) => (
+          <CategoryCard
+            name={item?.name}
+            image={item?.imageUrl || ''}
+            onPress={() =>
+              navigation.navigate(MainRoutes.Category, {categoryId: item?.id})
+            }
+          />
+        )}
         keyExtractor={item => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -54,4 +70,3 @@ const Categories = () => {
 };
 
 export default Categories;
-
