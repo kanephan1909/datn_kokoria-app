@@ -8,6 +8,8 @@ import {NavigationContainer} from '@react-navigation/native';
 import RootNavigator from './src/navigation/navigators/RootNavigator';
 import {AuthProvider} from './src/context/AuthContext';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {useCartStore} from './src/store/useCartStore';
+import {useEffect} from 'react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,14 +21,19 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
+  // Initialize cart khi app khởi động
+  useEffect(() => {
+    useCartStore.getState().loadCart();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-          <NavigationContainer
-            ref={navigationRef}
-            onReady={setIsNavigationReady}>
-            <RootNavigator />
-          </NavigationContainer>
+        <NavigationContainer
+          ref={navigationRef}
+          onReady={setIsNavigationReady}>
+          <RootNavigator />
+        </NavigationContainer>
       </AuthProvider>
     </QueryClientProvider>
   );

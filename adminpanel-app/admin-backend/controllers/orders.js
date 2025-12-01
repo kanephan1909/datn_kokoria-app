@@ -114,6 +114,53 @@ async function getOrders(req, res) {
 
         const total = await prisma.order.count({ where });
 
+        // Populate product data cho items trong tất cả orders
+        if (orders.length > 0) {
+            // Lấy tất cả productIds từ tất cả orders
+            const allProductIds = [];
+            orders.forEach(order => {
+                if (order.items && Array.isArray(order.items)) {
+                    order.items.forEach(item => {
+                        if (item.productId && !allProductIds.includes(item.productId)) {
+                            allProductIds.push(item.productId);
+                        }
+                    });
+                }
+            });
+
+            if (allProductIds.length > 0) {
+                // Fetch tất cả products một lần
+                const products = await prisma.product.findMany({
+                    where: {
+                        id: { in: allProductIds }
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        price: true,
+                        imageUrl: true,
+                        description: true,
+                    }
+                });
+
+                // Tạo map để lookup nhanh
+                const productMap = {};
+                products.forEach(product => {
+                    productMap[product.id] = product;
+                });
+
+                // Map lại items với product data cho từng order
+                orders.forEach(order => {
+                    if (order.items && Array.isArray(order.items)) {
+                        order.items = order.items.map(item => ({
+                            ...item,
+                            product: productMap[item.productId] || null,
+                        }));
+                    }
+                });
+            }
+        }
+
         res.json({
             success: true,
             data: orders,
@@ -174,6 +221,40 @@ async function getOrder(req, res) {
                     success: false,
                     message: 'Forbidden. You can only view orders assigned to you.',
                 });
+            }
+        }
+
+        // Populate product data cho items
+        if (order.items && Array.isArray(order.items) && order.items.length > 0) {
+            const productIds = order.items
+                .map(item => item.productId)
+                .filter(id => id); // Lọc bỏ undefined/null
+
+            if (productIds.length > 0) {
+                const products = await prisma.product.findMany({
+                    where: {
+                        id: { in: productIds }
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        price: true,
+                        imageUrl: true,
+                        description: true,
+                    }
+                });
+
+                // Tạo map để lookup nhanh
+                const productMap = {};
+                products.forEach(product => {
+                    productMap[product.id] = product;
+                });
+
+                // Map lại items với product data
+                order.items = order.items.map(item => ({
+                    ...item,
+                    product: productMap[item.productId] || null,
+                }));
             }
         }
 
