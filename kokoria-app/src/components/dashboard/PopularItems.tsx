@@ -1,6 +1,11 @@
 import {View, Text, TouchableOpacity, FlatList} from 'react-native';
 import React from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import {useQuery} from '@tanstack/react-query';
+import {fetchProducts, fetchCategories} from '../../../api/apiClient';
+import {useCart} from '../../store/useCartStore';
+import {useNavigation} from '@react-navigation/native';
+import {MainRoutes} from '../../navigation/Routes';
 
 interface PopularItem {
   id: string;
