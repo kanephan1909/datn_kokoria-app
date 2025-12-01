@@ -19,7 +19,7 @@ const DriversStack = () => {
       }}
     >
       <Stack.Screen
-        name="Drivers"
+        name="DriversList"
         component={DriversScreen}
         options={{ title: 'Tài Xế' }}
       />

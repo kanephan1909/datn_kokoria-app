@@ -24,11 +24,53 @@ async function getOrders(req, res) {
         }
         
         if (status) {
-            where.status = status;
+            // Convert status to uppercase to match enum
+            const statusUpper = status.toUpperCase();
+            // Map common status values to enum values
+            const statusMap = {
+                'PENDING': 'PENDING',
+                'CONFIRMED': 'CONFIRMED',
+                'PREPARING': 'PREPARING',
+                'READY': 'READY_FOR_PICKUP',
+                'READY_FOR_PICKUP': 'READY_FOR_PICKUP',
+                'PICKED_UP': 'PICKED_UP',
+                'DELIVERING': 'DELIVERING',
+                'COMPLETED': 'COMPLETED',
+                'CANCELED': 'CANCELED',
+                'CANCELLED': 'CANCELED',
+            };
+            
+            const mappedStatus = statusMap[statusUpper];
+            if (mappedStatus) {
+                where.status = mappedStatus;
+            } else {
+                // If status doesn't match, try using it as-is (might be valid enum value)
+                where.status = statusUpper;
+            }
         }
         
         if (paymentStatus) {
-            where.paymentStatus = paymentStatus;
+            // Convert paymentStatus to uppercase to match enum
+            const paymentStatusUpper = paymentStatus.toUpperCase();
+            // Map common payment status values to enum values
+            const paymentStatusMap = {
+                'PAYMENT_PENDING': 'PAYMENT_PENDING',
+                'PENDING': 'PAYMENT_PENDING',
+                'PAYMENT_SUCCESS': 'PAYMENT_SUCCESS',
+                'SUCCESS': 'PAYMENT_SUCCESS',
+                'PAYMENT_FAILED': 'PAYMENT_FAILED',
+                'FAILED': 'PAYMENT_FAILED',
+                'PAYMENT_REFUNDED': 'PAYMENT_REFUNDED',
+                'REFUNDED': 'PAYMENT_REFUNDED',
+            };
+            
+            const mappedPaymentStatus = paymentStatusMap[paymentStatusUpper];
+            if (mappedPaymentStatus) {
+                where.paymentStatus = mappedPaymentStatus;
+            } else {
+                // If paymentStatus doesn't match, try using it as-is
+                where.paymentStatus = paymentStatusUpper;
+            }
         }
         
         // ADMIN có thể filter theo userId hoặc driverId
@@ -71,6 +113,53 @@ async function getOrders(req, res) {
         });
 
         const total = await prisma.order.count({ where });
+
+        // Populate product data cho items trong tất cả orders
+        if (orders.length > 0) {
+            // Lấy tất cả productIds từ tất cả orders
+            const allProductIds = [];
+            orders.forEach(order => {
+                if (order.items && Array.isArray(order.items)) {
+                    order.items.forEach(item => {
+                        if (item.productId && !allProductIds.includes(item.productId)) {
+                            allProductIds.push(item.productId);
+                        }
+                    });
+                }
+            });
+
+            if (allProductIds.length > 0) {
+                // Fetch tất cả products một lần
+                const products = await prisma.product.findMany({
+                    where: {
+                        id: { in: allProductIds }
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        price: true,
+                        imageUrl: true,
+                        description: true,
+                    }
+                });
+
+                // Tạo map để lookup nhanh
+                const productMap = {};
+                products.forEach(product => {
+                    productMap[product.id] = product;
+                });
+
+                // Map lại items với product data cho từng order
+                orders.forEach(order => {
+                    if (order.items && Array.isArray(order.items)) {
+                        order.items = order.items.map(item => ({
+                            ...item,
+                            product: productMap[item.productId] || null,
+                        }));
+                    }
+                });
+            }
+        }
 
         res.json({
             success: true,
@@ -132,6 +221,40 @@ async function getOrder(req, res) {
                     success: false,
                     message: 'Forbidden. You can only view orders assigned to you.',
                 });
+            }
+        }
+
+        // Populate product data cho items
+        if (order.items && Array.isArray(order.items) && order.items.length > 0) {
+            const productIds = order.items
+                .map(item => item.productId)
+                .filter(id => id); // Lọc bỏ undefined/null
+
+            if (productIds.length > 0) {
+                const products = await prisma.product.findMany({
+                    where: {
+                        id: { in: productIds }
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        price: true,
+                        imageUrl: true,
+                        description: true,
+                    }
+                });
+
+                // Tạo map để lookup nhanh
+                const productMap = {};
+                products.forEach(product => {
+                    productMap[product.id] = product;
+                });
+
+                // Map lại items với product data
+                order.items = order.items.map(item => ({
+                    ...item,
+                    product: productMap[item.productId] || null,
+                }));
             }
         }
 
