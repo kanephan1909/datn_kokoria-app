@@ -16,9 +16,17 @@ const router = express.Router();
 
 const createAddressSchema = z.object({
     userId: z.string().optional(), // Optional vì có thể lấy từ token
-    type: z.string().min(1, 'Loại địa chỉ không được để trống'),
+    // Format từ frontend (Việt Nam)
     name: z.string().min(1, 'Tên không được để trống'),
-    mobile: z.string().min(10, 'Số điện thoại không hợp lệ'),
+    phone: z.string().min(10, 'Số điện thoại phải có ít nhất 10 số'),
+    address: z.string().optional(),
+    ward: z.string().optional(),
+    district: z.string().optional(),
+    city: z.string().optional(),
+    isDefault: z.boolean().optional(),
+    // Format cũ (quốc tế) - để tương thích ngược
+    type: z.string().optional(),
+    mobile: z.string().min(10, 'Số điện thoại phải có ít nhất 10 số').optional(), // Tương thích ngược
     flatNo: z.string().optional(),
     street: z.string().optional(),
     landmark: z.string().optional(),

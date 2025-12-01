@@ -1,61 +1,89 @@
 const z = require("zod");
 const logger = require("../utils/logger");
 
-// Middleware dùng để validate request body bằng Zod schema
-// Có thể validate req.body, req.params, hoặc req.query
+/**
+ * Middleware validate request bằng Zod.
+ *
+ * @param {z.ZodSchema} schema - Zod schema để validate.
+ * @param {Object} options
+ * @param {'body' | 'params' | 'query' | 'all'} [options.source='body']
+ *        Nguồn dữ liệu cần validate.
+ */
 function validate(schema, options = {}) {
+  const { source = "body" } = options;
+
+  // Helper: lấy dữ liệu nguồn theo option
+  const getSourceData = (req) => {
+    switch (source) {
+      case "body":
+        return req.body;
+      case "params":
+        return req.params;
+      case "query":
+        return req.query;
+      case "all":
+        return { ...req.params, ...req.query, ...req.body };
+      default:
+        // Nếu truyền sai source thì log cảnh báo nhưng không crash server
+        logger.warn(`validate(): Unknown source "${source}", fallback to "body"`);
+        return req.body;
+    }
+  };
+
+  // Helper: gán lại dữ liệu đã parse vào req
+  const assignParsedData = (req, parsedData) => {
+    switch (source) {
+      case "body":
+        req.body = parsedData;
+        break;
+      case "params":
+        req.params = parsedData;
+        break;
+      case "query":
+        req.query = parsedData;
+        break;
+      case "all":
+        // Với "all" thì merge theo key có thật trên req
+        Object.keys(parsedData).forEach((key) => {
+          if (key in req.params) req.params[key] = parsedData[key];
+          if (key in req.query) req.query[key] = parsedData[key];
+          if (key in req.body) req.body[key] = parsedData[key];
+        });
+        break;
+    }
+  };
+
   return (req, res, next) => {
     try {
-      // Xác định nguồn dữ liệu cần validate
-      // Mặc định validate req.body, nhưng có thể chọn validate req.params hoặc req.query
-      const source = options.source || 'body'; // 'body', 'params', 'query', hoặc 'all'
-      
-      let dataToValidate = {};
-      
-      if (source === 'body') {
-        dataToValidate = req.body;
-      } else if (source === 'params') {
-        dataToValidate = req.params;
-      } else if (source === 'query') {
-        dataToValidate = req.query;
-      } else if (source === 'all') {
-        // Validate tất cả: params, query, body
-        dataToValidate = { ...req.params, ...req.query, ...req.body };
-      }
+      const dataToValidate = getSourceData(req);
 
-      // safeParse trả về { success: true, data } hoặc { success: false, error }
       const result = schema.safeParse(dataToValidate);
 
-      // Nếu validate thất bại → trả lỗi 400
       if (!result.success) {
+        const issues = result.error.issues || [];
+
+        const formattedErrors = issues.map((issue) => ({
+          field: (issue.path || []).join(".") || "unknown",
+          message: issue.message || "Validation error",
+        }));
+
+        const errorMessage =
+          formattedErrors.length > 0
+            ? formattedErrors.map((e) => `${e.field}: ${e.message}`).join(", ")
+            : "Validation failed";
+
         return res.status(400).json({
           success: false,
-          message: "Validation failed",
-          errors: result.error.errors, // lấy danh sách lỗi chi tiết
+          message: errorMessage,
         });
       }
 
-      // Gán lại dữ liệu đã được parse (đã được Zod làm sạch)
-      if (source === 'body') {
-        req.body = result.data;
-      } else if (source === 'params') {
-        req.params = result.data;
-      } else if (source === 'query') {
-        req.query = result.data;
-      } else if (source === 'all') {
-        // Merge lại vào các object tương ứng
-        Object.keys(result.data).forEach(key => {
-          if (req.params[key] !== undefined) req.params[key] = result.data[key];
-          if (req.query[key] !== undefined) req.query[key] = result.data[key];
-          if (req.body[key] !== undefined) req.body[key] = result.data[key];
-        });
-      }
-      
-      next();
+      // Dữ liệu đã sạch → gán lại vào req
+      assignParsedData(req, result.data);
 
-    } catch (error) {
-      // Nếu chính bản thân middleware gặp lỗi (rất hiếm)
-      logger.error(`Error validating request: ${error}`);
+      return next();
+    } catch (err) {
+      logger.error("Error validating request:", err);
 
       return res.status(500).json({
         success: false,

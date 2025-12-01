@@ -2,6 +2,16 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import MainTabNavigator from './MainTabNavigator';
+import {MainRoutes} from '../Routes';
+import CartScreen from '../../screens/CartScreen';
+import ProductDetailsScreen from '../../screens/ProductDetailsScreen';
+import OrderHistoryScreen from '../../screens/OrderHistoryScreen';
+import OrderDetailsScreen from '../../screens/OrderDetailsScreen';
+import OrderScreen from '../../screens/OrderScreen';
+import AddressListScreen from '../../screens/AddressListScreen';
+import AddAddressScreen from '../../screens/AddAddressScreen';
+import EditAddressScreen from '../../screens/EditAddressScreen';
+import CategoryScreen from '../../screens/CatetoryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -9,6 +19,15 @@ const MainNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+      <Stack.Screen name={MainRoutes.Cart} component={CartScreen} />
+      <Stack.Screen name={MainRoutes.Checkout} component={OrderScreen} />
+      <Stack.Screen name={MainRoutes.Category} component={CategoryScreen} />
+      <Stack.Screen name={MainRoutes.ProductDetails} component={ProductDetailsScreen} />
+      <Stack.Screen name={MainRoutes.OrderHistory} component={OrderHistoryScreen} />
+      <Stack.Screen name={MainRoutes.OrderDetails} component={OrderDetailsScreen} />
+      <Stack.Screen name={MainRoutes.AddressList} component={AddressListScreen} />
+      <Stack.Screen name={MainRoutes.AddAddress} component={AddAddressScreen} />
+      <Stack.Screen name={MainRoutes.EditAddress} component={EditAddressScreen} />
     </Stack.Navigator>
   );
 };

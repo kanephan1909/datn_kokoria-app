@@ -145,3 +145,99 @@
 {"level":"error","message":"Cloudinary upload error: Unknown API key your_api_key","timestamp":"2025-11-18T13:19:11.988Z"}
 {"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-18T13:19:27.007Z"}
 {"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-18T14:05:50.259Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-18T15:37:29.556Z"}
+{"level":"error","message":"Error getting orders: PrismaClientValidationError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:45:43\n\n  42     }\n  43 }\n  44 \n→ 45 const orders = await prisma.order.findMany({\n       where: {\n         userId: \"691c5907ffb077a8ce096a9b\",\n         status: \"pending\"\n                 ~~~~~~~~~\n       },\n       skip: 0,\n       take: 50,\n       include: {\n         user: {\n           select: {\n             id: true,\n             name: true,\n             email: true,\n             phone: true\n           }\n         },\n         driver: {\n           select: {\n             id: true,\n             name: true,\n             phone: true\n           }\n         },\n         logs: {\n           orderBy: {\n             createdAt: \"desc\"\n           },\n           take: 5\n         }\n       },\n       orderBy: {\n         createdAt: \"desc\"\n       }\n     })\n\nInvalid value for argument `status`. Expected OrderStatus.","timestamp":"2025-11-18T17:08:12.269Z"}
+{"level":"error","message":"Error getting orders: PrismaClientValidationError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:45:43\n\n  42     }\n  43 }\n  44 \n→ 45 const orders = await prisma.order.findMany({\n       where: {\n         userId: \"691c5907ffb077a8ce096a9b\",\n         status: \"preparing\"\n                 ~~~~~~~~~~~\n       },\n       skip: 0,\n       take: 50,\n       include: {\n         user: {\n           select: {\n             id: true,\n             name: true,\n             email: true,\n             phone: true\n           }\n         },\n         driver: {\n           select: {\n             id: true,\n             name: true,\n             phone: true\n           }\n         },\n         logs: {\n           orderBy: {\n             createdAt: \"desc\"\n           },\n           take: 5\n         }\n       },\n       orderBy: {\n         createdAt: \"desc\"\n       }\n     })\n\nInvalid value for argument `status`. Expected OrderStatus.","timestamp":"2025-11-18T17:08:13.410Z"}
+{"level":"error","message":"Error getting orders: PrismaClientValidationError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:45:43\n\n  42     }\n  43 }\n  44 \n→ 45 const orders = await prisma.order.findMany({\n       where: {\n         userId: \"691c5907ffb077a8ce096a9b\",\n         status: \"delivering\"\n                 ~~~~~~~~~~~~\n       },\n       skip: 0,\n       take: 50,\n       include: {\n         user: {\n           select: {\n             id: true,\n             name: true,\n             email: true,\n             phone: true\n           }\n         },\n         driver: {\n           select: {\n             id: true,\n             name: true,\n             phone: true\n           }\n         },\n         logs: {\n           orderBy: {\n             createdAt: \"desc\"\n           },\n           take: 5\n         }\n       },\n       orderBy: {\n         createdAt: \"desc\"\n       }\n     })\n\nInvalid value for argument `status`. Expected OrderStatus.","timestamp":"2025-11-18T17:08:14.927Z"}
+{"level":"error","message":"Error getting orders: PrismaClientValidationError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:45:43\n\n  42     }\n  43 }\n  44 \n→ 45 const orders = await prisma.order.findMany({\n       where: {\n         userId: \"691c5907ffb077a8ce096a9b\",\n         status: \"completed\"\n                 ~~~~~~~~~~~\n       },\n       skip: 0,\n       take: 50,\n       include: {\n         user: {\n           select: {\n             id: true,\n             name: true,\n             email: true,\n             phone: true\n           }\n         },\n         driver: {\n           select: {\n             id: true,\n             name: true,\n             phone: true\n           }\n         },\n         logs: {\n           orderBy: {\n             createdAt: \"desc\"\n           },\n           take: 5\n         }\n       },\n       orderBy: {\n         createdAt: \"desc\"\n       }\n     })\n\nInvalid value for argument `status`. Expected OrderStatus.","timestamp":"2025-11-18T17:08:15.593Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-18T17:10:38.958Z"}
+{"level":"error","message":"Error getting orders: PrismaClientValidationError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:45:43\n\n  42     }\n  43 }\n  44 \n→ 45 const orders = await prisma.order.findMany({\n       where: {\n         userId: \"691c5907ffb077a8ce096a9b\",\n         status: \"pending\"\n                 ~~~~~~~~~\n       },\n       skip: 0,\n       take: 50,\n       include: {\n         user: {\n           select: {\n             id: true,\n             name: true,\n             email: true,\n             phone: true\n           }\n         },\n         driver: {\n           select: {\n             id: true,\n             name: true,\n             phone: true\n           }\n         },\n         logs: {\n           orderBy: {\n             createdAt: \"desc\"\n           },\n           take: 5\n         }\n       },\n       orderBy: {\n         createdAt: \"desc\"\n       }\n     })\n\nInvalid value for argument `status`. Expected OrderStatus.","timestamp":"2025-11-18T17:24:06.050Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-18T17:25:01.477Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-18T17:25:36.680Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:26:58.715Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:40:40.530Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:40:45.591Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:40:47.887Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:41:00.751Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:41:43.296Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:42:18.971Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:42:40.867Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:42:45.064Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:43:01.590Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:43:05.489Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:43:27.843Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:44:02.246Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:44:06.133Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:44:14.227Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:44:27.889Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:44:43.848Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:47:35.824Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:47:52.839Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:48:04.609Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:48:07.578Z"}
+{"level":"error","message":"Error validating request: TypeError: Cannot read properties of undefined (reading 'map')","timestamp":"2025-11-19T07:48:11.778Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:48:22.600Z"}
+{"level":"error","message":"Error validating request: TypeError: Cannot read properties of undefined (reading 'map')","timestamp":"2025-11-19T07:48:26.838Z"}
+{"level":"error","message":"Error validating request: TypeError: Cannot read properties of undefined (reading 'map')","timestamp":"2025-11-19T07:48:35.289Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:49:00.139Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:49:14.266Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:49:39.395Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:49:47.092Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:50:06.170Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:50:23.928Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:50:29.004Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:50:38.507Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:52:03.052Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:52:22.650Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:52:24.510Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:52:26.385Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:52:34.610Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:52:53.360Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:52:58.368Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:53:03.184Z"}
+{"level":"error","message":"Error validating request: ReferenceError: errorMessages is not defined","timestamp":"2025-11-19T07:53:04.432Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:53:08.730Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:55:37.352Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T07:56:06.535Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:06:13.397Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:10:59.354Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:11:22.894Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:11:41.745Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:11:55.171Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:11:56.915Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:11:58.523Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:12:57.808Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:14:05.997Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:14:11.030Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:14:27.881Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:14:45.356Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:14:55.905Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-19T08:18:18.781Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-22T15:32:02.674Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T14:14:59.614Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:07:14.061Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:07:22.395Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:07:26.708Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:07:30.357Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:07:38.447Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:07:52.483Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:08:22.438Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:15:40.347Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:19:59.049Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:35:51.237Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:37:43.940Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:39:06.875Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:39:10.057Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:39:10.984Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:46:27.864Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:46:31.499Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:47:46.576Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:53:22.956Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:55:36.945Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:55:41.074Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:55:44.739Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:55:48.740Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:56:00.887Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T16:56:45.997Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-23T17:01:22.066Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-24T17:59:16.435Z"}
