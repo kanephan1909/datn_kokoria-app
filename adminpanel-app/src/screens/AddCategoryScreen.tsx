@@ -115,7 +115,13 @@ const AddCategoryScreen = () => {
       }
       throw new Error(response.message || 'Upload ảnh thất bại')
     } catch (error: any) {
-      throw new Error(error?.response?.data?.message || error?.message || 'Upload ảnh thất bại')
+      // Xử lý network error
+      if (error?.isNetworkError || !error?.response) {
+        throw new Error(error?.message || 'Không thể kết nối đến server để upload ảnh. Vui lòng kiểm tra kết nối mạng.')
+      }
+      // Xử lý các lỗi khác
+      const errorMessage = error?.response?.data?.message || error?.message || 'Upload ảnh thất bại'
+      throw new Error(errorMessage)
     } finally {
       setUploading(false)
     }
@@ -202,7 +208,13 @@ const AddCategoryScreen = () => {
 
       // Nếu có ảnh từ image picker, upload lên Cloudinary
       if (formData.imageUri) {
-        imageUrl = await uploadImageToCloudinary(formData.imageUri)
+        try {
+          imageUrl = await uploadImageToCloudinary(formData.imageUri)
+        } catch (uploadError: any) {
+          // Hiển thị lỗi upload riêng
+          Alert.alert('Lỗi upload ảnh', uploadError?.message || 'Không thể upload ảnh. Vui lòng thử lại.')
+          return
+        }
       }
 
       // Gọi mutation để tạo hoặc cập nhật category

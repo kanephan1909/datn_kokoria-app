@@ -5,11 +5,29 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Đối với Android emulator: http://10.0.2.2:3000/api/v1
 // Đối với iOS simulator: http://localhost:3000/api/v1
 // Đối với thiết bị thật: http://<IP_MÁY>:3000/api/v1
-const API_BASE_URL = 'http://10.0.2.2:3000/api/v1';
+
+// Tự động detect môi trường hoặc sử dụng biến môi trường
+const getApiBaseUrl = () => {
+  // Nếu có biến môi trường, ưu tiên sử dụng
+  if (process.env.API_BASE_URL) {
+    return process.env.API_BASE_URL;
+  }
+  
+  // Mặc định cho Android emulator
+  // Nếu không hoạt động, thử các URL khác:
+  // - http://localhost:3000/api/v1 (cho Genymotion hoặc một số emulator)
+  // - http://127.0.0.1:3000/api/v1
+  // - http://<IP_MÁY_CỦA_BẠN>:3000/api/v1 (cho thiết bị thật)
+  
+  return 'http://10.0.2.2:3000/api/v1';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {'Content-Type': 'application/json'},
+  timeout: 30000, // 30 seconds timeout
 });
 
 // Thêm token vào request nếu có
@@ -31,6 +49,18 @@ api.interceptors.response.use(
   response => response,
   async error => {
     const originalRequest = error.config;
+
+    // Xử lý lỗi network
+    if (!error.response) {
+      // Network error - không có response từ server
+      const networkError = new Error('Network Error');
+      (networkError as any).isNetworkError = true;
+      (networkError as any).message = 
+        error.code === 'ECONNABORTED' 
+          ? 'Request timeout. Vui lòng thử lại.'
+          : 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+      return Promise.reject(networkError);
+    }
 
     // Nếu token hết hạn (401) và chưa retry
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -217,6 +247,7 @@ export const fetchCart = async () => {
 export const addToCart = async (data: {
   productId: string;
   quantity: number;
+  note?: string; // Ghi chú về options đã chọn
 }) => {
   try {
     // Get current cart
@@ -242,13 +273,16 @@ export const addToCart = async (data: {
     const cart = cartResponse.data;
     const items = cart.items || [];
 
-    // Check if product already exists in cart
+    // Check if product already exists in cart with same options (same note)
+    // Nếu có note khác nhau, coi như là item khác
     const existingItemIndex = items.findIndex(
-      (item: any) => item.productId === data.productId,
+      (item: any) => 
+        item.productId === data.productId && 
+        (item.note || '') === (data.note || ''),
     );
 
     if (existingItemIndex >= 0) {
-      // Update quantity if item exists
+      // Update quantity if item exists with same options
       items[existingItemIndex].quantity += data.quantity;
     } else {
       // Add new item
@@ -260,6 +294,7 @@ export const addToCart = async (data: {
           productId: data.productId,
           quantity: data.quantity,
           price: product.price,
+          note: data.note || undefined, // Lưu note về options
         });
       } catch (error) {
         throw new Error('Failed to get product information');
@@ -549,10 +584,29 @@ export interface Category {
   products: Product[];
 }
 
+export interface ProductOption {
+  id: string;
+  name: string;
+  price: number; // Giá bổ sung (có thể là 0)
+}
+
+export interface ProductVariant {
+  type: 'size' | 'sauce' | 'other'; // Loại variant
+  name: string; // Tên hiển thị (ví dụ: "Kích thước", "Loại sốt")
+  options: ProductOption[]; // Danh sách options
+  required: boolean; // Bắt buộc chọn hay không
+}
+
 export interface Product {
   id: string;
   name: string;
-  price: number;
+  price: number; // Giá cơ bản
   imageUrl: string;
   description: string;
+  variants?: ProductVariant[]; // Danh sách variants (size, sốt, ...)
+  categoryId?: string;
+  stock?: number;
+  isActive?: boolean;
+  rating?: number;
+  reviews?: number;
 }

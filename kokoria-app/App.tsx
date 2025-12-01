@@ -6,7 +6,7 @@ import './src/utils/nativewind-setup'; // Cấu hình NativeWind
 import {navigationRef, setIsNavigationReady} from './src/navigation/Navigation';
 import {NavigationContainer} from '@react-navigation/native';
 import RootNavigator from './src/navigation/navigators/RootNavigator';
-import {AuthProvider} from './src/context/AuthContext';
+import {AuthProvider} from './src/context';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {useCartStore} from './src/store/useCartStore';
 import {useEffect} from 'react';

@@ -12,7 +12,7 @@ export default function CategoryCard({
 }) {
   return (
     <Pressable className="mr-4" onPress={onPress}>
-      <View className="bg-gray-200 w-28 h-28 rounded-2xl items-center justify-center p-2 shadow">
+      <View className="bg-orange-200 w-28 h-28 rounded-2xl items-center justify-center p-2 shadow">
         <Image
           source={{uri: image}}
           resizeMode="cover"

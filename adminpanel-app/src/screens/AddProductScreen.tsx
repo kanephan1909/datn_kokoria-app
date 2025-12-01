@@ -20,6 +20,8 @@ import {
   fetchProductById,
   uploadImage,
 } from '../api/apiClient';
+import {ProductVariant, ProductOption} from '../types/product';
+import VariantManager from '../components/VariantManager';
 
 const AddProductScreen = () => {
   const navigation = useNavigation();
@@ -37,6 +39,7 @@ const AddProductScreen = () => {
     categoryId: '',
     stock: '',
     isActive: true,
+    variants: [] as ProductVariant[],
   });
   const [errors, setErrors] = useState<{
     name?: string;
@@ -64,6 +67,27 @@ const AddProductScreen = () => {
   useEffect(() => {
     if (productData?.success && productData?.data) {
       const product = productData.data;
+      
+      // Parse variants nếu là string (MongoDB có thể trả về JSON string)
+      let parsedVariants: ProductVariant[] = [];
+      if (product.variants) {
+        if (typeof product.variants === 'string') {
+          try {
+            parsedVariants = JSON.parse(product.variants);
+          } catch (e) {
+            console.error('Error parsing variants:', e);
+            parsedVariants = [];
+          }
+        } else if (Array.isArray(product.variants)) {
+          parsedVariants = product.variants;
+        } else if (typeof product.variants === 'object') {
+          // Nếu là object, convert thành array
+          parsedVariants = [product.variants];
+        }
+      }
+      
+      console.log('Loaded product variants:', parsedVariants);
+      
       setFormData({
         name: product.name || '',
         price: product.price?.toString() || '',
@@ -73,6 +97,7 @@ const AddProductScreen = () => {
         categoryId: product.categoryId || '',
         stock: product.stock?.toString() || '0',
         isActive: product.isActive !== undefined ? product.isActive : true,
+        variants: parsedVariants,
       });
     }
   }, [productData]);
@@ -186,8 +211,12 @@ const AddProductScreen = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: any) => updateProduct(productId, data),
-    onSuccess: () => {
+    mutationFn: (data: any) => {
+      console.log('Update mutation called with data:', JSON.stringify(data, null, 2));
+      return updateProduct(productId, data);
+    },
+    onSuccess: (response) => {
+      console.log('Update success response:', response);
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['product', productId] });
       Alert.alert('Thành công', 'Sản phẩm đã được cập nhật', [
@@ -195,6 +224,8 @@ const AddProductScreen = () => {
       ]);
     },
     onError: (error: any) => {
+      console.error('Update error:', error);
+      console.error('Update error response:', error?.response?.data);
       Alert.alert('Lỗi', error?.response?.data?.message || 'Không thể cập nhật sản phẩm');
     },
   });
@@ -212,6 +243,20 @@ const AddProductScreen = () => {
         imageUrl = await uploadImageToCloudinary(formData.imageUri);
       }
 
+      // Chuẩn bị variants để gửi
+      let variantsToSend = undefined;
+      if (formData.variants && formData.variants.length > 0) {
+        // Đảm bảo variants là array hợp lệ
+        variantsToSend = formData.variants.map(variant => ({
+          type: variant.type,
+          name: variant.name,
+          required: variant.required,
+          options: variant.options || [],
+        }));
+      }
+
+      console.log('Submitting product with variants:', variantsToSend);
+
       const submitData = {
         name: formData.name.trim(),
         price: parseFloat(formData.price),
@@ -220,7 +265,10 @@ const AddProductScreen = () => {
         categoryId: formData.categoryId,
         stock: formData.stock ? parseInt(formData.stock) : 0,
         isActive: formData.isActive,
+        variants: variantsToSend,
       };
+
+      console.log('Full submit data:', JSON.stringify(submitData, null, 2));
 
       if (isEdit) {
         updateMutation.mutate(submitData);
@@ -428,6 +476,12 @@ const AddProductScreen = () => {
             textAlignVertical="top"
           />
         </View>
+
+        {/* Variants Manager */}
+        <VariantManager
+          variants={formData.variants}
+          onChange={(variants) => setFormData({ ...formData, variants })}
+        />
 
         {/* Status */}
         <View className="mb-6">

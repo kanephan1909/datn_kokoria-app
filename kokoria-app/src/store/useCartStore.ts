@@ -20,6 +20,7 @@ interface CartItem {
   };
   quantity: number;
   price: number;
+  note?: string; // Ghi chú về options đã chọn
 }
 
 interface CartState {
@@ -30,7 +31,7 @@ interface CartState {
 
   // Actions
   loadCart: () => Promise<void>;
-  addItem: (productId: string, quantity: number) => Promise<void>;
+  addItem: (productId: string, quantity: number, note?: string) => Promise<void>;
   updateItem: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   clear: () => Promise<void>;
@@ -116,6 +117,7 @@ export const useCartStore = create<CartState>((set, get) => {
                   },
                   quantity: item.quantity,
                   price: item.price || product.price,
+                  note: item.note, // Lưu note về options
                 };
               } catch (error) {
                 console.error('Error fetching product:', error);
@@ -158,9 +160,9 @@ export const useCartStore = create<CartState>((set, get) => {
     },
 
     // Add item to cart
-    addItem: async (productId: string, quantity: number) => {
+    addItem: async (productId: string, quantity: number, note?: string) => {
       try {
-        const response = await addToCart({productId, quantity});
+        const response = await addToCart({productId, quantity, note});
 
         if (!response.success) {
           if (

@@ -115,7 +115,13 @@ const EditCategoryScreen = () => {
       }
       throw new Error(response.message || 'Upload ảnh thất bại')
     } catch (error: any) {
-      throw new Error(error?.response?.data?.message || error?.message || 'Upload ảnh thất bại')
+      // Xử lý network error
+      if (error?.isNetworkError || !error?.response) {
+        throw new Error(error?.message || 'Không thể kết nối đến server để upload ảnh. Vui lòng kiểm tra kết nối mạng.')
+      }
+      // Xử lý các lỗi khác
+      const errorMessage = error?.response?.data?.message || error?.message || 'Upload ảnh thất bại'
+      throw new Error(errorMessage)
     } finally {
       setUploading(false)
     }
@@ -156,7 +162,17 @@ const EditCategoryScreen = () => {
       )
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || error?.message || 'Có lỗi xảy ra khi cập nhật danh mục. Vui lòng thử lại.'
+      let errorMessage = 'Có lỗi xảy ra khi cập nhật danh mục. Vui lòng thử lại.';
+      
+      // Xử lý network error
+      if (error?.isNetworkError || !error?.response) {
+        errorMessage = error?.message || 'Không thể kết nối đến server. Vui lòng kiểm tra:\n- Backend server đang chạy\n- Kết nối mạng';
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
       Alert.alert(
         'Lỗi',
         errorMessage
@@ -174,7 +190,13 @@ const EditCategoryScreen = () => {
 
       // Nếu có ảnh mới từ image picker, upload lên Cloudinary
       if (formData.imageUri) {
-        imageUrl = await uploadImageToCloudinary(formData.imageUri)
+        try {
+          imageUrl = await uploadImageToCloudinary(formData.imageUri)
+        } catch (uploadError: any) {
+          // Hiển thị lỗi upload riêng
+          Alert.alert('Lỗi upload ảnh', uploadError?.message || 'Không thể upload ảnh. Vui lòng thử lại.')
+          return
+        }
       }
 
       // Gọi mutation để cập nhật category
@@ -184,7 +206,8 @@ const EditCategoryScreen = () => {
         isActive: formData.isActive,
       })
     } catch (error: any) {
-      Alert.alert('Lỗi', error?.message || 'Không thể upload ảnh')
+      // Fallback error handling
+      Alert.alert('Lỗi', error?.message || 'Có lỗi xảy ra. Vui lòng thử lại.')
     }
   }
 

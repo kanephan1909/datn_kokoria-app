@@ -9,3 +9,32 @@
 {"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-30T10:40:00.285Z"}
 {"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-30T10:56:15.533Z"}
 {"level":"info","message":"Server is running on port 3000","timestamp":"2025-11-30T10:56:16.619Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T10:28:45.367Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T13:32:23.888Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T13:32:27.726Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T13:32:38.502Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T13:33:06.737Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T13:33:08.485Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T13:38:45.638Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T13:39:16.386Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T13:39:20.434Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T13:39:21.169Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T13:59:58.855Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T14:00:03.499Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T14:00:35.623Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T14:01:05.457Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T14:01:26.841Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T14:01:28.907Z"}
+{"level":"info","message":"Updating product: 692d9a78c04f91e1952fa0c3, variants: undefined","timestamp":"2025-12-01T14:03:05.248Z"}
+{"level":"info","message":"Update data: {\"categoryId\":\"692337f9bdf28293002bb688\",\"name\":\"CHẢO GÀ PHÔ MAI\",\"price\":200000,\"imageUrl\":\"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764596929/kokoria-app/kduwjcgqu8jjydkcoony.png\",\"description\":\"Chảo phô mai béo ngậy, thơm lừng\",\"stock\":100,\"isActive\":true}","timestamp":"2025-12-01T14:03:05.558Z"}
+{"level":"info","message":"Product updated successfully: 692d9a78c04f91e1952fa0c3, variants saved: Yes","timestamp":"2025-12-01T14:03:06.195Z"}
+{"level":"info","message":"Updating product: 69233805bdf28293002bb6c2, variants: undefined","timestamp":"2025-12-01T14:04:40.774Z"}
+{"level":"info","message":"Update data: {\"categoryId\":\"692337f9bdf28293002bb689\",\"name\":\"CHẢO GÀ PHÔ MAI\",\"price\":209000,\"imageUrl\":\"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764589148/kokoria-app/y4utczvhgg6j4bqnzoc4.png\",\"description\":\"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\"stock\":100,\"isActive\":true}","timestamp":"2025-12-01T14:04:40.895Z"}
+{"level":"info","message":"Product updated successfully: 69233805bdf28293002bb6c2, variants saved: No","timestamp":"2025-12-01T14:04:41.390Z"}
+{"level":"info","message":"Updating product: 69233805bdf28293002bb6c2, variants: undefined","timestamp":"2025-12-01T14:08:48.005Z"}
+{"level":"info","message":"Update data: {\"categoryId\":\"692337f9bdf28293002bb689\",\"name\":\"CHẢO GÀ PHÔ MAI\",\"price\":209000,\"imageUrl\":\"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764589148/kokoria-app/y4utczvhgg6j4bqnzoc4.png\",\"description\":\"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\"stock\":100,\"isActive\":true}","timestamp":"2025-12-01T14:08:48.060Z"}
+{"level":"info","message":"Product updated successfully: 69233805bdf28293002bb6c2, variants saved: No","timestamp":"2025-12-01T14:08:48.474Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T14:10:13.450Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T14:10:32.473Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T14:11:33.759Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-01T14:11:41.992Z"}

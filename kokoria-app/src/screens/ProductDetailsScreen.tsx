@@ -9,28 +9,16 @@ import {
   Dimensions,
   StyleSheet,
 } from 'react-native';
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useMemo} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import {fetchProductById} from '../../api/apiClient';
+import {fetchProductById, Product, ProductVariant} from '../../api/apiClient';
 import {useCart} from '../store/useCartStore';
 import {MainRoutes} from '../navigation/Routes';
+import OptionSelector from '../components/OptionSelector';
 
 const {width} = Dimensions.get('window');
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  description?: string;
-  imageUrl?: string;
-  categoryId?: string;
-  stock?: number;
-  isActive?: boolean;
-  rating?: number;
-  reviews?: number;
-}
 
 const ProductDetailsScreen = () => {
   const route = useRoute();
@@ -40,6 +28,10 @@ const ProductDetailsScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
+  // State để lưu các options đã chọn: { variantType: optionId }
+  const [selectedOptions, setSelectedOptions] = useState<{
+    [key: string]: string;
+  }>({});
   const {addItem, cartItems, totalPrice} = useCart();
 
   const loadProduct = useCallback(async () => {
@@ -72,6 +64,62 @@ const ProductDetailsScreen = () => {
     }).format(price);
   };
 
+  // Tính toán giá dựa trên options đã chọn
+  const calculatedPrice = useMemo(() => {
+    if (!product) return 0;
+    let totalPrice = product.price;
+    
+    if (product.variants) {
+      product.variants.forEach(variant => {
+        const selectedOptionId = selectedOptions[variant.type];
+        if (selectedOptionId) {
+          const option = variant.options.find(opt => opt.id === selectedOptionId);
+          if (option) {
+            totalPrice += option.price;
+          }
+        }
+      });
+    }
+    
+    return totalPrice;
+  }, [product, selectedOptions]);
+
+  // Kiểm tra xem đã chọn đủ options bắt buộc chưa
+  const isOptionsValid = useMemo(() => {
+    if (!product?.variants) return true;
+    
+    return product.variants.every(variant => {
+      if (!variant.required) return true;
+      return !!selectedOptions[variant.type];
+    });
+  }, [product, selectedOptions]);
+
+  // Tự động chọn option đầu tiên nếu là required và chưa có selection
+  useEffect(() => {
+    if (product?.variants) {
+      const newSelections: {[key: string]: string} = {...selectedOptions};
+      let hasChange = false;
+      
+      product.variants.forEach(variant => {
+        if (variant.required && !newSelections[variant.type] && variant.options.length > 0) {
+          newSelections[variant.type] = variant.options[0].id;
+          hasChange = true;
+        }
+      });
+      
+      if (hasChange) {
+        setSelectedOptions(newSelections);
+      }
+    }
+  }, [product]);
+
+  const handleOptionSelect = (variantType: string, optionId: string) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [variantType]: optionId,
+    }));
+  };
+
   const handleQuantityChange = (change: number) => {
     const newQuantity = quantity + change;
     if (newQuantity >= 1 && (!product?.stock || newQuantity <= product.stock)) {
@@ -84,13 +132,36 @@ const ProductDetailsScreen = () => {
       return;
     }
 
+    // Kiểm tra options bắt buộc
+    if (!isOptionsValid) {
+      Alert.alert('Lỗi', 'Vui lòng chọn đầy đủ các tùy chọn bắt buộc');
+      return;
+    }
+
     if (product.stock !== undefined && quantity > product.stock) {
       Alert.alert('Lỗi', 'Số lượng vượt quá tồn kho');
       return;
     }
 
     try {
-      await addItem(product.id, quantity);
+      // Tạo note chứa thông tin options đã chọn
+      const optionsNote = product.variants
+        ? product.variants
+            .map(variant => {
+              const selectedOptionId = selectedOptions[variant.type];
+              if (selectedOptionId) {
+                const option = variant.options.find(opt => opt.id === selectedOptionId);
+                if (option) {
+                  return `${variant.name}: ${option.name}`;
+                }
+              }
+              return null;
+            })
+            .filter(Boolean)
+            .join(', ')
+        : '';
+
+      await addItem(product.id, quantity, optionsNote);
       // Alert.alert('Thành công', 'Đã thêm sản phẩm vào giỏ hàng');
     } catch (error: any) {
       Alert.alert('Lỗi', error.response?.data?.message || 'Không thể thêm vào giỏ hàng');
@@ -155,7 +226,7 @@ const ProductDetailsScreen = () => {
           <View style={styles.headerSection}>
             <View style={styles.titleRow}>
               <Text style={styles.productName}>{product.name}</Text>
-              <Text style={styles.price}>{formatPrice(product.price)}</Text>
+              <Text style={styles.price}>{formatPrice(calculatedPrice)}</Text>
             </View>
 
             {/* Rating and Stock Info */}
@@ -197,6 +268,20 @@ const ProductDetailsScreen = () => {
             <View style={styles.descriptionSection}>
               <Text style={styles.sectionTitle}>Mô tả</Text>
               <Text style={styles.description}>{product.description}</Text>
+            </View>
+          )}
+
+          {/* Options/Variants Selector */}
+          {product.variants && product.variants.length > 0 && (
+            <View style={styles.optionsSection}>
+              {product.variants.map(variant => (
+                <OptionSelector
+                  key={variant.type}
+                  variant={variant}
+                  selectedOptionId={selectedOptions[variant.type]}
+                  onSelect={optionId => handleOptionSelect(variant.type, optionId)}
+                />
+              ))}
             </View>
           )}
 
@@ -253,7 +338,7 @@ const ProductDetailsScreen = () => {
           <View style={styles.totalPreview}>
             <Text style={styles.totalLabel}>Tổng cộng</Text>
             <Text style={styles.totalAmount}>
-              {formatPrice(product.price * quantity)}
+              {formatPrice(calculatedPrice * quantity)}
             </Text>
           </View>
         </View>
@@ -290,7 +375,8 @@ const ProductDetailsScreen = () => {
             ]}
             onPress={handleAddToCart}
             disabled={
-              product.stock !== undefined && product.stock === 0
+              (product.stock !== undefined && product.stock === 0) ||
+              !isOptionsValid
             }
             activeOpacity={0.8}>
             <Ionicons
@@ -302,7 +388,7 @@ const ProductDetailsScreen = () => {
             <Text style={styles.addToCartText}>
               {product.stock !== undefined && product.stock === 0
                 ? 'Hết hàng'
-                : `Thêm vào giỏ - ${formatPrice(product.price * quantity)}`}
+                : `Thêm vào giỏ - ${formatPrice(calculatedPrice * quantity)}`}
             </Text>
           </TouchableOpacity>
         </View>
@@ -459,6 +545,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#6B7280',
     lineHeight: 24,
+  },
+  optionsSection: {
+    marginBottom: 24,
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
   },
   quantitySection: {
     marginBottom: 24,

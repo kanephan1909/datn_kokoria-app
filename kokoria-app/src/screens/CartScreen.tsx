@@ -158,6 +158,11 @@ const CartScreen = () => {
                     <Text className="text-gray-800 text-base font-semibold" numberOfLines={2}>
                       {item.product.name}
                     </Text>
+                    {item.note && (
+                      <Text className="text-orange-600 text-xs font-medium mt-1" numberOfLines={2}>
+                        {item.note}
+                      </Text>
+                    )}
                     {item.product.description && (
                       <Text className="text-gray-500 text-xs mt-1" numberOfLines={1}>
                         {item.product.description}

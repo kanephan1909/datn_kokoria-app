@@ -68,19 +68,21 @@ const authRateLimit = rateLimit({
  * Middleware parse JSON body
  * express.json() giúp parse JSON incoming request
  */
-app.use(express.json());
+// Đặt limit lớn để xử lý variants (có thể có nhiều data)
+app.use(express.json({ limit: '10mb' }));
 
 /**
  * Parse form-data kiểu application/x-www-form-urlencoded
  */
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 /**
  * bodyParser.raw() — chỉ dùng nếu bạn nhận JSON dưới dạng raw buffer,
  * thường dùng để verify webhook (Stripe, PayPal,...)
- * -> Nếu project không cần thì có thể bỏ.
+ * -> Comment lại để tránh conflict với express.json()
+ * -> Chỉ uncomment nếu thực sự cần verify webhook
  */
-app.use(bodyParser.raw({ type: 'application/json' }));
+// app.use(bodyParser.raw({ type: 'application/json' }));
 
 app.use(errorHandler);
 

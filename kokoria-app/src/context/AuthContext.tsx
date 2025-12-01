@@ -1,15 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Lazy import to avoid circular dependency issues
-const getApiFunctions = () => {
-  try {
-    return require('../../api/apiClient');
-  } catch (error) {
-    console.error('Error loading apiClient:', error);
-    return null;
-  }
-};
+// Import API functions directly - no circular dependency since apiClient doesn't import AuthContext
+import { getMe, logout as apiLogout } from '../../api/apiClient';
 
 interface User {
   id: string;
@@ -40,13 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (token) {
         // Verify token bằng cách gọi getMe
         try {
-          const api = getApiFunctions();
-          if (!api || !api.getMe) {
-            console.error('API functions not available');
-            setIsLoading(false);
-            return;
-          }
-          const response = await api.getMe();
+          const response = await getMe();
           if (response && response.success && response.data) {
             setUser(response.data);
           } else {
@@ -81,10 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      const api = getApiFunctions();
-      if (api && api.logout) {
-        await api.logout();
-      }
+      await apiLogout();
     } catch (error) {
       // Ignore logout API error
     } finally {
@@ -116,4 +100,7 @@ export const useAuth = () => {
   }
   return context;
 };
+
+// Ensure AuthProvider is exported
+export default AuthProvider;
 

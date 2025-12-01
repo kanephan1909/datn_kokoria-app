@@ -7,6 +7,7 @@ const API_BASE_URL = 'http://10.0.2.2:3000/api/v1';
 export const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {"Content-Type": "application/json"},
+    timeout: 30000, // 30 seconds timeout
 });
 
 // Thêm token vào request nếu có
@@ -28,6 +29,19 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+        
+        // Xử lý lỗi network - không có response từ server
+        if (!error.response) {
+            const networkError = new Error('Network Error');
+            (networkError as any).isNetworkError = true;
+            (networkError as any).message = 
+                error.code === 'ECONNABORTED' 
+                    ? 'Request timeout. Vui lòng thử lại.'
+                    : error.code === 'ERR_NETWORK'
+                    ? 'Không thể kết nối đến server. Vui lòng kiểm tra:\n- Backend server đang chạy\n- Kết nối mạng\n- URL API: ' + API_BASE_URL
+                    : 'Lỗi kết nối mạng. Vui lòng thử lại.';
+            return Promise.reject(networkError);
+        }
         
         // Xử lý lỗi rate limiting (429) - không retry
         if (error.response?.status === 429) {
@@ -110,8 +124,8 @@ export const fetchProducts = async (params?: { categoryId?: string; page?: numbe
 };
 
 export const fetchProductById = async (id: string) => (await api.get(`/products/${id}`)).data;
-export const createProduct = async (data: { name: string; price: number; imageUrl?: string; description?: string; categoryId: string; stock?: number; isActive?: boolean }) => (await api.post('/products', data)).data;
-export const updateProduct = async (id: string, data: { name?: string; price?: number; imageUrl?: string; description?: string; categoryId?: string; stock?: number; isActive?: boolean }) => (await api.put(`/products/${id}`, data)).data;
+export const createProduct = async (data: { name: string; price: number; imageUrl?: string; description?: string; categoryId: string; stock?: number; isActive?: boolean; variants?: any[] }) => (await api.post('/products', data)).data;
+export const updateProduct = async (id: string, data: { name?: string; price?: number; imageUrl?: string; description?: string; categoryId?: string; stock?: number; isActive?: boolean; variants?: any[] }) => (await api.put(`/products/${id}`, data)).data;
 export const deleteProduct = async (id: string) => (await api.delete(`/products/${id}`)).data;
 
 // Users API
