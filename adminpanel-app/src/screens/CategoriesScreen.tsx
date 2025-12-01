@@ -174,7 +174,6 @@ const CategoriesScreen = () => {
                       </Text>
                     </View>
                   </View>
-<<<<<<< Updated upstream
                   <View className="flex-row items-center gap-2">
                     <TouchableOpacity
                       className="bg-blue-50 rounded-xl p-3 border border-blue-200"
@@ -190,26 +189,11 @@ const CategoriesScreen = () => {
                         shadowOpacity: 0.15,
                         shadowRadius: 3,
                         elevation: 3,
-=======
-                  <View className="flex-row items-center ml-3">
-                    <TouchableOpacity
-                      className="bg-blue-50 rounded-xl p-2.5 border border-blue-200 mr-2"
-                      onPress={() => {
-                        (navigation as any).navigate('EditCategory', { categoryId: category.id });
-                      }}
-                      style={{
-                        shadowColor: '#3B82F6',
-                        shadowOffset: { width: 0, height: 1 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 2,
-                        elevation: 2,
->>>>>>> Stashed changes
                       }}
                     >
                       <Ionicons name="pencil" size={20} color="#3B82F6" />
                     </TouchableOpacity>
                     <TouchableOpacity
-<<<<<<< Updated upstream
                       className="bg-red-50 rounded-xl p-3 border border-red-200"
                       onPress={() => {
                         Alert.alert(
@@ -220,24 +204,11 @@ const CategoriesScreen = () => {
                             {
                               text: "Xóa",
                               style: "destructive",
-=======
-                      className="bg-red-50 rounded-xl p-2.5 border border-red-200"
-                      onPress={() => {
-                        Alert.alert(
-                          'Xác nhận',
-                          'Bạn có chắc muốn xóa danh mục này?',
-                          [
-                            { text: 'Hủy', style: 'cancel' },
-                            {
-                              text: 'Xóa',
-                              style: 'destructive',
->>>>>>> Stashed changes
                               onPress: () => handleDeleteCategory(category.id),
                             },
                           ]
                         );
                       }}
-<<<<<<< Updated upstream
                       activeOpacity={0.7}
                       style={{
                         shadowColor: "#EF4444",
@@ -245,14 +216,6 @@ const CategoriesScreen = () => {
                         shadowOpacity: 0.15,
                         shadowRadius: 3,
                         elevation: 3,
-=======
-                      style={{
-                        shadowColor: '#EF4444',
-                        shadowOffset: { width: 0, height: 1 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 2,
-                        elevation: 2,
->>>>>>> Stashed changes
                       }}
                     >
                       <Ionicons name="trash-outline" size={20} color="#EF4444" />

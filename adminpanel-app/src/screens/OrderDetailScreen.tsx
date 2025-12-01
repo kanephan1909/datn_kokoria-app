@@ -261,13 +261,8 @@ const OrderDetailScreen = () => {
               Alert.alert("Xác nhận", "Xác nhận đơn hàng này?", [
                 { text: "Hủy", style: "cancel" },
                 {
-<<<<<<< Updated upstream
                   text: "Xác nhận",
-                  onPress: () => confirmMutation.mutate(),
-=======
-                  text: 'Xác nhận',
-                  onPress: () => confirmMutation.mutate(undefined as any),
->>>>>>> Stashed changes
+                  onPress: () => confirmMutation.mutate(undefined),
                 },
               ]);
             }}
