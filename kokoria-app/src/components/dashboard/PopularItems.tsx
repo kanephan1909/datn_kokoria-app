@@ -3,7 +3,7 @@ import React, {useMemo} from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {useQuery} from '@tanstack/react-query';
 import {fetchProducts, fetchCategories} from '../../../api/apiClient';
-import {useCart} from '../../context/CartContext';
+import {useCart} from '../../store/useCartStore';
 import {useNavigation} from '@react-navigation/native';
 import {MainRoutes} from '../../navigation/Routes';
 
