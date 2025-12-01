@@ -19,6 +19,7 @@ export enum AuthRoutes {
 // Enum for the main routes
 export enum MainRoutes {
     Home = 'Trang chủ',
+    Menu = 'Menu',
     Order = 'Đơn Hàng',
     ProductDetails = 'Chi tiết sản phẩm',
     Category = 'Category',
@@ -53,6 +54,7 @@ export type AuthStackParamList = {
 
 export type MainTabParamList = {
     [MainRoutes.Home]:undefined;
+    [MainRoutes.Menu]:undefined;
     [MainRoutes.Order]:undefined;
     [MainRoutes.Cart]:undefined;
 }
