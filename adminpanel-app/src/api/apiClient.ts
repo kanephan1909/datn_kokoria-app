@@ -29,6 +29,15 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
         
+        // Xử lý lỗi rate limiting (429) - không retry
+        if (error.response?.status === 429) {
+            // Trả về error với message rõ ràng
+            const rateLimitMessage = error.response?.data?.message || 
+                'Quá nhiều yêu cầu. Vui lòng đợi vài phút trước khi thử lại.';
+            error.message = rateLimitMessage;
+            return Promise.reject(error);
+        }
+        
         // Nếu token hết hạn (401) và chưa retry
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;

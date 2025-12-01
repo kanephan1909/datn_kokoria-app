@@ -36,8 +36,21 @@ const LoginScreen = () => {
       }
     },
     onError: (error: any) => {
+      // Xử lý lỗi rate limiting (429)
+      if (error?.response?.status === 429) {
+        Alert.alert(
+          'Quá nhiều yêu cầu',
+          'Bạn đã gửi quá nhiều yêu cầu đăng nhập. Vui lòng đợi vài phút trước khi thử lại.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      // Xử lý các lỗi khác
       const errorMessage =
-        error?.response?.data?.message || error?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
+        error?.response?.data?.message || 
+        error?.message || 
+        'Đăng nhập thất bại. Vui lòng thử lại.';
       Alert.alert('Lỗi', errorMessage);
     },
   });
@@ -103,7 +116,7 @@ const LoginScreen = () => {
           <View className="mb-4">
             <Text className="text-gray-700 font-semibold mb-2.5 text-base">Email</Text>
             <View
-              className={`flex-row items-center bg-white rounded-xl px-4 py-3.5 border ${
+              className={`flex-row items-center bg-white rounded-xl px-4 py-2.5 border ${
                 errors.email ? 'border-red-500' : 'border-gray-200'
               }`}
               style={{
@@ -138,7 +151,7 @@ const LoginScreen = () => {
           <View className="mb-4">
             <Text className="text-gray-700 font-semibold mb-2.5 text-base">Mật khẩu</Text>
             <View
-              className={`flex-row items-center bg-white rounded-xl px-4 py-3.5 border ${
+              className={`flex-row items-center bg-white rounded-xl px-4 py-2.5 border ${
                 errors.password ? 'border-red-500' : 'border-gray-200'
               }`}
               style={{
