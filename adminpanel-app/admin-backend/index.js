@@ -57,10 +57,11 @@ app.use(
 // Rate limit riêng cho auth routes (register/login) - chặt hơn để chống spam
 const authRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isDevelopment ? 20 : 5, // Development: 20 requests, Production: 5 requests
-  message: 'Quá nhiều yêu cầu đăng ký/đăng nhập, vui lòng thử lại sau.',
+  max: isDevelopment ? 50 : 5, // Development: 50 requests (tăng từ 20), Production: 5 requests
+  message: 'Quá nhiều yêu cầu đăng ký/đăng nhập, vui lòng đợi vài phút trước khi thử lại.',
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true, // Không đếm các request thành công
 });
 
 /**
