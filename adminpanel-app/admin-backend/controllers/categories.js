@@ -1,8 +1,5 @@
 const logger = require('../utils/logger');
-const { PrismaClient } = require('@prisma/client');
-
-// Khởi tạo Prisma Client để làm việc với database
-const prisma = new PrismaClient();
+const prisma = require('../utils/prisma');
 
 // Ví dụ URL gọi API:
 // http://localhost:3000/api/v1/categories?page=2&limit=20
@@ -17,7 +14,7 @@ async function getCategories(req, res) {
 
     try {
         // Lấy danh sách category, kèm products liên quan
-        const categories = await prisma?.categories.findMany({
+        const categories = await prisma?.category.findMany({
             include: { products: true }, // Load quan hệ category → products
             skip: +skip, // convert từ string sang number
             take: +limit,
@@ -37,6 +34,36 @@ async function getCategories(req, res) {
     }
 }
 
+async function getCategory(req, res) {
+    const { id } = req.params;
+
+    try {
+        const category = await prisma.category.findUnique({
+            where: { id },
+            include: { products: true },
+        });
+
+        if (!category) {
+            return res.status(404).json({
+                success: false,
+                message: 'Category not found',
+            });
+        }
+
+        res.json({
+            success: true,
+            data: category,
+            message: 'Category fetched successfully',
+        });
+    } catch (error) {
+        logger.error(`Error getting category: ${error}`);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
+}
+
 async function getProductsByCategory(req, res) {
     const { id } = req.params; // Lấy id category từ URL
     const { page = 1, limit = 10 } = req.query;
@@ -45,7 +72,7 @@ async function getProductsByCategory(req, res) {
 
     try {
         // Lấy danh sách sản phẩm theo categoryId
-        const products = await prisma.products.findMany({
+        const products = await prisma.product.findMany({
             where: { categoryId: id },
             skip: +skip,
             take: +limit,
@@ -66,12 +93,16 @@ async function getProductsByCategory(req, res) {
 }
 
 async function createCategory(req, res) {
-    const { name, imageUrl } = req.body;
+    const { name, imageUrl, isActive } = req.body;
 
     try {
         // Tạo category mới
-        const category = await prisma.categories.create({
-            data: { name, imageUrl },
+        const category = await prisma.category.create({
+            data: { 
+                name, 
+                imageUrl,
+                isActive: isActive !== undefined ? isActive : true,
+            },
         });
 
         res.json({
@@ -90,13 +121,18 @@ async function createCategory(req, res) {
 
 async function updateCategory(req, res) {
     const { id } = req.params; // ID category cần update
-    const { name, imageUrl } = req.body;
+    const { name, imageUrl, isActive } = req.body;
 
     try {
         // Cập nhật category theo id
-        const category = await prisma.categories.update({
+        const updateData = {};
+        if (name !== undefined) updateData.name = name;
+        if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+        if (isActive !== undefined) updateData.isActive = isActive;
+
+        const category = await prisma.category.update({
             where: { id },
-            data: { name, imageUrl },
+            data: updateData,
         });
 
         res.json({
@@ -118,12 +154,12 @@ async function deleteCategory(req, res) {
 
     try {
         // Xóa toàn bộ sản phẩm thuộc category này trước
-        await prisma.products.deleteMany({
+        await prisma.product.deleteMany({
             where: { categoryId: id },
         });
 
         // Sau đó xóa category
-        await prisma.categories.delete({
+        await prisma.category.delete({
             where: { id },
         });
 
@@ -143,6 +179,7 @@ async function deleteCategory(req, res) {
 // Export các controller để sử dụng trong router
 module.exports = {
     getCategories,
+    getCategory,
     getProductsByCategory,
     createCategory,
     updateCategory,
