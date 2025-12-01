@@ -44,7 +44,7 @@ const AddCategoryScreen = () => {
       const category = categoryData.data
       setFormData({
         name: category.name || '',
-        status: category.status || 'active',
+        isActive: category.isActive !== undefined ? category.isActive : true,
         image: category.imageUrl || null,
         imageUri: null,
       })
@@ -142,7 +142,7 @@ const AddCategoryScreen = () => {
 
   // Sử dụng useMutation để tạo category
   const createCategoryMutation = useMutation({
-    mutationFn: (data: { name: string; imageUrl: string }) => createCategory(data),
+    mutationFn: (data: { name: string; imageUrl: string; isActive?: boolean }) => createCategory(data),
     onSuccess: () => {
       // Invalidate cache để refetch danh sách categories
       queryClient.invalidateQueries({ queryKey: ['categories'] })
@@ -168,7 +168,7 @@ const AddCategoryScreen = () => {
 
   // Sử dụng useMutation để cập nhật category
   const updateCategoryMutation = useMutation({
-    mutationFn: (data: { name: string; imageUrl: string }) => updateCategory(categoryId, data),
+    mutationFn: (data: { name: string; imageUrl: string; isActive?: boolean }) => updateCategory(categoryId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
       queryClient.invalidateQueries({ queryKey: ['category', categoryId] })
@@ -205,36 +205,30 @@ const AddCategoryScreen = () => {
         imageUrl = await uploadImageToCloudinary(formData.imageUri)
       }
 
-<<<<<<< Updated upstream
       // Gọi mutation để tạo hoặc cập nhật category
       if (isEdit) {
         // Khi edit, chỉ gửi imageUrl nếu có ảnh mới, nếu không thì giữ nguyên ảnh cũ
         if (imageUrl) {
           updateCategoryMutation.mutate({
             name: formData.name.trim(),
-            imageUrl: imageUrl
+            imageUrl: imageUrl,
+            isActive: formData.isActive
           })
         } else {
           // Nếu không có ảnh mới, chỉ cập nhật tên (giữ nguyên ảnh cũ)
           updateCategoryMutation.mutate({
             name: formData.name.trim(),
-            imageUrl: formData.image || '' // Giữ nguyên ảnh cũ
+            imageUrl: formData.image || '', // Giữ nguyên ảnh cũ
+            isActive: formData.isActive
           })
         }
       } else {
         createCategoryMutation.mutate({
           name: formData.name.trim(),
-          imageUrl: imageUrl
+          imageUrl: imageUrl,
+          isActive: formData.isActive
         })
       }
-=======
-      // Gọi mutation để tạo category
-      createCategoryMutation.mutate({
-        name: formData.name.trim(),
-        imageUrl: imageUrl,
-        isActive: formData.isActive,
-      })
->>>>>>> Stashed changes
     } catch (error: any) {
       Alert.alert('Lỗi', error?.message || 'Không thể upload ảnh')
     }
