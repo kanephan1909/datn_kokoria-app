@@ -8,13 +8,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
+  Animated,
 } from 'react-native';
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { login, getMe } from '../../api/apiClient';
-import { AuthRoutes } from '../navigation/Routes';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import { useAuth } from '../context/AuthContext';
+import { login as apiLogin, getMe } from '../../api/apiClient';
+import { AuthRoutes } from '../navigation/Routes';
+
+
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -24,6 +28,31 @@ const LoginScreen = () => {
   const { login: setUser } = useAuth();
   const navigation = useNavigation();
 
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, slideAnim, scaleAnim]);
+
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
       Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
@@ -32,150 +61,329 @@ const LoginScreen = () => {
 
     setIsLoading(true);
     try {
-      const response = await login(email.trim(), password);
+      const response = await apiLogin(email.trim(), password);
       if (response.success) {
-        // Lấy thông tin user từ response hoặc gọi getMe
-        if (response.data?.user) {
-          setUser(response.data.user);
+        // Lấy thông tin user sau khi login thành công
+        const userResponse = await getMe();
+        if (userResponse.success && userResponse.data) {
+          setUser(userResponse.data);
+          // Navigation sẽ được xử lý tự động bởi RootNavigator dựa trên isAuthenticated
         } else {
-          // Nếu không có user trong response, cần gọi getMe
-          const meResponse = await getMe();
-          if (meResponse.success && meResponse.data) {
-            setUser(meResponse.data);
-          }
+          Alert.alert('Lỗi', 'Không thể lấy thông tin người dùng');
         }
       } else {
-        Alert.alert('Đăng nhập thất bại', response.message || 'Email hoặc mật khẩu không đúng');
+        Alert.alert('Lỗi', response.message || 'Đăng nhập thất bại');
       }
     } catch (error: any) {
-      Alert.alert('Lỗi', error.response?.data?.message || 'Đã xảy ra lỗi khi đăng nhập');
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'Đã xảy ra lỗi khi đăng nhập';
+      Alert.alert('Lỗi', errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled">
-        <View style={styles.content}>
-          {/* Logo/Header */}
-          <View style={styles.header}>
-            <View style={styles.logoContainer}>
-              <Ionicons name="restaurant" size={60} color="#F97316" />
-            </View>
-            <Text style={styles.title}>Chào mừng trở lại!</Text>
-            <Text style={styles.subtitle}>Đăng nhập để tiếp tục</Text>
-          </View>
+    <View style={styles.container}>
+      {/* Background with gradient effect using multiple Views */}
+      <View style={styles.gradientBackground} />
+      <View style={styles.gradientLayer1} />
+      <View style={styles.gradientLayer2} />
 
-          {/* Form */}
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                placeholderTextColor="#9CA3AF"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
+      {/* Decorative circles */}
+      <View style={styles.circle1} />
+      <View style={styles.circle2} />
+      <View style={styles.circle3} />
 
-            <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Mật khẩu"
-                placeholderTextColor="#9CA3AF"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-              />
-              <TouchableOpacity
-                onPress={() => setShowPassword(!showPassword)}
-                style={styles.eyeIcon}>
-                <Ionicons
-                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
-                  size={20}
-                  color="#9CA3AF"
-                />
-              </TouchableOpacity>
-            </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <Animated.View
+            style={[
+              styles.content,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}>
+            {/* Logo section */}
+            <Animated.View
+              style={[
+                styles.logoSection,
+                { transform: [{ scale: scaleAnim }] },
+              ]}>
+              <View style={styles.logoContainer}>
+                <View style={styles.logoGradient}>
+                  <Image
+                    source={require('../assets/images/logo.png')}
+                    style={styles.logoImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              </View>
+              <Text style={styles.appName}>KOKORIA CHICKEN</Text>
+              <Text style={styles.tagline}>Thức ăn ngon, giao nhanh đến tay</Text>
+            </Animated.View>
 
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={isLoading}>
-              <Text style={styles.loginButtonText}>
-                {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
-              </Text>
-            </TouchableOpacity>
+            {/* Login card */}
+            <Animated.View
+              style={[
+                styles.cardContainer,
+                { transform: [{ scale: scaleAnim }] },
+              ]}>
+              <View style={styles.blurCard}>
+                <View style={styles.card}>
+                  <Text style={styles.welcomeText}>Đăng nhập</Text>
+                  <Text style={styles.subtitleText}>Nhập thông tin để tiếp tục</Text>
 
+                  {/* Email input */}
+                  <View style={styles.inputWrapper}>
+                    <View style={styles.inputContainer}>
+                      <Ionicons name="mail-outline" size={20} color="#FF6B35" style={styles.inputIcon} />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Email của bạn"
+                        placeholderTextColor="#999"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
+                    </View>
+                  </View>
+
+                  {/* Password input */}
+                  <View style={styles.inputWrapper}>
+                    <View style={styles.inputContainer}>
+                      <Ionicons name="lock-closed-outline" size={20} color="#FF6B35" style={styles.inputIcon} />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Mật khẩu"
+                        placeholderTextColor="#999"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={!showPassword}
+                        autoCapitalize="none"
+                      />
+                      <TouchableOpacity
+                        onPress={() => setShowPassword(!showPassword)}
+                        style={styles.eyeButton}>
+                        <Ionicons
+                          name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                          size={20}
+                          color="#666"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {/* Forgot password */}
+                  <TouchableOpacity style={styles.forgotButton}>
+                    <Text style={styles.forgotText}>Quên mật khẩu?</Text>
+                  </TouchableOpacity>
+
+                  {/* Login button */}
+                  <TouchableOpacity
+                    style={styles.loginButton}
+                    onPress={handleLogin}
+                    disabled={isLoading}
+                    activeOpacity={0.8}>
+                    <View style={styles.loginGradient}>
+                      <Text style={styles.loginButtonText}>
+                        {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                      </Text>
+                      <Ionicons name="chevron-forward" size={20} color="#FFF" />
+                    </View>
+                  </TouchableOpacity>
+
+                  {/* Divider */}
+                  <View style={styles.divider}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>hoặc</Text>
+                    <View style={styles.dividerLine} />
+                  </View>
+
+                  {/* Social login buttons */}
+                  <View style={styles.socialContainer}>
+                    <TouchableOpacity style={styles.socialButton}>
+                      <Ionicons name="logo-google" size={24} color="#4285F4" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.socialButton}>
+                      <Ionicons name="logo-facebook" size={24} color="#1877F2" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.socialButton}>
+                      <Ionicons name="logo-apple" size={24} color="#000000" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </Animated.View>
+
+                  {/* Register link */}
             <View style={styles.registerContainer}>
               <Text style={styles.registerText}>Chưa có tài khoản? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate(AuthRoutes.Register as never)}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate(AuthRoutes.Register as never)}>
                 <Text style={styles.registerLink}>Đăng ký ngay</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          </Animated.View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FF6B35',
+  },
+  gradientBackground: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#FF6B35',
+  },
+  gradientLayer1: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#F7931E',
+    opacity: 0.5,
+  },
+  gradientLayer2: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#FFC837',
+    opacity: 0.3,
+  },
+  keyboardView: {
+    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
+    paddingVertical: 40,
   },
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 60,
-    paddingBottom: 40,
+    justifyContent: 'center',
   },
-  header: {
+  circle1: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    top: -50,
+    right: -50,
+  },
+  circle2: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    top: 120,
+    left: -30,
+  },
+  circle3: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    bottom: 100,
+    right: -60,
+  },
+  logoSection: {
     alignItems: 'center',
     marginBottom: 40,
   },
   logoContainer: {
+    marginBottom: 16,
+  },
+  logoGradient: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#F9731620',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 10,
+    overflow: 'hidden',
+  },
+  logoImage: {
+    width: 100,
+    height: 100,
+  },
+  appName: {
+    fontSize: 32,
+    fontWeight: '800' as const,
+    color: '#FFFFFF',
+    marginBottom: 4,
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  tagline: {
+    fontSize: 15,
+    color: '#FFFFFF',
+    opacity: 0.9,
+    textAlign: 'center',
+  },
+  cardContainer: {
     marginBottom: 24,
   },
-  title: {
+  blurCard: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 24,
+    padding: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  welcomeText: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: '800' as const,
     color: '#1F2937',
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  subtitle: {
-    fontSize: 16,
+  subtitleText: {
+    fontSize: 15,
     color: '#6B7280',
+    marginBottom: 28,
   },
-  form: {
-    flex: 1,
+  inputWrapper: {
+    marginBottom: 16,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    marginBottom: 16,
-    borderWidth: 1,
+    height: 56,
+    borderWidth: 2,
     borderColor: '#E5E7EB',
   },
   inputIcon: {
@@ -183,26 +391,75 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 50,
     fontSize: 16,
     color: '#1F2937',
   },
-  eyeIcon: {
+  eyeButton: {
     padding: 4,
   },
-  loginButton: {
-    backgroundColor: '#F97316',
-    borderRadius: 12,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
+  forgotButton: {
+    alignSelf: 'flex-end',
     marginBottom: 24,
   },
+  forgotText: {
+    fontSize: 14,
+    color: '#FF6B35',
+    fontWeight: '600' as const,
+  },
+  loginButton: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginBottom: 24,
+    shadowColor: '#FF6B35',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  loginGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 56,
+    paddingHorizontal: 24,
+    backgroundColor: '#FF6B35',
+    borderRadius: 14,
+  },
   loginButtonText: {
+    fontSize: 17,
+    fontWeight: '700' as const,
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    marginRight: 8,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E7EB',
+  },
+  dividerText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    marginHorizontal: 16,
+  },
+  socialContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  socialButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 14,
+    backgroundColor: '#F9FAFB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   registerContainer: {
     flexDirection: 'row',
@@ -210,13 +467,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   registerText: {
-    color: '#6B7280',
-    fontSize: 14,
+    fontSize: 15,
+    color: '#FFFFFF',
+    opacity: 0.9,
   },
   registerLink: {
-    color: '#F97316',
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 15,
+    color: '#FFFFFF',
+    fontWeight: '700' as const,
+    textDecorationLine: 'underline',
   },
 });
 
