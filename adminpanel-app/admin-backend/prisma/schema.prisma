@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  // output   = "../generated/prisma"
 }
 
 datasource db {
@@ -200,13 +199,14 @@ enum PaymentStatus {
 }
 
 enum PaymentMethod {
-  ONLINE // thanh toán qua cổng (MoMo, ZaloPay,…)
+  ONLINE // thanh toán qua cổng (MoMo, ZaloPay, VNPAY,…)
   COD // thanh toán khi nhận hàng
 }
 
 enum PaymentProvider {
   MOMO
   ZALOPAY
+  VNPAY
   CASH // cho COD / thanh toán trực tiếp
   OTHER
 }

@@ -3,9 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const logger = require('./utils/logger');
 const helmet = require('helmet');
-const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
-const crypto = require('crypto');
 const errorHandler = require('./middlesware/errorHandler.js');
 
 const authRoutes = require('./routes/auth');

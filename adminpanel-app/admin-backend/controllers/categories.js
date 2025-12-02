@@ -1,5 +1,7 @@
 const logger = require('../utils/logger');
-const prisma = require('../utils/prisma');
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
 
 // Ví dụ URL gọi API:
 // http://localhost:3000/api/v1/categories?page=2&limit=20
