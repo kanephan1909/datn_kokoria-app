@@ -54,7 +54,7 @@ const VariantManager = ({variants, onChange}: VariantManagerProps) => {
 
   const addOption = (variantIndex: number) => {
     const newOption: ProductOption = {
-      id: `option-${Date.now()}`,
+      id: `option-${variantIndex}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: '',
       price: 0,
     };
@@ -126,7 +126,7 @@ const VariantManager = ({variants, onChange}: VariantManagerProps) => {
 
       {variants.map((variant, variantIndex) => (
         <View
-          key={variantIndex}
+          key={`variant-${variantIndex}-${variant.type}-${variant.name || ''}`}
           className="bg-white rounded-lg p-4 mb-3 border border-gray-200">
           {/* Variant Header */}
           <View className="flex-row items-center justify-between mb-3">
@@ -302,7 +302,7 @@ const VariantManager = ({variants, onChange}: VariantManagerProps) => {
 
                 {variant.options.map((option, optionIndex) => (
                   <View
-                    key={optionIndex}
+                    key={option.id || `option-${variantIndex}-${optionIndex}`}
                     className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 mb-3 border border-gray-200 shadow-sm"
                     style={{
                       shadowColor: '#000',

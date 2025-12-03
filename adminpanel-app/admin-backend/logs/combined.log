@@ -113,3 +113,307 @@
 {"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-02T12:11:56.655Z"}
 {"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-02T12:14:08.913Z"}
 {"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-02T12:14:55.171Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T06:53:09.771Z"}
+{"level":"error","message":"Error getting user: PrismaClientUnknownRequestError: \nInvalid `prisma.user.findUnique()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\auth.js:208:40\n\n  205 async function getMe(req, res) {\n  206     try {\n  207         // req.user được set bởi authMiddleware\n→ 208         const user = await prisma.user.findUnique(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T06:53:53.743Z"}
+{"level":"error","message":"Error getting dashboard stats: PrismaClientUnknownRequestError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\dashboard.js:51:26\n\n  48 }),\n  49 \n  50 // 10 orders gần nhất\n→ 51 prisma.order.findMany(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T06:55:12.232Z"}
+{"level":"error","message":"Error getting dashboard stats: PrismaClientUnknownRequestError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\dashboard.js:51:26\n\n  48 }),\n  49 \n  50 // 10 orders gần nhất\n→ 51 prisma.order.findMany(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T06:55:13.406Z"}
+{"level":"error","message":"Error getting dashboard stats: PrismaClientUnknownRequestError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\dashboard.js:51:26\n\n  48 }),\n  49 \n  50 // 10 orders gần nhất\n→ 51 prisma.order.findMany(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T06:55:15.783Z"}
+{"level":"error","message":"Error getting dashboard stats: PrismaClientUnknownRequestError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\dashboard.js:51:26\n\n  48 }),\n  49 \n  50 // 10 orders gần nhất\n→ 51 prisma.order.findMany(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T06:55:19.910Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T06:56:18.783Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T06:56:31.131Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T06:56:54.142Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T06:57:38.805Z"}
+{"level":"error","message":"Error getting orders: PrismaClientUnknownRequestError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:114:43\n\n  111     }\n  112 }\n  113 \n→ 114 const orders = await prisma.order.findMany(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T07:03:18.993Z"}
+{"level":"error","message":"Error getting orders: PrismaClientUnknownRequestError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:114:43\n\n  111     }\n  112 }\n  113 \n→ 114 const orders = await prisma.order.findMany(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T07:03:20.219Z"}
+{"level":"error","message":"Error getting orders: PrismaClientUnknownRequestError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:114:43\n\n  111     }\n  112 }\n  113 \n→ 114 const orders = await prisma.order.findMany(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T07:03:22.436Z"}
+{"level":"error","message":"Error getting orders: PrismaClientUnknownRequestError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:114:43\n\n  111     }\n  112 }\n  113 \n→ 114 const orders = await prisma.order.findMany(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T07:03:26.649Z"}
+{"level":"error","message":"Error getting orders: PrismaClientUnknownRequestError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:114:43\n\n  111     }\n  112 }\n  113 \n→ 114 const orders = await prisma.order.findMany(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T07:03:37.405Z"}
+{"level":"error","message":"Error getting orders: PrismaClientUnknownRequestError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:114:43\n\n  111     }\n  112 }\n  113 \n→ 114 const orders = await prisma.order.findMany(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T07:03:38.615Z"}
+{"level":"error","message":"Error getting orders: PrismaClientUnknownRequestError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:114:43\n\n  111     }\n  112 }\n  113 \n→ 114 const orders = await prisma.order.findMany(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T07:03:40.839Z"}
+{"level":"error","message":"Error getting orders: PrismaClientUnknownRequestError: \nInvalid `prisma.order.findMany()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\orders.js:114:43\n\n  111     }\n  112 }\n  113 \n→ 114 const orders = await prisma.order.findMany(\nValue 'VNPAY' not found in enum 'PaymentMethod'","timestamp":"2025-12-03T07:03:45.078Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:09:19.010Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:10:10.031Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:10:20.209Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:10:59.532Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:11:37.430Z"}
+{"level":"info","message":"Updating product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T07:27:40.463Z"}
+{"level":"info","message":"Full request body: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764596929/kokoria-app/kduwjcgqu8jjydkcoony.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T07:27:40.463Z"}
+{"level":"info","message":"Variants from body: undefined","timestamp":"2025-12-03T07:27:40.463Z"}
+{"level":"info","message":"Variants type: undefined, isArray: false","timestamp":"2025-12-03T07:27:40.464Z"}
+{"level":"info","message":"Update data: {\"categoryId\":\"692337f9bdf28293002bb689\",\"name\":\"CHẢO SƯỜN PHÔ MAI\",\"price\":320000,\"imageUrl\":\"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764596929/kokoria-app/kduwjcgqu8jjydkcoony.png\",\"description\":\"Chảo phô mai béo ngậy, thơm lừng\",\"stock\":100,\"isActive\":true}","timestamp":"2025-12-03T07:27:40.518Z"}
+{"level":"info","message":"Product updated successfully: 692dd90c289e96626e43786f, variants saved: No","timestamp":"2025-12-03T07:27:40.812Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:32:59.785Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:33:03.084Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:33:09.127Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:33:12.615Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:33:22.840Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:33:27.209Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:33:40.783Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:33:44.154Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:33:47.653Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:33:51.083Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:33:54.748Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:34:17.023Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:37:01.230Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:37:05.842Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:37:09.735Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:37:22.799Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:37:40.001Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:37:41.878Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:38:08.792Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:39:33.522Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:39:58.261Z"}
+{"level":"info","message":"Updating product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T07:41:51.503Z"}
+{"level":"info","message":"Full request body: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO GÀ PHÔ MAI\",\n  \"price\": 209000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747709/kokoria-app/iuxwxlmrglcgbsec5aj6.png\",\n  \"description\": \"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T07:41:51.504Z"}
+{"level":"info","message":"Variants from body: undefined","timestamp":"2025-12-03T07:41:51.504Z"}
+{"level":"info","message":"Variants type: undefined, isArray: false","timestamp":"2025-12-03T07:41:51.504Z"}
+{"level":"info","message":"Update data: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO GÀ PHÔ MAI\",\n  \"price\": 209000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747709/kokoria-app/iuxwxlmrglcgbsec5aj6.png\",\n  \"description\": \"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T07:41:51.553Z"}
+{"level":"info","message":"Product updated successfully: 692dd90c289e96626e43786e, variants saved: No","timestamp":"2025-12-03T07:41:51.802Z"}
+{"level":"info","message":"Updating product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T07:42:14.226Z"}
+{"level":"info","message":"Full request body: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747732/kokoria-app/nbqjnxcdokp2u8kg46qy.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T07:42:14.226Z"}
+{"level":"info","message":"Variants from body: undefined","timestamp":"2025-12-03T07:42:14.227Z"}
+{"level":"info","message":"Variants type: undefined, isArray: false","timestamp":"2025-12-03T07:42:14.227Z"}
+{"level":"info","message":"Update data: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747732/kokoria-app/nbqjnxcdokp2u8kg46qy.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T07:42:14.278Z"}
+{"level":"info","message":"Product updated successfully: 692dd90c289e96626e43786f, variants saved: No","timestamp":"2025-12-03T07:42:14.537Z"}
+{"level":"info","message":"Updating product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T07:56:43.025Z"}
+{"level":"info","message":"Full request body: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747732/kokoria-app/nbqjnxcdokp2u8kg46qy.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T07:56:43.025Z"}
+{"level":"info","message":"Variants from body: undefined","timestamp":"2025-12-03T07:56:43.026Z"}
+{"level":"info","message":"Variants type: undefined, isArray: false","timestamp":"2025-12-03T07:56:43.026Z"}
+{"level":"info","message":"Update data: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747732/kokoria-app/nbqjnxcdokp2u8kg46qy.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T07:56:43.072Z"}
+{"level":"info","message":"Product updated successfully: 692dd90c289e96626e43786f, variants saved: No","timestamp":"2025-12-03T07:56:43.303Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:58:37.733Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:59:16.882Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:59:32.266Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T07:59:33.658Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T07:59:36.810Z"}
+{"level":"info","message":"Product variants: null","timestamp":"2025-12-03T07:59:36.810Z"}
+{"level":"info","message":"Product variants type: object","timestamp":"2025-12-03T07:59:36.811Z"}
+{"level":"info","message":"Product variants isArray: false","timestamp":"2025-12-03T07:59:36.811Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T07:59:42.453Z"}
+{"level":"info","message":"Product variants: null","timestamp":"2025-12-03T07:59:42.453Z"}
+{"level":"info","message":"Product variants type: object","timestamp":"2025-12-03T07:59:42.454Z"}
+{"level":"info","message":"Product variants isArray: false","timestamp":"2025-12-03T07:59:42.454Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T08:00:30.719Z"}
+{"level":"info","message":"Product variants: null","timestamp":"2025-12-03T08:00:30.721Z"}
+{"level":"info","message":"Product variants type: object","timestamp":"2025-12-03T08:00:30.722Z"}
+{"level":"info","message":"Product variants isArray: false","timestamp":"2025-12-03T08:00:30.722Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:00:37.328Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:00:41.823Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:00:50.487Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:01:38.498Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:01:59.924Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:02:12.735Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:02:17.830Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:02:29.482Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:02:45.885Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:02:49.507Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:02:53.008Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:02:56.734Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:03:11.658Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:04:10.579Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T08:04:23.583Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:04:23.584Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:04:26.273Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:04:26.273Z"}
+{"level":"info","message":"Updating product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:06:57.396Z"}
+{"level":"info","message":"Full request body: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO GÀ PHÔ MAI\",\n  \"price\": 209000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747709/kokoria-app/iuxwxlmrglcgbsec5aj6.png\",\n  \"description\": \"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T08:06:57.396Z"}
+{"level":"info","message":"Variants from body: undefined","timestamp":"2025-12-03T08:06:57.397Z"}
+{"level":"info","message":"Variants type: undefined, isArray: false","timestamp":"2025-12-03T08:06:57.397Z"}
+{"level":"info","message":"Update data: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO GÀ PHÔ MAI\",\n  \"price\": 209000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747709/kokoria-app/iuxwxlmrglcgbsec5aj6.png\",\n  \"description\": \"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T08:06:57.454Z"}
+{"level":"info","message":"Product updated successfully: 692dd90c289e96626e43786e, variants saved: No","timestamp":"2025-12-03T08:06:57.825Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:06:58.042Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:06:58.043Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:07:07.426Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:07:07.426Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:08:52.472Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:08:52.472Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:09:21.466Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:09:21.472Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:09:42.877Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:10:35.014Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:10:43.681Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:10:44.942Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:11:14.896Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:11:14.896Z"}
+{"level":"info","message":"Updating product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:11:26.409Z"}
+{"level":"info","message":"Full request body: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO GÀ PHÔ MAI\",\n  \"price\": 209000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747709/kokoria-app/iuxwxlmrglcgbsec5aj6.png\",\n  \"description\": \"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T08:11:26.410Z"}
+{"level":"info","message":"Variants from body: undefined","timestamp":"2025-12-03T08:11:26.410Z"}
+{"level":"info","message":"Variants type: undefined, isArray: false","timestamp":"2025-12-03T08:11:26.411Z"}
+{"level":"info","message":"Variants is undefined - keeping existing variants","timestamp":"2025-12-03T08:11:26.461Z"}
+{"level":"info","message":"Update data: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO GÀ PHÔ MAI\",\n  \"price\": 209000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747709/kokoria-app/iuxwxlmrglcgbsec5aj6.png\",\n  \"description\": \"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T08:11:26.461Z"}
+{"level":"info","message":"Product updated successfully: 692dd90c289e96626e43786e, variants saved: No","timestamp":"2025-12-03T08:11:26.764Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:11:27.254Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:11:27.254Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:14:02.949Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:14:47.485Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:14:47.485Z"}
+{"level":"info","message":"Updating product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:14:57.971Z"}
+{"level":"info","message":"Full request body: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO GÀ PHÔ MAI\",\n  \"price\": 209000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747709/kokoria-app/iuxwxlmrglcgbsec5aj6.png\",\n  \"description\": \"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T08:14:57.971Z"}
+{"level":"info","message":"Variants from body: undefined","timestamp":"2025-12-03T08:14:57.972Z"}
+{"level":"info","message":"Variants type: undefined, isArray: false","timestamp":"2025-12-03T08:14:57.973Z"}
+{"level":"info","message":"Variants is undefined - keeping existing variants","timestamp":"2025-12-03T08:14:58.028Z"}
+{"level":"info","message":"Update data: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO GÀ PHÔ MAI\",\n  \"price\": 209000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747709/kokoria-app/iuxwxlmrglcgbsec5aj6.png\",\n  \"description\": \"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T08:14:58.029Z"}
+{"level":"info","message":"Product updated successfully: 692dd90c289e96626e43786e, variants saved: No","timestamp":"2025-12-03T08:14:58.364Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:14:58.772Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:14:58.773Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:15:01.085Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:15:01.086Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:15:20.570Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:15:20.570Z"}
+{"level":"info","message":"Creating product: Chảo Gà Phô Mai, variants: undefined","timestamp":"2025-12-03T08:17:40.640Z"}
+{"level":"info","message":"Product data to save: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"Chảo Gà Phô Mai\",\n  \"price\": 209000,\n  \"imageUrl\": null,\n  \"description\": \"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\n  \"stock\": 100,\n  \"isActive\": true,\n  \"productVariants\": {\n    \"create\": []\n  }\n}","timestamp":"2025-12-03T08:17:40.690Z"}
+{"level":"info","message":"Product created successfully: 692ff224a62090b84c2bc909, variants saved: No","timestamp":"2025-12-03T08:17:40.945Z"}
+{"level":"info","message":"Getting product: 692ff224a62090b84c2bc909","timestamp":"2025-12-03T08:17:44.102Z"}
+{"level":"info","message":"Product variants count: 0","timestamp":"2025-12-03T08:17:44.102Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:20:04.089Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:20:13.649Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:20:29.483Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:20:50.151Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:31:53.138Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T08:32:20.207Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:32:21.144Z"}
+{"level":"info","message":"Product variants (raw): null","timestamp":"2025-12-03T08:32:21.145Z"}
+{"level":"info","message":"Product variants type: object, isArray: false","timestamp":"2025-12-03T08:32:21.146Z"}
+{"level":"info","message":"Parsed variants count: 0","timestamp":"2025-12-03T08:32:21.147Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:32:26.808Z"}
+{"level":"info","message":"Product variants (raw): null","timestamp":"2025-12-03T08:32:26.809Z"}
+{"level":"info","message":"Product variants type: object, isArray: false","timestamp":"2025-12-03T08:32:26.809Z"}
+{"level":"info","message":"Parsed variants count: 0","timestamp":"2025-12-03T08:32:26.809Z"}
+{"level":"info","message":"Updating product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:32:35.061Z"}
+{"level":"info","message":"Full request body: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO GÀ PHÔ MAI\",\n  \"price\": 209000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747709/kokoria-app/iuxwxlmrglcgbsec5aj6.png\",\n  \"description\": \"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T08:32:35.061Z"}
+{"level":"info","message":"Variants from body: undefined","timestamp":"2025-12-03T08:32:35.062Z"}
+{"level":"info","message":"Variants type: undefined, isArray: false","timestamp":"2025-12-03T08:32:35.062Z"}
+{"level":"info","message":"Variants is undefined - keeping existing variants","timestamp":"2025-12-03T08:32:35.111Z"}
+{"level":"info","message":"Update data: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO GÀ PHÔ MAI\",\n  \"price\": 209000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747709/kokoria-app/iuxwxlmrglcgbsec5aj6.png\",\n  \"description\": \"Chảo gà phô mai size lớn. Sốt: Koko (Ngọt, the) hoặc Sốt cay\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T08:32:35.111Z"}
+{"level":"info","message":"Product updated successfully: 692dd90c289e96626e43786e, variants saved: No","timestamp":"2025-12-03T08:32:35.359Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786e","timestamp":"2025-12-03T08:32:35.755Z"}
+{"level":"info","message":"Product variants (raw): null","timestamp":"2025-12-03T08:32:35.756Z"}
+{"level":"info","message":"Product variants type: object, isArray: false","timestamp":"2025-12-03T08:32:35.756Z"}
+{"level":"info","message":"Parsed variants count: 0","timestamp":"2025-12-03T08:32:35.756Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:27:48.716Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:29:48.434Z"}
+{"level":"info","message":"Product variants (raw): null","timestamp":"2025-12-03T09:29:48.435Z"}
+{"level":"info","message":"Product variants type: object, isArray: false","timestamp":"2025-12-03T09:29:48.435Z"}
+{"level":"info","message":"Parsed variants count: 0","timestamp":"2025-12-03T09:29:48.436Z"}
+{"level":"info","message":"Updating product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:30:09.571Z"}
+{"level":"info","message":"Full request body: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747732/kokoria-app/nbqjnxcdokp2u8kg46qy.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T09:30:09.571Z"}
+{"level":"info","message":"Variants from body: undefined","timestamp":"2025-12-03T09:30:09.571Z"}
+{"level":"info","message":"Variants type: undefined, isArray: false","timestamp":"2025-12-03T09:30:09.572Z"}
+{"level":"info","message":"Variants is undefined - keeping existing variants","timestamp":"2025-12-03T09:30:09.626Z"}
+{"level":"info","message":"Update data: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747732/kokoria-app/nbqjnxcdokp2u8kg46qy.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T09:30:09.626Z"}
+{"level":"info","message":"Product updated successfully: 692dd90c289e96626e43786f, variants saved: No","timestamp":"2025-12-03T09:30:09.919Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:30:10.323Z"}
+{"level":"info","message":"Product variants (raw): null","timestamp":"2025-12-03T09:30:10.323Z"}
+{"level":"info","message":"Product variants type: object, isArray: false","timestamp":"2025-12-03T09:30:10.323Z"}
+{"level":"info","message":"Parsed variants count: 0","timestamp":"2025-12-03T09:30:10.323Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:31:47.513Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:31:56.385Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:32:20.731Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:32:34.394Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:32:48.721Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:32:53.399Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:32:58.864Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:33:12.999Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:33:22.943Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:33:29.770Z"}
+{"level":"info","message":"Product variants (raw): null","timestamp":"2025-12-03T09:33:29.770Z"}
+{"level":"info","message":"Product variants type: object, isArray: false","timestamp":"2025-12-03T09:33:29.771Z"}
+{"level":"info","message":"Parsed variants count: 0","timestamp":"2025-12-03T09:33:29.771Z"}
+{"level":"info","message":"Updating product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:33:43.113Z"}
+{"level":"info","message":"Full request body: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747732/kokoria-app/nbqjnxcdokp2u8kg46qy.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T09:33:43.114Z"}
+{"level":"info","message":"Variants from body: undefined","timestamp":"2025-12-03T09:33:43.114Z"}
+{"level":"info","message":"Variants type: undefined, isArray: false","timestamp":"2025-12-03T09:33:43.114Z"}
+{"level":"info","message":"Variants is undefined - keeping existing variants","timestamp":"2025-12-03T09:33:43.165Z"}
+{"level":"info","message":"Update data before Prisma: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747732/kokoria-app/nbqjnxcdokp2u8kg46qy.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true\n}","timestamp":"2025-12-03T09:33:43.165Z"}
+{"level":"info","message":"Variants in updateData: undefined","timestamp":"2025-12-03T09:33:43.166Z"}
+{"level":"info","message":"Product after update - variants (raw): null","timestamp":"2025-12-03T09:33:43.416Z"}
+{"level":"info","message":"Product after update - variants type: object, isArray: false","timestamp":"2025-12-03T09:33:43.416Z"}
+{"level":"info","message":"Product updated successfully: 692dd90c289e96626e43786f, variants saved: No","timestamp":"2025-12-03T09:33:43.417Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:33:43.529Z"}
+{"level":"info","message":"Product variants (raw): null","timestamp":"2025-12-03T09:33:43.529Z"}
+{"level":"info","message":"Product variants type: object, isArray: false","timestamp":"2025-12-03T09:33:43.529Z"}
+{"level":"info","message":"Parsed variants count: 0","timestamp":"2025-12-03T09:33:43.529Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:35:22.394Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:35:27.815Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:35:28.723Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:35:32.891Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:35:34.761Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:35:47.833Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:35:58.703Z"}
+{"level":"info","message":"Product variants (raw): null","timestamp":"2025-12-03T09:35:58.703Z"}
+{"level":"info","message":"Product variants type: object, isArray: false","timestamp":"2025-12-03T09:35:58.704Z"}
+{"level":"info","message":"Parsed variants count: 0","timestamp":"2025-12-03T09:35:58.704Z"}
+{"level":"info","message":"Updating product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:36:12.508Z"}
+{"level":"info","message":"Full request body: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747732/kokoria-app/nbqjnxcdokp2u8kg46qy.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true,\n  \"variants\": [\n    {\n      \"type\": \"size\",\n      \"name\": \"ds\",\n      \"required\": true,\n      \"options\": [\n        {\n          \"id\": \"option-0-1764754565703-jc4cl13z3\",\n          \"name\": \"s\",\n          \"price\": 9000\n        }\n      ]\n    }\n  ]\n}","timestamp":"2025-12-03T09:36:12.508Z"}
+{"level":"info","message":"Variants from body: [{\"type\":\"size\",\"name\":\"ds\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754565703-jc4cl13z3\",\"name\":\"s\",\"price\":9000}]}]","timestamp":"2025-12-03T09:36:12.508Z"}
+{"level":"info","message":"Variants type: object, isArray: true","timestamp":"2025-12-03T09:36:12.508Z"}
+{"level":"info","message":"Processing variants: [{\"type\":\"size\",\"name\":\"ds\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754565703-jc4cl13z3\",\"name\":\"s\",\"price\":9000}]}]","timestamp":"2025-12-03T09:36:12.564Z"}
+{"level":"info","message":"Variants type: object, isArray: true","timestamp":"2025-12-03T09:36:12.565Z"}
+{"level":"info","message":"Setting variants: 1 variants","timestamp":"2025-12-03T09:36:12.565Z"}
+{"level":"info","message":"Variants content: [{\"type\":\"size\",\"name\":\"ds\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754565703-jc4cl13z3\",\"name\":\"s\",\"price\":9000}]}]","timestamp":"2025-12-03T09:36:12.565Z"}
+{"level":"info","message":"Update data before Prisma: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747732/kokoria-app/nbqjnxcdokp2u8kg46qy.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true,\n  \"variants\": [\n    {\n      \"type\": \"size\",\n      \"name\": \"ds\",\n      \"required\": true,\n      \"options\": [\n        {\n          \"id\": \"option-0-1764754565703-jc4cl13z3\",\n          \"name\": \"s\",\n          \"price\": 9000\n        }\n      ]\n    }\n  ]\n}","timestamp":"2025-12-03T09:36:12.565Z"}
+{"level":"info","message":"Variants in updateData: [{\"type\":\"size\",\"name\":\"ds\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754565703-jc4cl13z3\",\"name\":\"s\",\"price\":9000}]}]","timestamp":"2025-12-03T09:36:12.565Z"}
+{"level":"info","message":"Product after update - variants (raw): [{\"type\":\"size\",\"name\":\"ds\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754565703-jc4cl13z3\",\"name\":\"s\",\"price\":9000}]}]","timestamp":"2025-12-03T09:36:12.853Z"}
+{"level":"info","message":"Product after update - variants type: object, isArray: true","timestamp":"2025-12-03T09:36:12.853Z"}
+{"level":"info","message":"Product updated successfully: 692dd90c289e96626e43786f, variants saved: Yes","timestamp":"2025-12-03T09:36:12.853Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:36:13.268Z"}
+{"level":"info","message":"Product variants (raw): [{\"type\":\"size\",\"name\":\"ds\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754565703-jc4cl13z3\",\"name\":\"s\",\"price\":9000}]}]","timestamp":"2025-12-03T09:36:13.268Z"}
+{"level":"info","message":"Product variants type: object, isArray: true","timestamp":"2025-12-03T09:36:13.268Z"}
+{"level":"info","message":"Parsed variants count: 1","timestamp":"2025-12-03T09:36:13.269Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:36:21.228Z"}
+{"level":"info","message":"Product variants (raw): [{\"type\":\"size\",\"name\":\"ds\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754565703-jc4cl13z3\",\"name\":\"s\",\"price\":9000}]}]","timestamp":"2025-12-03T09:36:21.229Z"}
+{"level":"info","message":"Product variants type: object, isArray: true","timestamp":"2025-12-03T09:36:21.229Z"}
+{"level":"info","message":"Parsed variants count: 1","timestamp":"2025-12-03T09:36:21.229Z"}
+{"level":"info","message":"Updating product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:37:25.126Z"}
+{"level":"info","message":"Full request body: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747732/kokoria-app/nbqjnxcdokp2u8kg46qy.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true,\n  \"variants\": [\n    {\n      \"type\": \"sauce\",\n      \"name\": \"Loại sốt\",\n      \"required\": true,\n      \"options\": [\n        {\n          \"id\": \"option-0-1764754631619-6ockg6jas\",\n          \"name\": \"Sốt BBQ\",\n          \"price\": 0\n        },\n        {\n          \"id\": \"option-0-1764754638001-vbnpr75pr\",\n          \"name\": \"Sốt cay\",\n          \"price\": 0\n        }\n      ]\n    }\n  ]\n}","timestamp":"2025-12-03T09:37:25.126Z"}
+{"level":"info","message":"Variants from body: [{\"type\":\"sauce\",\"name\":\"Loại sốt\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754631619-6ockg6jas\",\"name\":\"Sốt BBQ\",\"price\":0},{\"id\":\"option-0-1764754638001-vbnpr75pr\",\"name\":\"Sốt cay\",\"price\":0}]}]","timestamp":"2025-12-03T09:37:25.127Z"}
+{"level":"info","message":"Variants type: object, isArray: true","timestamp":"2025-12-03T09:37:25.127Z"}
+{"level":"info","message":"Processing variants: [{\"type\":\"sauce\",\"name\":\"Loại sốt\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754631619-6ockg6jas\",\"name\":\"Sốt BBQ\",\"price\":0},{\"id\":\"option-0-1764754638001-vbnpr75pr\",\"name\":\"Sốt cay\",\"price\":0}]}]","timestamp":"2025-12-03T09:37:25.178Z"}
+{"level":"info","message":"Variants type: object, isArray: true","timestamp":"2025-12-03T09:37:25.178Z"}
+{"level":"info","message":"Setting variants: 1 variants","timestamp":"2025-12-03T09:37:25.179Z"}
+{"level":"info","message":"Variants content: [{\"type\":\"sauce\",\"name\":\"Loại sốt\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754631619-6ockg6jas\",\"name\":\"Sốt BBQ\",\"price\":0},{\"id\":\"option-0-1764754638001-vbnpr75pr\",\"name\":\"Sốt cay\",\"price\":0}]}]","timestamp":"2025-12-03T09:37:25.179Z"}
+{"level":"info","message":"Update data before Prisma: {\n  \"categoryId\": \"692337f9bdf28293002bb689\",\n  \"name\": \"CHẢO SƯỜN PHÔ MAI\",\n  \"price\": 320000,\n  \"imageUrl\": \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1764747732/kokoria-app/nbqjnxcdokp2u8kg46qy.png\",\n  \"description\": \"Chảo phô mai béo ngậy, thơm lừng\",\n  \"stock\": 100,\n  \"isActive\": true,\n  \"variants\": [\n    {\n      \"type\": \"sauce\",\n      \"name\": \"Loại sốt\",\n      \"required\": true,\n      \"options\": [\n        {\n          \"id\": \"option-0-1764754631619-6ockg6jas\",\n          \"name\": \"Sốt BBQ\",\n          \"price\": 0\n        },\n        {\n          \"id\": \"option-0-1764754638001-vbnpr75pr\",\n          \"name\": \"Sốt cay\",\n          \"price\": 0\n        }\n      ]\n    }\n  ]\n}","timestamp":"2025-12-03T09:37:25.179Z"}
+{"level":"info","message":"Variants in updateData: [{\"type\":\"sauce\",\"name\":\"Loại sốt\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754631619-6ockg6jas\",\"name\":\"Sốt BBQ\",\"price\":0},{\"id\":\"option-0-1764754638001-vbnpr75pr\",\"name\":\"Sốt cay\",\"price\":0}]}]","timestamp":"2025-12-03T09:37:25.180Z"}
+{"level":"info","message":"Product after update - variants (raw): [{\"type\":\"sauce\",\"name\":\"Loại sốt\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754631619-6ockg6jas\",\"name\":\"Sốt BBQ\",\"price\":0},{\"id\":\"option-0-1764754638001-vbnpr75pr\",\"name\":\"Sốt cay\",\"price\":0}]}]","timestamp":"2025-12-03T09:37:25.436Z"}
+{"level":"info","message":"Product after update - variants type: object, isArray: true","timestamp":"2025-12-03T09:37:25.437Z"}
+{"level":"info","message":"Product updated successfully: 692dd90c289e96626e43786f, variants saved: Yes","timestamp":"2025-12-03T09:37:25.437Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:37:25.567Z"}
+{"level":"info","message":"Product variants (raw): [{\"type\":\"sauce\",\"name\":\"Loại sốt\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754631619-6ockg6jas\",\"name\":\"Sốt BBQ\",\"price\":0},{\"id\":\"option-0-1764754638001-vbnpr75pr\",\"name\":\"Sốt cay\",\"price\":0}]}]","timestamp":"2025-12-03T09:37:25.568Z"}
+{"level":"info","message":"Product variants type: object, isArray: true","timestamp":"2025-12-03T09:37:25.569Z"}
+{"level":"info","message":"Parsed variants count: 1","timestamp":"2025-12-03T09:37:25.570Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:37:28.725Z"}
+{"level":"info","message":"Product variants (raw): [{\"type\":\"sauce\",\"name\":\"Loại sốt\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754631619-6ockg6jas\",\"name\":\"Sốt BBQ\",\"price\":0},{\"id\":\"option-0-1764754638001-vbnpr75pr\",\"name\":\"Sốt cay\",\"price\":0}]}]","timestamp":"2025-12-03T09:37:28.725Z"}
+{"level":"info","message":"Product variants type: object, isArray: true","timestamp":"2025-12-03T09:37:28.726Z"}
+{"level":"info","message":"Parsed variants count: 1","timestamp":"2025-12-03T09:37:28.726Z"}
+{"level":"info","message":"Getting product: 692d9a78c04f91e1952fa0c4","timestamp":"2025-12-03T09:42:12.513Z"}
+{"level":"info","message":"Product variants (raw): [{\"type\":\"size\",\"name\":\"Kích thước\",\"required\":true,\"options\":[{\"id\":\"ga-nua-con\",\"name\":\"Gà nửa con\",\"price\":0},{\"id\":\"ga-nguyen-con\",\"name\":\"Gà nguyên con\",\"price\":180000}]}]","timestamp":"2025-12-03T09:42:12.514Z"}
+{"level":"info","message":"Product variants type: object, isArray: true","timestamp":"2025-12-03T09:42:12.514Z"}
+{"level":"info","message":"Parsed variants count: 1","timestamp":"2025-12-03T09:42:12.515Z"}
+{"level":"info","message":"Getting product: 692d9a78c04f91e1952fa0c4","timestamp":"2025-12-03T09:42:45.169Z"}
+{"level":"info","message":"Product variants (raw): [{\"type\":\"size\",\"name\":\"Kích thước\",\"required\":true,\"options\":[{\"id\":\"ga-nua-con\",\"name\":\"Gà nửa con\",\"price\":0},{\"id\":\"ga-nguyen-con\",\"name\":\"Gà nguyên con\",\"price\":180000}]}]","timestamp":"2025-12-03T09:42:45.169Z"}
+{"level":"info","message":"Product variants type: object, isArray: true","timestamp":"2025-12-03T09:42:45.169Z"}
+{"level":"info","message":"Parsed variants count: 1","timestamp":"2025-12-03T09:42:45.170Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:44:32.581Z"}
+{"level":"info","message":"Product variants (raw): [{\"type\":\"sauce\",\"name\":\"Loại sốt\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754631619-6ockg6jas\",\"name\":\"Sốt BBQ\",\"price\":0},{\"id\":\"option-0-1764754638001-vbnpr75pr\",\"name\":\"Sốt cay\",\"price\":0}]}]","timestamp":"2025-12-03T09:44:32.581Z"}
+{"level":"info","message":"Product variants type: object, isArray: true","timestamp":"2025-12-03T09:44:32.582Z"}
+{"level":"info","message":"Parsed variants count: 1","timestamp":"2025-12-03T09:44:32.582Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e437871","timestamp":"2025-12-03T09:46:04.244Z"}
+{"level":"info","message":"Product variants (raw): null","timestamp":"2025-12-03T09:46:04.244Z"}
+{"level":"info","message":"Product variants type: object, isArray: false","timestamp":"2025-12-03T09:46:04.245Z"}
+{"level":"info","message":"Parsed variants count: 0","timestamp":"2025-12-03T09:46:04.245Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:46:13.651Z"}
+{"level":"info","message":"Product variants (raw): [{\"type\":\"sauce\",\"name\":\"Loại sốt\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754631619-6ockg6jas\",\"name\":\"Sốt BBQ\",\"price\":0},{\"id\":\"option-0-1764754638001-vbnpr75pr\",\"name\":\"Sốt cay\",\"price\":0}]}]","timestamp":"2025-12-03T09:46:13.652Z"}
+{"level":"info","message":"Product variants type: object, isArray: true","timestamp":"2025-12-03T09:46:13.652Z"}
+{"level":"info","message":"Parsed variants count: 1","timestamp":"2025-12-03T09:46:13.652Z"}
+{"level":"info","message":"Getting product: 692dd90c289e96626e43786f","timestamp":"2025-12-03T09:46:14.514Z"}
+{"level":"info","message":"Product variants (raw): [{\"type\":\"sauce\",\"name\":\"Loại sốt\",\"required\":true,\"options\":[{\"id\":\"option-0-1764754631619-6ockg6jas\",\"name\":\"Sốt BBQ\",\"price\":0},{\"id\":\"option-0-1764754638001-vbnpr75pr\",\"name\":\"Sốt cay\",\"price\":0}]}]","timestamp":"2025-12-03T09:46:14.514Z"}
+{"level":"info","message":"Product variants type: object, isArray: true","timestamp":"2025-12-03T09:46:14.514Z"}
+{"level":"info","message":"Parsed variants count: 1","timestamp":"2025-12-03T09:46:14.514Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:46:29.427Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:46:30.526Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:46:38.161Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:46:41.645Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:46:46.864Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:46:50.778Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:46:54.179Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-03T09:47:03.090Z"}

@@ -80,13 +80,21 @@ const AddProductScreen = () => {
           }
         } else if (Array.isArray(product.variants)) {
           parsedVariants = product.variants;
-        } else if (typeof product.variants === 'object') {
+        } else if (typeof product.variants === 'object' && product.variants !== null) {
           // Nếu là object, convert thành array
           parsedVariants = [product.variants];
         }
       }
       
-      console.log('Loaded product variants:', parsedVariants);
+      // QUAN TRỌNG: Đảm bảo tất cả options có id
+      parsedVariants = parsedVariants.map((variant, variantIndex) => ({
+        ...variant,
+        options: variant.options?.map((option, optionIndex) => ({
+          ...option,
+          // Nếu option không có id, tạo id mới dựa trên variant type và index
+          id: option.id || `variant-${variantIndex}-option-${optionIndex}-${Date.now()}`,
+        })) || [],
+      }));
       
       setFormData({
         name: product.name || '',
@@ -198,7 +206,14 @@ const AddProductScreen = () => {
   };
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => createProduct(data),
+    mutationFn: (data: any) => {
+      // Đảm bảo variants luôn có trong data
+      const mutationData = {
+        ...data,
+        variants: data.variants !== undefined ? data.variants : [],
+      };
+      return createProduct(mutationData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       Alert.alert('Thành công', 'Sản phẩm đã được tạo thành công', [
@@ -212,11 +227,14 @@ const AddProductScreen = () => {
 
   const updateMutation = useMutation({
     mutationFn: (data: any) => {
-      console.log('Update mutation called with data:', JSON.stringify(data, null, 2));
-      return updateProduct(productId, data);
+      // Đảm bảo variants luôn có trong data
+      const mutationData = {
+        ...data,
+        variants: data.variants !== undefined ? data.variants : [],
+      };
+      return updateProduct(productId, mutationData);
     },
-    onSuccess: (response) => {
-      console.log('Update success response:', response);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['product', productId] });
       Alert.alert('Thành công', 'Sản phẩm đã được cập nhật', [
@@ -224,8 +242,6 @@ const AddProductScreen = () => {
       ]);
     },
     onError: (error: any) => {
-      console.error('Update error:', error);
-      console.error('Update error response:', error?.response?.data);
       Alert.alert('Lỗi', error?.response?.data?.message || 'Không thể cập nhật sản phẩm');
     },
   });
@@ -243,21 +259,34 @@ const AddProductScreen = () => {
         imageUrl = await uploadImageToCloudinary(formData.imageUri);
       }
 
-      // Chuẩn bị variants để gửi
-      let variantsToSend = undefined;
+      // Chuẩn bị variants để gửi - QUAN TRỌNG: Luôn gửi variants (kể cả empty array)
+      // KHÔNG filter - giữ lại TẤT CẢ variants để user có thể chỉnh sửa sau
+      let variantsToSend: any[] = [];
+      
       if (formData.variants && formData.variants.length > 0) {
-        // Đảm bảo variants là array hợp lệ
-        variantsToSend = formData.variants.map(variant => ({
-          type: variant.type,
-          name: variant.name,
-          required: variant.required,
-          options: variant.options || [],
-        }));
+        // Map TẤT CẢ variants (kể cả chưa hoàn chỉnh) - KHÔNG filter
+        variantsToSend = formData.variants.map((variant, variantIndex) => {
+          // Map TẤT CẢ options (kể cả chưa có name) - KHÔNG filter
+          const mappedOptions = (variant.options || []).map((option, optionIndex) => ({
+            id: option.id || `variant-${variantIndex}-option-${optionIndex}-${Date.now()}`,
+            name: (option.name || '').trim(),
+            price: typeof option.price === 'number' ? option.price : 0,
+          }));
+
+          return {
+            type: variant.type || 'other',
+            name: (variant.name || '').trim(),
+            required: variant.required !== undefined ? variant.required : true,
+            options: mappedOptions,
+          };
+        });
       }
+      
+      // Đảm bảo variants luôn là array (không phải undefined)
+      // Nếu variantsToSend là empty array, vẫn gửi để backend biết là muốn xóa variants
+      const finalVariants = Array.isArray(variantsToSend) ? variantsToSend : [];
 
-      console.log('Submitting product with variants:', variantsToSend);
-
-      const submitData = {
+      const submitData: any = {
         name: formData.name.trim(),
         price: parseFloat(formData.price),
         description: formData.description.trim() || undefined,
@@ -265,10 +294,8 @@ const AddProductScreen = () => {
         categoryId: formData.categoryId,
         stock: formData.stock ? parseInt(formData.stock) : 0,
         isActive: formData.isActive,
-        variants: variantsToSend,
+        variants: finalVariants,
       };
-
-      console.log('Full submit data:', JSON.stringify(submitData, null, 2));
 
       if (isEdit) {
         updateMutation.mutate(submitData);

@@ -1,5 +1,5 @@
 const logger = require('../utils/logger');
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient, Prisma } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
@@ -36,9 +36,35 @@ async function getProducts(req, res) {
 
         const total = await prisma.product.count({ where });
 
+        // Parse variants từ JSON cho mỗi product
+        const transformedProducts = products.map(product => {
+            let variants = [];
+            if (product.variants) {
+                if (Array.isArray(product.variants)) {
+                    variants = product.variants;
+                } else if (typeof product.variants === 'string') {
+                    try {
+                        variants = JSON.parse(product.variants);
+                        if (!Array.isArray(variants)) {
+                            variants = [];
+                        }
+                    } catch (e) {
+                        logger.error(`Error parsing variants JSON for product ${product.id}: ${e.message}`);
+                        variants = [];
+                    }
+                } else if (typeof product.variants === 'object') {
+                    variants = [product.variants];
+                }
+            }
+            return {
+                ...product,
+                variants,
+            };
+        });
+
         res.json({
             success: true,
-            data: products,
+            data: transformedProducts,
             pagination: {
                 page: +page,
                 limit: +limit,
@@ -75,9 +101,34 @@ async function getProduct(req, res) {
             });
         }
 
+        // Parse variants từ JSON
+        let variants = [];
+        if (product.variants) {
+            if (Array.isArray(product.variants)) {
+                variants = product.variants;
+            } else if (typeof product.variants === 'string') {
+                try {
+                    variants = JSON.parse(product.variants);
+                    if (!Array.isArray(variants)) {
+                        variants = [];
+                    }
+                } catch (e) {
+                    logger.error(`Error parsing variants JSON for product ${id}: ${e.message}`);
+                    variants = [];
+                }
+            } else if (typeof product.variants === 'object') {
+                variants = [product.variants];
+            }
+        }
+
+        const transformedProduct = {
+            ...product,
+            variants,
+        };
+
         res.json({
             success: true,
-            data: product,
+            data: transformedProduct,
             message: 'Product fetched successfully',
         });
     } catch (error) {
@@ -94,9 +145,6 @@ async function createProduct(req, res) {
     const { categoryId, name, price, imageUrl, description, stock, isActive, variants } = req.body;
 
     try {
-        // Log để debug
-        logger.info(`Creating product: ${name}, variants: ${JSON.stringify(variants)}`);
-
         // Kiểm tra category có tồn tại không
         const category = await prisma.category.findUnique({
             where: { id: categoryId },
@@ -109,7 +157,25 @@ async function createProduct(req, res) {
             });
         }
 
-        // Chuẩn bị data, đảm bảo variants được xử lý đúng
+        // Xử lý variants - lưu vào JSON field
+        let variantsToSave = null;
+        if (variants !== undefined) {
+            if (Array.isArray(variants)) {
+                if (variants.length > 0) {
+                    // Có variants - lưu vào database
+                    variantsToSave = variants;
+                } else {
+                    // Empty array - set null
+                    variantsToSave = null;
+                }
+            } else if (variants === null || variants === '') {
+                variantsToSave = null;
+            } else {
+                variantsToSave = variants;
+            }
+        }
+
+        // Chuẩn bị data
         const productData = {
             categoryId,
             name,
@@ -118,18 +184,8 @@ async function createProduct(req, res) {
             description: description || null,
             stock: stock !== undefined ? stock : 0,
             isActive: isActive !== undefined ? isActive : true,
+            variants: variantsToSave,
         };
-
-        // Chỉ thêm variants nếu có và là array/object hợp lệ
-        if (variants && Array.isArray(variants) && variants.length > 0) {
-            productData.variants = variants;
-        } else if (variants && typeof variants === 'object' && Object.keys(variants).length > 0) {
-            productData.variants = variants;
-        } else {
-            productData.variants = null;
-        }
-
-        logger.info(`Product data to save: ${JSON.stringify(productData)}`);
 
         const product = await prisma.product.create({
             data: productData,
@@ -143,11 +199,34 @@ async function createProduct(req, res) {
             },
         });
 
-        logger.info(`Product created successfully: ${product.id}, variants saved: ${product.variants ? 'Yes' : 'No'}`);
+        // Parse variants từ JSON để trả về
+        let parsedVariants = [];
+        if (product.variants) {
+            if (Array.isArray(product.variants)) {
+                parsedVariants = product.variants;
+            } else if (typeof product.variants === 'string') {
+                try {
+                    parsedVariants = JSON.parse(product.variants);
+                    if (!Array.isArray(parsedVariants)) {
+                        parsedVariants = [];
+                    }
+                } catch (e) {
+                    logger.error(`Error parsing variants JSON: ${e.message}`);
+                    parsedVariants = [];
+                }
+            } else if (typeof product.variants === 'object') {
+                parsedVariants = [product.variants];
+            }
+        }
+
+        const transformedProduct = {
+            ...product,
+            variants: parsedVariants,
+        };
 
         res.status(201).json({
             success: true,
-            data: product,
+            data: transformedProduct,
             message: 'Product created successfully',
         });
     } catch (error) {
@@ -167,12 +246,6 @@ async function updateProduct(req, res) {
     const { categoryId, name, price, imageUrl, description, stock, isActive, variants } = req.body;
 
     try {
-        // Debug: Log toàn bộ request body
-        logger.info(`Updating product: ${id}`);
-        logger.info(`Full request body: ${JSON.stringify(req.body, null, 2)}`);
-        logger.info(`Variants from body: ${JSON.stringify(variants)}`);
-        logger.info(`Variants type: ${typeof variants}, isArray: ${Array.isArray(variants)}`);
-
         // Nếu có categoryId, kiểm tra category có tồn tại không
         if (categoryId) {
             const category = await prisma.category.findUnique({
@@ -197,30 +270,25 @@ async function updateProduct(req, res) {
         if (stock !== undefined) updateData.stock = stock;
         if (isActive !== undefined) updateData.isActive = isActive;
         
-        // Xử lý variants - Luôn cập nhật variants nếu có trong request
+        // Xử lý variants - lưu vào JSON field
+        // QUAN TRỌNG: Luôn xử lý variants nếu có trong request (kể cả empty array)
         if (variants !== undefined) {
-            if (variants === null || variants === 'null' || variants === '') {
-                // Nếu gửi null hoặc empty string, set null
-                updateData.variants = null;
-            } else if (Array.isArray(variants) && variants.length > 0) {
-                // Nếu là array hợp lệ, lưu
-                updateData.variants = variants;
-            } else if (typeof variants === 'object' && variants !== null && Object.keys(variants).length > 0) {
-                // Nếu là object hợp lệ, lưu
-                updateData.variants = variants;
-            } else if (Array.isArray(variants) && variants.length === 0) {
-                // Nếu là empty array, set null
+            if (Array.isArray(variants)) {
+                if (variants.length > 0) {
+                    // Có variants - lưu vào database dưới dạng JSON
+                    // Với MongoDB, Prisma sẽ tự động convert array thành JSON
+                    updateData.variants = variants;
+                } else {
+                    // Empty array - set null để xóa variants
+                    updateData.variants = null;
+                }
+            } else if (variants === null || variants === '') {
                 updateData.variants = null;
             } else {
-                // Trường hợp khác, set null
-                updateData.variants = null;
+                // Không phải array, null, hoặc empty string - lưu nguyên
+                updateData.variants = variants;
             }
-        } else {
-            // Nếu không có variants trong request, không update field này (giữ nguyên giá trị cũ)
-            // Không thêm vào updateData
         }
-
-        logger.info(`Update data: ${JSON.stringify(updateData)}`);
 
         const product = await prisma.product.update({
             where: { id },
@@ -235,11 +303,34 @@ async function updateProduct(req, res) {
             },
         });
 
-        logger.info(`Product updated successfully: ${product.id}, variants saved: ${product.variants ? 'Yes' : 'No'}`);
+        // Parse variants từ JSON để trả về
+        let parsedVariants = [];
+        if (product.variants) {
+            if (Array.isArray(product.variants)) {
+                parsedVariants = product.variants;
+            } else if (typeof product.variants === 'string') {
+                try {
+                    parsedVariants = JSON.parse(product.variants);
+                    if (!Array.isArray(parsedVariants)) {
+                        parsedVariants = [];
+                    }
+                } catch (e) {
+                    logger.error(`Error parsing variants JSON: ${e.message}`);
+                    parsedVariants = [];
+                }
+            } else if (typeof product.variants === 'object') {
+                parsedVariants = [product.variants];
+            }
+        }
+
+        const transformedProduct = {
+            ...product,
+            variants: parsedVariants,
+        };
 
         res.json({
             success: true,
-            data: product,
+            data: transformedProduct,
             message: 'Product updated successfully',
         });
     } catch (error) {

@@ -13,7 +13,7 @@ import React, {useState, useEffect, useCallback, useMemo} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import {fetchProductById, Product, ProductVariant} from '../../api/apiClient';
+import {fetchProductById, Product} from '../../api/apiClient';
 import {useCart} from '../store/useCartStore';
 import {MainRoutes} from '../navigation/Routes';
 import OptionSelector from '../components/OptionSelector';
@@ -66,30 +66,36 @@ const ProductDetailsScreen = () => {
 
   // Tính toán giá dựa trên options đã chọn
   const calculatedPrice = useMemo(() => {
-    if (!product) return 0;
-    let totalPrice = product.price;
-    
+    if (!product) {
+      return 0;
+    }
+    let calculatedTotal = product.price;
+
     if (product.variants) {
       product.variants.forEach(variant => {
         const selectedOptionId = selectedOptions[variant.type];
-        if (selectedOptionId) {
-          const option = variant.options.find(opt => opt.id === selectedOptionId);
-          if (option) {
-            totalPrice += option.price;
+        if (selectedOptionId && variant.options) {
+          const option = variant.options.find(opt => opt && opt.id === selectedOptionId);
+          if (option && option.price !== undefined) {
+            calculatedTotal += option.price;
           }
         }
       });
     }
-    
-    return totalPrice;
+
+    return calculatedTotal;
   }, [product, selectedOptions]);
 
   // Kiểm tra xem đã chọn đủ options bắt buộc chưa
   const isOptionsValid = useMemo(() => {
-    if (!product?.variants) return true;
-    
+    if (!product?.variants) {
+      return true;
+    }
+
     return product.variants.every(variant => {
-      if (!variant.required) return true;
+      if (!variant.required) {
+        return true;
+      }
       return !!selectedOptions[variant.type];
     });
   }, [product, selectedOptions]);
@@ -99,18 +105,23 @@ const ProductDetailsScreen = () => {
     if (product?.variants) {
       const newSelections: {[key: string]: string} = {...selectedOptions};
       let hasChange = false;
-      
+
       product.variants.forEach(variant => {
-        if (variant.required && !newSelections[variant.type] && variant.options.length > 0) {
-          newSelections[variant.type] = variant.options[0].id;
-          hasChange = true;
+        if (variant.required && !newSelections[variant.type] && variant.options && variant.options.length > 0) {
+          const firstOption = variant.options[0];
+          // Đảm bảo option có id
+          if (firstOption && firstOption.id) {
+            newSelections[variant.type] = firstOption.id;
+            hasChange = true;
+          }
         }
       });
-      
+
       if (hasChange) {
         setSelectedOptions(newSelections);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product]);
 
   const handleOptionSelect = (variantType: string, optionId: string) => {
@@ -149,10 +160,10 @@ const ProductDetailsScreen = () => {
         ? product.variants
             .map(variant => {
               const selectedOptionId = selectedOptions[variant.type];
-              if (selectedOptionId) {
-                const option = variant.options.find(opt => opt.id === selectedOptionId);
-                if (option) {
-                  return `${variant.name}: ${option.name}`;
+              if (selectedOptionId && variant.options) {
+                const option = variant.options.find(opt => opt && opt.id === selectedOptionId);
+                if (option && option.name) {
+                  return `${variant.name || variant.type}: ${option.name}`;
                 }
               }
               return null;
@@ -274,14 +285,26 @@ const ProductDetailsScreen = () => {
           {/* Options/Variants Selector */}
           {product.variants && product.variants.length > 0 && (
             <View style={styles.optionsSection}>
-              {product.variants.map(variant => (
-                <OptionSelector
-                  key={variant.type}
-                  variant={variant}
-                  selectedOptionId={selectedOptions[variant.type]}
-                  onSelect={optionId => handleOptionSelect(variant.type, optionId)}
-                />
-              ))}
+              {product.variants.map((variant, index) => {
+                // Đảm bảo tất cả options có id
+                const variantWithIds = {
+                  ...variant,
+                  options: variant.options?.map((option, optIndex) => ({
+                    ...option,
+                    id: option.id || `variant-${index}-option-${optIndex}-${Date.now()}`,
+                  })) || [],
+                };
+                // Sử dụng unique key kết hợp type và index để tránh duplicate key
+                const variantKey = `${variant.type}-${index}-${variant.name || ''}`;
+                return (
+                  <OptionSelector
+                    key={variantKey}
+                    variant={variantWithIds}
+                    selectedOptionId={selectedOptions[variant.type]}
+                    onSelect={optionId => handleOptionSelect(variant.type, optionId)}
+                  />
+                );
+              })}
             </View>
           )}
 

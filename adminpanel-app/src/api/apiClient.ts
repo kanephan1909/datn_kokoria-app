@@ -17,6 +17,7 @@ api.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+        
         return config;
     },
     (error) => {
@@ -124,8 +125,42 @@ export const fetchProducts = async (params?: { categoryId?: string; page?: numbe
 };
 
 export const fetchProductById = async (id: string) => (await api.get(`/products/${id}`)).data;
-export const createProduct = async (data: { name: string; price: number; imageUrl?: string; description?: string; categoryId: string; stock?: number; isActive?: boolean; variants?: any[] }) => (await api.post('/products', data)).data;
-export const updateProduct = async (id: string, data: { name?: string; price?: number; imageUrl?: string; description?: string; categoryId?: string; stock?: number; isActive?: boolean; variants?: any[] }) => (await api.put(`/products/${id}`, data)).data;
+export const createProduct = async (data: { name: string; price: number; imageUrl?: string; description?: string; categoryId: string; stock?: number; isActive?: boolean; variants?: any[] }) => {
+    // Đảm bảo variants luôn có trong data
+    const requestData = {
+        ...data,
+        variants: data.variants !== undefined ? data.variants : [],
+    };
+    return (await api.post('/products', requestData)).data;
+};
+
+export const updateProduct = async (id: string, data: { name?: string; price?: number; imageUrl?: string; description?: string; categoryId?: string; stock?: number; isActive?: boolean; variants?: any[] }) => {
+    // Đảm bảo variants luôn có trong data - QUAN TRỌNG: Luôn gửi variants (kể cả empty array)
+    const requestData: any = {
+        ...data,
+    };
+    
+    // QUAN TRỌNG: Luôn thêm variants vào requestData, kể cả khi undefined hoặc empty
+    // Điều này đảm bảo backend biết là muốn update variants
+    if (data.variants !== undefined) {
+        requestData.variants = data.variants;
+    } else {
+        // Nếu variants không có trong data, vẫn gửi empty array để backend biết
+        requestData.variants = [];
+    }
+    
+    // QUAN TRỌNG: Sử dụng config với transformRequest để đảm bảo variants được serialize đúng
+    return (await api.put(`/products/${id}`, requestData, {
+        transformRequest: [(data, headers) => {
+            // Đảm bảo data được stringify đúng cách
+            if (typeof data === 'object' && data !== null) {
+                headers['Content-Type'] = 'application/json';
+                return JSON.stringify(data);
+            }
+            return data;
+        }],
+    })).data;
+};
 export const deleteProduct = async (id: string) => (await api.delete(`/products/${id}`)).data;
 
 // Users API

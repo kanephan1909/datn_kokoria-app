@@ -15,6 +15,7 @@ const productSchema = z.object({
     description: z.string().optional(),
     stock: z.number().int().min(0, 'Số lượng tồn kho phải >= 0').optional(),
     isActive: z.boolean().optional(),
+    variants: z.array(z.any()).optional(), // Cho phép variants là array hoặc undefined
 });
 
 const updateProductSchema = z.object({
@@ -25,6 +26,7 @@ const updateProductSchema = z.object({
     description: z.string().optional(),
     stock: z.number().int().min(0).optional(),
     isActive: z.boolean().optional(),
+    variants: z.array(z.any()).optional(), // Cho phép variants là array hoặc undefined
 }); 
 
 /**
