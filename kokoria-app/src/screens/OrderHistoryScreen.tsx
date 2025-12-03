@@ -337,6 +337,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
+    marginBottom: 12,
     fontSize: 20,
     fontWeight: 'bold',
     color: '#000000',
@@ -403,7 +404,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    borderRadius: 8,
+    borderRadius: 50,
     paddingVertical: 4,
     paddingHorizontal: 8,
   },
@@ -445,8 +446,8 @@ const styles = StyleSheet.create({
   },
   placeOrderButton: {
     backgroundColor: '#EA580C',
-    borderRadius: 12,
-    paddingVertical: 16,
+    borderRadius: 50,
+    paddingVertical: 8,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 50,

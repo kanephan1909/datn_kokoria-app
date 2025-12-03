@@ -23,8 +23,8 @@ export enum MainRoutes {
     Order = 'Đơn Hàng',
     ProductDetails = 'Chi tiết sản phẩm',
     Category = 'Category',
-    Cart = 'Giỏ hàng',
     Checkout = 'Thanh toán',
+    Checkout2 = 'Thanh toán 2',
     OrderDetails = 'Chi tiết đơn hàng',
     OrderHistory = 'Lịch sử đơn hàng',
     Profile = 'Tôi',
@@ -56,7 +56,6 @@ export type MainTabParamList = {
     [MainRoutes.Home]:undefined;
     [MainRoutes.Menu]:undefined;
     [MainRoutes.Order]:undefined;
-    [MainRoutes.Cart]:undefined;
 }
 
 // Type for the main stack param list
@@ -64,8 +63,8 @@ export type MainStackParamList = {
     MainTabs:NavigatorScreenParams<MainTabParamList>;
     [MainRoutes.ProductDetails]:{productId:string};
     [MainRoutes.Category]:{categoryId:string};
-    [MainRoutes.Cart]:undefined;
     [MainRoutes.Checkout]:undefined;
+    [MainRoutes.Checkout2]:{addressId?: string; voucherId?: string};
     [MainRoutes.OrderDetails]:{orderId:string};
     [MainRoutes.OrderHistory]:undefined;
     [MainRoutes.Profile]:undefined;

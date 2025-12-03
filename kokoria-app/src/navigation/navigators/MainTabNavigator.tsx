@@ -65,11 +65,6 @@ const MainTabNavigator = () => {
           tabBarIcon: OrderIcon,
         }}
       />
-      {/* <Tab.Screen name={MainRoutes.Cart} component={CartScreen} options={{
-        tabBarIcon: ({color}: {color: string}) => (
-          <FontAwesome name="cart" color={color} size={24} />
-        ),
-      }}/> */}
       <Tab.Screen
         name={MainRoutes.Profile}
         component={UserScreen}

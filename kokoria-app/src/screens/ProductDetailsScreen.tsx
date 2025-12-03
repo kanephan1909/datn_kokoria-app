@@ -17,6 +17,7 @@ import {fetchProductById, Product} from '../../api/apiClient';
 import {useCart} from '../store/useCartStore';
 import {MainRoutes} from '../navigation/Routes';
 import OptionSelector from '../components/OptionSelector';
+import CartBottomBar from '../components/CartBottomBar';
 
 const {width} = Dimensions.get('window');
 
@@ -172,8 +173,9 @@ const ProductDetailsScreen = () => {
             .join(', ')
         : '';
 
+      // Chỉ thêm vào cart, CartBottomBar sẽ tự hiện
       await addItem(product.id, quantity, optionsNote);
-      // Alert.alert('Thành công', 'Đã thêm sản phẩm vào giỏ hàng');
+      Alert.alert('Thành công', 'Đã thêm sản phẩm vào giỏ hàng');
     } catch (error: any) {
       Alert.alert('Lỗi', error.response?.data?.message || 'Không thể thêm vào giỏ hàng');
     }
@@ -416,6 +418,7 @@ const ProductDetailsScreen = () => {
           </TouchableOpacity>
         </View>
       )}
+      <CartBottomBar />
     </SafeAreaView>
   );
 };

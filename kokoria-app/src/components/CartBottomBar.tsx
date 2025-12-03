@@ -18,14 +18,16 @@ const CartBottomBar = () => {
   };
 
   const handleCartPress = () => {
-    (navigation as any).navigate(MainRoutes.Cart);
+    // Navigate đến OrderScreen (My Orders)
+    (navigation as any).navigate(MainRoutes.Order);
   };
 
   const handleCheckoutPress = () => {
     if (cartItems.length === 0) {
       return;
     }
-    (navigation as any).navigate(MainRoutes.Checkout);
+    // Navigate đến OrderScreen (My Orders)
+    (navigation as any).navigate(MainRoutes.Order);
   };
 
   // Chỉ hiển thị khi có sản phẩm trong giỏ
@@ -60,7 +62,7 @@ const CartBottomBar = () => {
         onPress={handleCheckoutPress}
         style={styles.checkoutButton}
         activeOpacity={0.8}>
-        <Text style={styles.checkoutText}>Giao hàng</Text>
+        <Text style={styles.checkoutText}>Xem giỏ hàng</Text>
       </TouchableOpacity>
     </View>
   );
@@ -120,9 +122,9 @@ const styles = StyleSheet.create({
   },
   checkoutButton: {
     backgroundColor: '#EA580C',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 50,
   },
   checkoutText: {
     color: '#FFFFFF',

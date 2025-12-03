@@ -13,8 +13,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {useCart} from '../store/useCartStore';
-import {useAuth} from '../context/AuthContext';
-import {fetchAddresses, createOrder} from '../../api/apiClient';
+import {fetchAddresses} from '../../api/apiClient';
 import {MainRoutes} from '../navigation/Routes';
 
 interface Address {
@@ -30,11 +29,9 @@ interface Address {
 
 const OrderScreen = () => {
   const navigation = useNavigation();
-  const {cartItems, totalPrice, clear, loadCart, updateItem} = useCart();
-  const {user} = useAuth();
+  const {cartItems, totalPrice, updateItem} = useCart();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
 
   const loadAddresses = useCallback(async () => {
@@ -65,7 +62,6 @@ const OrderScreen = () => {
       loadAddresses();
     }, [loadAddresses]),
   );
-
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -80,102 +76,13 @@ const OrderScreen = () => {
     await updateItem(itemId, newQuantity);
   };
 
-  const handlePlaceOrder = async () => {
-    if (!selectedAddressId) {
-      Alert.alert('Lỗi', 'Vui lòng chọn địa chỉ giao hàng');
-      return;
-    }
-
+  const handlePlaceOrder = () => {
     if (cartItems.length === 0) {
       Alert.alert('Lỗi', 'Giỏ hàng trống');
       return;
     }
-
-    if (!user || !user.id) {
-      Alert.alert('Lỗi', 'Vui lòng đăng nhập để đặt hàng');
-      return;
-    }
-
-    Alert.alert(
-      'Xác nhận đặt hàng',
-      `Bạn có chắc chắn muốn đặt hàng với tổng tiền ${formatPrice(totalPrice)}?`,
-      [
-        {
-          text: 'Hủy',
-          style: 'cancel',
-        },
-        {
-          text: 'Đặt hàng',
-          onPress: async () => {
-            setIsLoading(true);
-            try {
-              // Tìm address object từ selectedAddressId
-              const selectedAddress = addresses.find(
-                (addr) => addr.id === selectedAddressId,
-              );
-
-              if (!selectedAddress) {
-                Alert.alert('Lỗi', 'Địa chỉ không hợp lệ');
-                setIsLoading(false);
-                return;
-              }
-
-              // Tạo address object theo format backend yêu cầu
-              const addressObject = {
-                name: selectedAddress.name,
-                phone: selectedAddress.phone,
-                address: selectedAddress.address,
-                ward: selectedAddress.ward,
-                district: selectedAddress.district,
-                city: selectedAddress.city,
-              };
-
-              const orderData = {
-                userId: user.id,
-                items: cartItems.map((item) => ({
-                  productId: item.productId,
-                  quantity: item.quantity,
-                  price: item.price,
-                })),
-                totalAmount: totalPrice,
-                address: addressObject,
-                paymentMethod: 'COD',
-              };
-
-              console.log('Creating order with data:', orderData);
-
-              const response = await createOrder(orderData);
-              if (response.success) {
-                Alert.alert('Thành công', 'Đơn hàng đã được tạo thành công', [
-                  {
-                    text: 'OK',
-                    onPress: async () => {
-                      await clear();
-                      await loadCart();
-                      (navigation as any).navigate(MainRoutes.OrderDetails, {
-                        orderId: response.data.id,
-                      });
-                    },
-                  },
-                ]);
-              } else {
-                console.error('Order creation failed:', response);
-                Alert.alert('Lỗi', response.message || 'Không thể tạo đơn hàng');
-              }
-            } catch (error: any) {
-              console.error('Error creating order:', error);
-              console.error('Error response:', error.response?.data);
-              Alert.alert(
-                'Lỗi',
-                error.response?.data?.message || 'Không thể tạo đơn hàng',
-              );
-            } finally {
-              setIsLoading(false);
-            }
-          },
-        },
-      ],
-    );
+    // Navigate đến CheckoutScreen (chọn địa chỉ và voucher)
+    (navigation as any).navigate(MainRoutes.Checkout);
   };
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -199,7 +106,7 @@ const OrderScreen = () => {
             style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Order Summary</Text>
+          <Text style={styles.headerTitle}>My Orders</Text>
           <View style={styles.placeholder} />
         </View>
         <View style={styles.emptyContainer}>
@@ -222,7 +129,7 @@ const OrderScreen = () => {
           style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Order Summary</Text>
+        <Text style={styles.headerTitle}>My Orders</Text>
         <TouchableOpacity style={styles.searchButton} activeOpacity={0.7}>
           <Ionicons name="search" size={24} color="#000" />
         </TouchableOpacity>
@@ -338,17 +245,9 @@ const OrderScreen = () => {
         {/* Place Order Button */}
         <View style={styles.placeOrderContainer}>
           <TouchableOpacity
-            style={[
-              styles.placeOrderButton,
-              (!selectedAddressId || isLoading) && styles.placeOrderButtonDisabled,
-            ]}
-            onPress={handlePlaceOrder}
-            disabled={!selectedAddressId || isLoading}>
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text style={styles.placeOrderText}>Place Order</Text>
-            )}
+            style={styles.placeOrderButton}
+            onPress={handlePlaceOrder}>
+            <Text style={styles.placeOrderText}>Place Order</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
