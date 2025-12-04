@@ -65,7 +65,7 @@ const HomeScreen = () => {
                 <Ionicons name="flash" size={16} color="#fff" />
               </View>
               <Text className="text-xl font-bold text-gray-800">
-                Flash Sale
+                Khuyến mãi
               </Text>
             </View>
             <TouchableOpacity activeOpacity={0.7}>
@@ -85,7 +85,7 @@ const HomeScreen = () => {
           {!query && (
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-xl font-bold text-gray-800">
-                Explore Chicken
+                Đồ ăn ngon
               </Text>
               <TouchableOpacity activeOpacity={0.7}>
                 <Text className="text-orange-500 font-semibold">

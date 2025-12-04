@@ -195,15 +195,15 @@ const MenuScreen = () => {
         {/* Popular Dishes Section */}
         <View style={styles.popularSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Popular Dishes</Text>
+            <Text style={styles.sectionTitle}>Món phổ biến</Text>
             <TouchableOpacity activeOpacity={0.7}>
-              <Text style={styles.seeAllText}>See All</Text>
+              <Text style={styles.seeAllText}>Xem tất cả</Text>
             </TouchableOpacity>
           </View>
 
           {isLoading ? (
             <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>Loading...</Text>
+              <Text style={styles.loadingText}>Đang tải...</Text>
             </View>
           ) : products.length > 0 ? (
             <FlatList
@@ -216,7 +216,7 @@ const MenuScreen = () => {
             />
           ) : (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No products available</Text>
+              <Text style={styles.emptyText}>Không có sản phẩm</Text>
             </View>
           )}
         </View>

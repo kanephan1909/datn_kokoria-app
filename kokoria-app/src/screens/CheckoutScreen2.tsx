@@ -183,7 +183,7 @@ const CheckoutScreen2 = () => {
             <Ionicons name="arrow-back" size={20} color="#000000" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Checkout</Text>
+        <Text style={styles.headerTitle}>Thanh toán</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -204,7 +204,7 @@ const CheckoutScreen2 = () => {
               <Ionicons name="location" size={32} color="#EF4444" />
             </View>
             <TouchableOpacity style={styles.editPinButton}>
-              <Text style={styles.editPinText}>Edit Pin</Text>
+              <Text style={styles.editPinText}>Chỉnh sửa vị trí</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -220,7 +220,7 @@ const CheckoutScreen2 = () => {
               <Ionicons name="home-outline" size={20} color="#000" />
             </View>
             <View style={styles.deliveryContent}>
-              <Text style={styles.deliveryLabel}>Home</Text>
+              <Text style={styles.deliveryLabel}>Nhà</Text>
               {selectedAddress ? (
                 <Text style={styles.deliveryValue}>
                   {selectedAddress.address}
@@ -239,7 +239,7 @@ const CheckoutScreen2 = () => {
               <Ionicons name="call-outline" size={20} color="#000" />
             </View>
             <View style={styles.deliveryContent}>
-              <Text style={styles.deliveryLabel}>Phone</Text>
+              <Text style={styles.deliveryLabel}>Điện thoại</Text>
               {selectedAddress ? (
                 <Text style={styles.deliveryValue}>{selectedAddress.phone}</Text>
               ) : (
@@ -256,8 +256,8 @@ const CheckoutScreen2 = () => {
               <Ionicons name="time-outline" size={20} color="#000" />
             </View>
             <View style={styles.deliveryContent}>
-              <Text style={styles.deliveryLabel}>Delivery Time</Text>
-              <Text style={styles.deliveryValue}>30-45 mins</Text>
+              <Text style={styles.deliveryLabel}>Thời gian giao hàng</Text>
+              <Text style={styles.deliveryValue}>30-45 phút</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
@@ -341,7 +341,7 @@ const CheckoutScreen2 = () => {
       {/* Total and Place Order Button */}
       <View style={styles.bottomContainer}>
         <View style={styles.totalContainer}>
-          <Text style={styles.totalLabel}>Total</Text>
+          <Text style={styles.totalLabel}>Tổng cộng</Text>
           <Text style={styles.totalValue}>{formatPrice(finalTotal)}</Text>
         </View>
         <TouchableOpacity
@@ -351,7 +351,7 @@ const CheckoutScreen2 = () => {
           {isLoading ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Text style={styles.placeOrderText}>Place Order</Text>
+            <Text style={styles.placeOrderText}>Đặt hàng</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -383,7 +383,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -642,8 +641,9 @@ const styles = StyleSheet.create({
   },
   placeOrderButton: {
     backgroundColor: '#EA580C',
-    borderRadius: 12,
-    paddingVertical: 16,
+    marginBottom: 10,
+    borderRadius: 50,
+    paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },

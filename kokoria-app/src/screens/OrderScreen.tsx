@@ -106,7 +106,7 @@ const OrderScreen = () => {
             style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>My Orders</Text>
+          <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
           <View style={styles.placeholder} />
         </View>
         <View style={styles.emptyContainer}>
@@ -190,7 +190,7 @@ const OrderScreen = () => {
 
           {/* Total */}
           <View style={styles.summaryTotal}>
-            <Text style={styles.totalItemsText}>Total {totalItems} items</Text>
+            <Text style={styles.totalItemsText}>Tổng {totalItems} sản phẩm</Text>
             <Text style={styles.totalPriceText}>{formatPrice(totalPrice)}</Text>
           </View>
         </View>
@@ -198,7 +198,7 @@ const OrderScreen = () => {
         {/* Address Selection */}
         {addresses.length > 0 && (
           <View style={styles.addressSection}>
-            <Text style={styles.addressTitle}>Delivery Address</Text>
+            <Text style={styles.addressTitle}>Địa chỉ giao hàng</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {addresses.map((address) => (
                 <TouchableOpacity
@@ -215,7 +215,7 @@ const OrderScreen = () => {
                   </Text>
                   {address.isDefault && (
                     <View style={styles.defaultBadge}>
-                      <Text style={styles.defaultBadgeText}>Default</Text>
+                      <Text style={styles.defaultBadgeText}>Mặc định</Text>
                     </View>
                   )}
                 </TouchableOpacity>
@@ -226,7 +226,7 @@ const OrderScreen = () => {
               onPress={() => {
                 (navigation as any).navigate(MainRoutes.AddressList);
               }}>
-              <Text style={styles.changeAddressText}>Change Address</Text>
+              <Text style={styles.changeAddressText}>Thay đổi địa chỉ</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -238,7 +238,7 @@ const OrderScreen = () => {
               (navigation as any).navigate(MainRoutes.AddAddress);
             }}>
             <Ionicons name="add-circle-outline" size={24} color="#EA580C" />
-            <Text style={styles.addAddressText}>Add Delivery Address</Text>
+            <Text style={styles.addAddressText}>Thêm địa chỉ giao hàng</Text>
           </TouchableOpacity>
         )}
 
@@ -247,7 +247,7 @@ const OrderScreen = () => {
           <TouchableOpacity
             style={styles.placeOrderButton}
             onPress={handlePlaceOrder}>
-            <Text style={styles.placeOrderText}>Place Order</Text>
+            <Text style={styles.placeOrderText}>Đặt hàng</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

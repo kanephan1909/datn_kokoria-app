@@ -65,6 +65,7 @@ const MainTabNavigator = () => {
           tabBarIcon: OrderIcon,
         }}
       />
+
       <Tab.Screen
         name={MainRoutes.Profile}
         component={UserScreen}

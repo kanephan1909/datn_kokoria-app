@@ -27,7 +27,7 @@ const API_BASE_URL = getApiBaseUrl();
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {'Content-Type': 'application/json'},
-  timeout: 30000, // 30 seconds timeout
+  timeout: 10000, // 10 seconds timeout
 });
 
 // Thêm token vào request nếu có
@@ -50,15 +50,38 @@ api.interceptors.response.use(
   async error => {
     const originalRequest = error.config;
 
-    // Xử lý lỗi network
+    // Xử lý lỗi network - Backend không chạy hoặc không kết nối được
     if (!error.response) {
       // Network error - không có response từ server
       const networkError = new Error('Network Error');
       (networkError as any).isNetworkError = true;
-      (networkError as any).message = 
-        error.code === 'ECONNABORTED' 
-          ? 'Request timeout. Vui lòng thử lại.'
-          : 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+      (networkError as any).isBackendOffline = true;
+      
+      // Xác định loại lỗi và thông báo phù hợp
+      let errorMessage = '';
+      
+      if (error.code === 'ECONNABORTED') {
+        errorMessage = '⏱ Request timeout. Vui lòng thử lại.';
+      } else if (error.code === 'ERR_NETWORK' || error.code === 'ECONNREFUSED') {
+        errorMessage = `Backend server chưa chạy!\n\n` +
+          `Vui lòng kiểm tra:\n` +
+          `• Backend server đã được khởi động chưa?\n` +
+          `• Đúng địa chỉ API: ${API_BASE_URL}\n` +
+          `• Kết nối mạng có ổn định không?\n\n`;
+      } else if (error.message?.includes('Network request failed')) {
+        errorMessage = `❌ Không thể kết nối đến backend server!\n\n` +
+          `Có thể do:\n` +
+          `• Backend server chưa được khởi động\n` +
+          `• URL API không đúng: ${API_BASE_URL}\n` +
+          `• Mạng không kết nối được\n\n` +
+          `Vui lòng kiểm tra lại backend server và thử lại.`;
+      } else {
+        errorMessage = `❌ Lỗi kết nối!\n\n` +
+          `Không thể kết nối đến backend server tại:\n${API_BASE_URL}\n\n` +
+          `Vui lòng đảm bảo backend server đã được khởi động.`;
+      }
+      
+      (networkError as any).message = errorMessage;
       return Promise.reject(networkError);
     }
 
@@ -120,6 +143,79 @@ export const logout = async () => {
 };
 
 export const getMe = async () => (await api.get('/auth/me')).data;
+
+// ==================== FORGOT PASSWORD API ====================
+/**
+ * Gửi email chứa mã xác nhận để đặt lại mật khẩu
+ * @param email - Email của người dùng
+ */
+export const forgotPasswordByEmail = async (email: string) => {
+  try {
+    const response = await api.post('/auth/forgot-password/email', {email});
+    return response.data;
+  } catch (error: any) {
+    // Nếu backend chưa có endpoint này, trả về error message thân thiện
+    if (error.response?.status === 404) {
+      return {
+        success: false,
+        message:
+          'Chức năng quên mật khẩu qua email chưa được triển khai trên server. Vui lòng liên hệ admin.',
+      };
+    }
+    throw error;
+  }
+};
+
+/**
+ * Gửi SMS chứa mã xác nhận để đặt lại mật khẩu
+ * @param phone - Số điện thoại của người dùng
+ */
+export const forgotPasswordBySMS = async (phone: string) => {
+  try {
+    const response = await api.post('/auth/forgot-password/sms', {phone});
+    return response.data;
+  } catch (error: any) {
+    // Nếu backend chưa có endpoint này, trả về error message thân thiện
+    if (error.response?.status === 404) {
+      return {
+        success: false,
+        message:
+          'Chức năng quên mật khẩu qua SMS chưa được triển khai trên server. Vui lòng liên hệ admin.',
+      };
+    }
+    throw error;
+  }
+};
+
+/**
+ * Đặt lại mật khẩu với mã xác nhận (qua Email hoặc SMS)
+ * @param data - { email?, phone?, code, newPassword, method: 'email' | 'sms' }
+ */
+export const resetPassword = async (data: {
+  email?: string;
+  phone?: string;
+  code: string;
+  newPassword: string;
+  method: 'email' | 'sms';
+}) => {
+  try {
+    const response = await api.post('/auth/reset-password', data);
+    return response.data;
+  } catch (error: any) {
+    // Nếu backend chưa có endpoint này, trả về error message thân thiện
+    if (error.response?.status === 404) {
+      return {
+        success: false,
+        message:
+          'Chức năng đặt lại mật khẩu chưa được triển khai trên server. Vui lòng liên hệ admin.',
+      };
+    }
+    throw error;
+  }
+};
+
+// Backward compatibility - giữ lại function cũ
+export const forgotPassword = forgotPasswordByEmail;
 
 // ==================== CATEGORIES API ====================
 export const fetchCategories = async () => (await api.get('/categories')).data;

@@ -43,29 +43,29 @@ const UserScreen = () => {
   const menuItems = [
     {
       id: 'orders',
-      title: 'My Orders',
-      description: 'View past & ongoing orders',
+      title: 'Đơn hàng của tôi',
+      description: 'Xem đơn hàng đã qua và đang xử lý',
       icon: 'document-text-outline',
       route: MainRoutes.OrderHistory,
     },
     {
       id: 'favorites',
-      title: 'Favorites',
-      description: 'See your saved dishes',
+      title: 'Yêu thích',
+      description: 'Xem món ăn đã lưu',
       icon: 'heart-outline',
       route: null,
     },
     {
       id: 'vouchers',
-      title: 'My Vouchers',
-      description: 'Check available discounts',
+      title: 'Voucher của tôi',
+      description: 'Kiểm tra ưu đãi có sẵn',
       icon: 'pricetag-outline',
       route: null,
     },
     {
       id: 'payment',
-      title: 'Payment Methods',
-      description: 'Manage cards & wallets',
+      title: 'Phương thức thanh toán',
+      description: 'Quản lý thẻ và ví',
       icon: 'card-outline',
       route: null,
     },
@@ -73,8 +73,8 @@ const UserScreen = () => {
 
   const helpSupportItem = {
     id: 'help',
-    title: 'Help & Support',
-    description: 'Contact us or FAQs',
+    title: 'Trợ giúp & Hỗ trợ',
+    description: 'Liên hệ hoặc Câu hỏi thường gặp',
     icon: 'help-circle-outline',
     route: null,
   };
@@ -97,7 +97,7 @@ const UserScreen = () => {
       }
     } else {
       // TODO: Implement navigation for these routes
-      console.log('Route not implemented yet');
+      Alert.alert('Thông báo', 'Tính năng này đang được phát triển');
     }
   };
 
@@ -116,7 +116,7 @@ const UserScreen = () => {
     <SafeAreaView edges={['top']} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Profile</Text>
+        <Text style={styles.headerTitle}>Tài khoản</Text>
         <TouchableOpacity
           style={styles.settingsButton}
           activeOpacity={0.7}
@@ -149,7 +149,7 @@ const UserScreen = () => {
             </View>
             <View style={styles.profileInfo}>
               <Text style={styles.userName}>
-                {user?.name || 'M. Takahashi'}
+                {user?.name || 'Người dùng'}
               </Text>
             </View>
             <TouchableOpacity
@@ -159,7 +159,7 @@ const UserScreen = () => {
                 // TODO: Navigate to edit profile
                 console.log('Edit profile');
               }}>
-              <Text style={styles.editButtonText}>Edit</Text>
+              <Text style={styles.editButtonText}>Chỉnh sửa</Text>
             </TouchableOpacity>
           </View>
 
@@ -167,15 +167,15 @@ const UserScreen = () => {
           <View style={styles.statsContainer}>
             <View style={styles.statCard}>
               <Text style={styles.statNumber}>{ordersCount}</Text>
-              <Text style={styles.statLabel}>Orders</Text>
+              <Text style={styles.statLabel}>Đơn hàng</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statNumber}>12</Text>
-              <Text style={styles.statLabel}>Favorites</Text>
+              <Text style={styles.statLabel}>Yêu thích</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statNumber}>5</Text>
-              <Text style={styles.statLabel}>Vouchers</Text>
+              <Text style={styles.statLabel}>Voucher</Text>
             </View>
           </View>
         </View>

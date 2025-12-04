@@ -47,7 +47,7 @@ export type AuthStackParamList = {
     [AuthRoutes.Register]: undefined;
     [AuthRoutes.ForgotPassword]: undefined;
     [AuthRoutes.VerifyEmail]: undefined;
-    [AuthRoutes.ResetPassword]: undefined;
+    [AuthRoutes.ResetPassword]: { email?: string; phone?: string; method?: 'email' | 'sms' };
     [AuthRoutes.VerifyCode]: undefined;
     [AuthRoutes.VerifyPhone]: undefined;
 }

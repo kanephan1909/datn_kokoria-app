@@ -84,13 +84,13 @@ const OrderHistoryScreen = () => {
 
   const getStatusText = (status: string) => {
     const statusMap: {[key: string]: string} = {
-      pending: 'Arriving',
-      confirmed: 'Arriving',
-      preparing: 'Arriving',
-      ready: 'Arriving',
-      delivering: 'Arriving',
-      completed: 'Delivered',
-      cancelled: 'Cancelled',
+      pending: 'Đang đến',
+      confirmed: 'Đang đến',
+      preparing: 'Đang đến',
+      ready: 'Đang đến',
+      delivering: 'Đang đến',
+      completed: 'Đã giao',
+      cancelled: 'Đã hủy',
     };
     return statusMap[status.toLowerCase()] || status;
   };
@@ -122,7 +122,7 @@ const OrderHistoryScreen = () => {
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
         )}
-        <Text style={styles.headerTitle}>My Orders</Text>
+        <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
         <TouchableOpacity style={styles.searchButton} activeOpacity={0.7}>
           <Ionicons name="search" size={24} color="#000" />
         </TouchableOpacity>
@@ -134,7 +134,7 @@ const OrderHistoryScreen = () => {
         {/* Order Summary Section */}
         {cartItems.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Order Summary</Text>
+            <Text style={styles.sectionTitle}>Tóm tắt đơn hàng</Text>
             <View style={styles.summaryCard}>
               {cartItems.map((item) => (
                 <View key={item.id} style={styles.orderItem}>
@@ -187,7 +187,7 @@ const OrderHistoryScreen = () => {
               ))}
               <View style={styles.summaryTotal}>
                 <Text style={styles.totalItemsText}>
-                  Total {totalItems} items
+                  Tổng {totalItems} sản phẩm
                 </Text>
                 <Text style={styles.totalPriceText}>
                   {formatPrice(totalPrice)}
@@ -202,7 +202,7 @@ const OrderHistoryScreen = () => {
                   (navigation as any).navigate(MainRoutes.Checkout);
                 }}
                 hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-                <Text style={styles.placeOrderText}>Place Order</Text>
+                <Text style={styles.placeOrderText}>Đặt hàng</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -211,9 +211,9 @@ const OrderHistoryScreen = () => {
         {/* Ordered Items Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Ordered Items</Text>
+            <Text style={styles.sectionTitle}>Đơn hàng đã đặt</Text>
             <TouchableOpacity activeOpacity={0.7}>
-              <Text style={styles.seeAllText}>See All</Text>
+              <Text style={styles.seeAllText}>Xem tất cả</Text>
             </TouchableOpacity>
           </View>
 
@@ -223,7 +223,7 @@ const OrderHistoryScreen = () => {
             </View>
           ) : orders.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No orders yet</Text>
+              <Text style={styles.emptyText}>Chưa có đơn hàng</Text>
             </View>
           ) : (
             orders.map((order) => (
@@ -251,16 +251,16 @@ const OrderHistoryScreen = () => {
                 </View>
                 <View style={styles.orderInfo}>
                   <Text style={styles.orderName} numberOfLines={1}>
-                    {order.items[0]?.product?.name || 'Order'}
+                    {order.items[0]?.product?.name || 'Đơn hàng'}
                   </Text>
                   <Text style={styles.orderDetail}>
-                    Delivery ·{' '}
+                    Giao hàng ·{' '}
                     {order.address
                       ? `${order.address.address}, ${order.address.ward}`
-                      : '123 Tokyo Lane'}
+                      : 'Chưa có địa chỉ'}
                   </Text>
                   <Text style={styles.orderDetail}>
-                    From {order.restaurant?.name || 'Sushi World'}
+                    Từ {order.restaurant?.name || 'Nhà hàng'}
                   </Text>
                   <View style={styles.orderFooter}>
                     <Text
@@ -278,7 +278,7 @@ const OrderHistoryScreen = () => {
                           orderId: order.id,
                         });
                       }}>
-                      <Text style={styles.trackButtonText}>Track</Text>
+                      <Text style={styles.trackButtonText}>Theo dõi</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -447,10 +447,10 @@ const styles = StyleSheet.create({
   placeOrderButton: {
     backgroundColor: '#EA580C',
     borderRadius: 50,
-    paddingVertical: 8,
+    paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 50,
+    minHeight: 45,
     width: '100%',
   },
   placeOrderText: {

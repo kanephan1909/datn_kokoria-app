@@ -142,7 +142,7 @@ const CheckoutScreen = () => {
           style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Checkout</Text>
+        <Text style={styles.headerTitle}>Thanh toán</Text>
         <TouchableOpacity style={styles.editButton}>
           <Ionicons name="create-outline" size={24} color="#000" />
         </TouchableOpacity>
@@ -211,7 +211,7 @@ const CheckoutScreen = () => {
               <Ionicons name="person-outline" size={20} color="#6B7280" />
             </View>
             <View style={styles.detailContent}>
-              <Text style={styles.detailLabel}>Deliver to:</Text>
+              <Text style={styles.detailLabel}>Giao đến:</Text>
               {selectedAddressId ? (
                 <Text style={styles.detailValue}>
                   {addresses.find(a => a.id === selectedAddressId)?.name || 'Chọn địa chỉ'}
@@ -255,7 +255,7 @@ const CheckoutScreen = () => {
             <View style={styles.detailContent}>
               {selectedVoucher ? (
                 <Text style={[styles.detailValue, styles.voucherApplied]}>
-                  {selectedVoucher.discount}% OFF Applied
+                  Đã áp dụng {selectedVoucher.discount}% giảm giá
                 </Text>
               ) : (
                 <Text style={styles.detailValue}>Chọn voucher</Text>
@@ -268,28 +268,28 @@ const CheckoutScreen = () => {
         {/* Checkout Summary */}
         <View style={styles.section}>
           <View style={styles.summaryHeader}>
-            <Text style={styles.sectionTitle}>Checkout</Text>
-            <Text style={styles.deliveryTime}>30-45 mins</Text>
+            <Text style={styles.sectionTitle}>Thanh toán</Text>
+            <Text style={styles.deliveryTime}>30-45 phút</Text>
           </View>
           <View style={styles.summaryCard}>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Subtotal:</Text>
+              <Text style={styles.summaryLabel}>Tạm tính:</Text>
               <Text style={styles.summaryValue}>{formatPrice(totalPrice)}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Delivery Fee:</Text>
+              <Text style={styles.summaryLabel}>Phí giao hàng:</Text>
               <Text style={styles.summaryValue}>{formatPrice(deliveryFee)}</Text>
             </View>
             {discount > 0 && (
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Discount:</Text>
+                <Text style={styles.summaryLabel}>Giảm giá:</Text>
                 <Text style={[styles.summaryValue, styles.discountValue]}>
                   -{formatPrice(discount)}
                 </Text>
               </View>
             )}
             <View style={[styles.summaryRow, styles.totalRow]}>
-              <Text style={styles.totalLabel}>Total:</Text>
+              <Text style={styles.totalLabel}>Tổng cộng:</Text>
               <Text style={styles.totalValue}>{formatPrice(finalTotal)}</Text>
             </View>
           </View>
@@ -302,7 +302,7 @@ const CheckoutScreen = () => {
           style={styles.continueButton}
           onPress={handleContinue}
           disabled={!selectedAddressId}>
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.continueButtonText}>Tiếp tục</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -538,8 +538,9 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     backgroundColor: '#EA580C',
-    borderRadius: 12,
-    paddingVertical: 16,
+    marginBottom: 10,
+    borderRadius: 50,
+    paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
