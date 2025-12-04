@@ -31,16 +31,38 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
         
-        // Xử lý lỗi network - không có response từ server
+        // Xử lý lỗi network - Backend không chạy hoặc không kết nối được
         if (!error.response) {
             const networkError = new Error('Network Error');
             (networkError as any).isNetworkError = true;
-            (networkError as any).message = 
-                error.code === 'ECONNABORTED' 
-                    ? 'Request timeout. Vui lòng thử lại.'
-                    : error.code === 'ERR_NETWORK'
-                    ? 'Không thể kết nối đến server. Vui lòng kiểm tra:\n- Backend server đang chạy\n- Kết nối mạng\n- URL API: ' + API_BASE_URL
-                    : 'Lỗi kết nối mạng. Vui lòng thử lại.';
+            (networkError as any).isBackendOffline = true;
+            
+            // Xác định loại lỗi và thông báo phù hợp
+            let errorMessage = '';
+            
+            if (error.code === 'ECONNABORTED') {
+                errorMessage = '⏱ Request timeout. Vui lòng thử lại.';
+            } else if (error.code === 'ERR_NETWORK' || error.code === 'ECONNREFUSED') {
+                errorMessage = `❌ Backend server chưa chạy!\n\n` +
+                    `Vui lòng kiểm tra:\n` +
+                    `• Backend server đã được khởi động chưa?\n` +
+                    `• Đúng địa chỉ API: ${API_BASE_URL}\n` +
+                    `• Kết nối mạng có ổn định không?\n\n` +
+                    `Hướng dẫn: Chạy backend server trước khi sử dụng ứng dụng.`;
+            } else if (error.message?.includes('Network request failed')) {
+                errorMessage = `❌ Không thể kết nối đến backend server!\n\n` +
+                    `Có thể do:\n` +
+                    `• Backend server chưa được khởi động\n` +
+                    `• URL API không đúng: ${API_BASE_URL}\n` +
+                    `• Mạng không kết nối được\n\n` +
+                    `Vui lòng kiểm tra lại backend server và thử lại.`;
+            } else {
+                errorMessage = `❌ Lỗi kết nối!\n\n` +
+                    `Không thể kết nối đến backend server tại:\n${API_BASE_URL}\n\n` +
+                    `Vui lòng đảm bảo backend server đã được khởi động.`;
+            }
+            
+            (networkError as any).message = errorMessage;
             return Promise.reject(networkError);
         }
         

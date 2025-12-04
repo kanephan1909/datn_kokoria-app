@@ -8,26 +8,50 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Image,
   Animated,
+  Image,
 } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { useAuth } from '../context/AuthContext';
-import { login as apiLogin, getMe } from '../../api/apiClient';
-import { AuthRoutes } from '../navigation/Routes';
+import { resetPassword } from '../../api/apiClient';
+import { AuthRoutes, AuthStackParamList } from '../navigation/Routes';
 import { handleApiError } from '../utils/errorHandler';
 
+type ResetPasswordScreenRouteProp = RouteProp<
+  AuthStackParamList,
+  AuthRoutes.ResetPassword
+>;
 
+const ResetPasswordScreen = () => {
+  const navigation = useNavigation();
+  const route = useRoute<ResetPasswordScreenRouteProp>();
+  const email = route.params?.email || '';
+  const phone = route.params?.phone || '';
+  const method = route.params?.method || (email ? 'email' : 'sms');
 
-const LoginScreen = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  // Nếu không có email hoặc phone, quay lại màn hình quên mật khẩu
+  useEffect(() => {
+    if (!email && !phone) {
+      Alert.alert(
+        'Thông báo',
+        'Vui lòng nhập email hoặc số điện thoại trước',
+        [
+          {
+            text: 'Quay lại',
+            onPress: () => navigation.goBack(),
+          },
+        ]
+      );
+    }
+  }, [email, phone, navigation]);
+
+  const [code, setCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { login: setUser } = useAuth();
-  const navigation = useNavigation();
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -54,30 +78,56 @@ const LoginScreen = () => {
     ]).start();
   }, [fadeAnim, slideAnim, scaleAnim]);
 
-  const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
+  const handleResetPassword = async () => {
+    // Validation
+    if (!code.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng nhập mã xác nhận');
+      return;
+    }
+
+    if (!newPassword.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu mới');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
       return;
     }
 
     setIsLoading(true);
     try {
-      const response = await apiLogin(email.trim(), password);
+      const response = await resetPassword({
+        email: email || undefined,
+        phone: phone || undefined,
+        code: code.trim(),
+        newPassword: newPassword,
+        method: method as 'email' | 'sms',
+      });
+
       if (response.success) {
-        // Lấy thông tin user sau khi login thành công
-        const userResponse = await getMe();
-        if (userResponse.success && userResponse.data) {
-          setUser(userResponse.data);
-          // Navigation sẽ được xử lý tự động bởi RootNavigator dựa trên isAuthenticated
-        } else {
-          Alert.alert('Lỗi', 'Không thể lấy thông tin người dùng');
-        }
+        Alert.alert(
+          'Thành công',
+          'Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.',
+          [
+            {
+              text: 'Đăng nhập',
+              onPress: () => {
+                navigation.navigate(AuthRoutes.Login as never);
+              },
+            },
+          ]
+        );
       } else {
-        Alert.alert('Lỗi', response.message || 'Đăng nhập thất bại');
+        Alert.alert('Lỗi', response.message || 'Đặt lại mật khẩu thất bại');
       }
     } catch (error: any) {
-      // Sử dụng error handler để hiển thị thông báo lỗi thân thiện
-      handleApiError(error, 'Đã xảy ra lỗi khi đăng nhập');
+      handleApiError(error, 'Không thể đặt lại mật khẩu');
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +135,7 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Background with gradient effect using multiple Views */}
+      {/* Background with gradient effect */}
       <View style={styles.gradientBackground} />
       <View style={styles.gradientLayer1} />
       <View style={styles.gradientLayer2} />
@@ -116,6 +166,11 @@ const LoginScreen = () => {
                 styles.logoSection,
                 { transform: [{ scale: scaleAnim }] },
               ]}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
               <View style={styles.logoContainer}>
                 <View style={styles.logoGradient}>
                   <Image
@@ -125,11 +180,23 @@ const LoginScreen = () => {
                   />
                 </View>
               </View>
-              <Text style={styles.appName}>KOKORIA CHICKEN</Text>
-              <Text style={styles.tagline}>Thức ăn ngon, giao nhanh đến tay</Text>
+              <Text style={styles.appName}>ĐẶT LẠI MẬT KHẨU</Text>
+              <Text style={styles.tagline}>
+                Nhập mã xác nhận và mật khẩu mới
+              </Text>
+              {email && (
+                <Text style={styles.emailText}>
+                  📧 {email}
+                </Text>
+              )}
+              {phone && (
+                <Text style={styles.emailText}>
+                  📱 {phone}
+                </Text>
+              )}
             </Animated.View>
 
-            {/* Login card */}
+            {/* Card */}
             <Animated.View
               style={[
                 styles.cardContainer,
@@ -137,36 +204,49 @@ const LoginScreen = () => {
               ]}>
               <View style={styles.blurCard}>
                 <View style={styles.card}>
-                  <Text style={styles.welcomeText}>Đăng nhập</Text>
-                  <Text style={styles.subtitleText}>Nhập thông tin để tiếp tục</Text>
+                  <Text style={styles.welcomeText}>Mật khẩu mới</Text>
+                  <Text style={styles.subtitleText}>
+                    Nhập mã xác nhận và mật khẩu mới của bạn
+                  </Text>
 
-                  {/* Email input */}
+                  {/* Code input */}
                   <View style={styles.inputWrapper}>
                     <View style={styles.inputContainer}>
-                      <Ionicons name="mail-outline" size={20} color="#FF6B35" style={styles.inputIcon} />
+                      <Ionicons
+                        name="key-outline"
+                        size={20}
+                        color="#FF6B35"
+                        style={styles.inputIcon}
+                      />
                       <TextInput
                         style={styles.input}
-                        placeholder="Email của bạn"
+                        placeholder="Mã xác nhận"
                         placeholderTextColor="#999"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
+                        value={code}
+                        onChangeText={setCode}
+                        keyboardType="number-pad"
                         autoCapitalize="none"
                         autoCorrect={false}
+                        maxLength={6}
                       />
                     </View>
                   </View>
 
-                  {/* Password input */}
+                  {/* New password input */}
                   <View style={styles.inputWrapper}>
                     <View style={styles.inputContainer}>
-                      <Ionicons name="lock-closed-outline" size={20} color="#FF6B35" style={styles.inputIcon} />
+                      <Ionicons
+                        name="lock-closed-outline"
+                        size={20}
+                        color="#FF6B35"
+                        style={styles.inputIcon}
+                      />
                       <TextInput
                         style={styles.input}
-                        placeholder="Mật khẩu"
+                        placeholder="Mật khẩu mới"
                         placeholderTextColor="#999"
-                        value={password}
-                        onChangeText={setPassword}
+                        value={newPassword}
+                        onChangeText={setNewPassword}
                         secureTextEntry={!showPassword}
                         autoCapitalize="none"
                       />
@@ -182,58 +262,71 @@ const LoginScreen = () => {
                     </View>
                   </View>
 
-                  {/* Forgot password */}
-                  <TouchableOpacity 
-                    style={styles.forgotButton}
-                    onPress={() => navigation.navigate(AuthRoutes.ForgotPassword as never)}>
-                    <Text style={styles.forgotText}>Quên mật khẩu?</Text>
-                  </TouchableOpacity>
+                  {/* Confirm password input */}
+                  <View style={styles.inputWrapper}>
+                    <View style={styles.inputContainer}>
+                      <Ionicons
+                        name="lock-closed-outline"
+                        size={20}
+                        color="#FF6B35"
+                        style={styles.inputIcon}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Xác nhận mật khẩu mới"
+                        placeholderTextColor="#999"
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                        secureTextEntry={!showConfirmPassword}
+                        autoCapitalize="none"
+                      />
+                      <TouchableOpacity
+                        onPress={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        style={styles.eyeButton}>
+                        <Ionicons
+                          name={
+                            showConfirmPassword ? 'eye-outline' : 'eye-off-outline'
+                          }
+                          size={20}
+                          color="#666"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
 
-                  {/* Login button */}
+                  {/* Submit button */}
                   <TouchableOpacity
-                    style={styles.loginButton}
-                    onPress={handleLogin}
+                    style={styles.submitButton}
+                    onPress={handleResetPassword}
                     disabled={isLoading}
                     activeOpacity={0.8}>
-                    <View style={styles.loginGradient}>
-                      <Text style={styles.loginButtonText}>
-                        {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                    <View style={styles.submitGradient}>
+                      <Text style={styles.submitButtonText}>
+                        {isLoading
+                          ? 'Đang xử lý...'
+                          : 'Đặt lại mật khẩu'}
                       </Text>
-                      <Ionicons name="chevron-forward" size={20} color="#FFF" />
+                      {!isLoading && (
+                        <Ionicons name="chevron-forward" size={20} color="#FFF" />
+                      )}
                     </View>
                   </TouchableOpacity>
 
-                  {/* Divider */}
-                  <View style={styles.divider}>
-                    <View style={styles.dividerLine} />
-                    <Text style={styles.dividerText}>hoặc</Text>
-                    <View style={styles.dividerLine} />
-                  </View>
-
-                  {/* Social login buttons */}
-                  <View style={styles.socialContainer}>
-                    <TouchableOpacity style={styles.socialButton}>
-                      <Ionicons name="logo-google" size={24} color="#4285F4" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.socialButton}>
-                      <Ionicons name="logo-facebook" size={24} color="#1877F2" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.socialButton}>
-                      <Ionicons name="logo-apple" size={24} color="#000000" />
+                  {/* Back to login */}
+                  <View style={styles.backToLoginContainer}>
+                    <Text style={styles.backToLoginText}>
+                      Nhớ mật khẩu?{' '}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate(AuthRoutes.Login as never)}>
+                      <Text style={styles.backToLoginLink}>Đăng nhập</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
               </View>
             </Animated.View>
-
-                  {/* Register link */}
-            <View style={styles.registerContainer}>
-              <Text style={styles.registerText}>Chưa có tài khoản? </Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate(AuthRoutes.Register as never)}>
-                <Text style={styles.registerLink}>Đăng ký ngay</Text>
-              </TouchableOpacity>
-            </View>
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -303,13 +396,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
   },
+  backButton: {
+    position: 'absolute',
+    top: -20,
+    left: -10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
   logoContainer: {
     marginBottom: 16,
   },
   logoGradient: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
@@ -321,11 +426,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   logoImage: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
   },
   appName: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: '800' as const,
     color: '#FFFFFF',
     marginBottom: 4,
@@ -334,10 +439,19 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
   tagline: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#FFFFFF',
     opacity: 0.9,
     textAlign: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 8,
+  },
+  emailText: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    opacity: 0.8,
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
   cardContainer: {
     marginBottom: 24,
@@ -397,18 +511,10 @@ const styles = StyleSheet.create({
   eyeButton: {
     padding: 4,
   },
-  forgotButton: {
-    alignSelf: 'flex-end',
-    marginBottom: 24,
-  },
-  forgotText: {
-    fontSize: 14,
-    color: '#FF6B35',
-    fontWeight: '600' as const,
-  },
-  loginButton: {
+  submitButton: {
     borderRadius: 14,
     overflow: 'hidden',
+    marginTop: 8,
     marginBottom: 24,
     shadowColor: '#FF6B35',
     shadowOffset: { width: 0, height: 4 },
@@ -416,7 +522,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
   },
-  loginGradient: {
+  submitGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -425,58 +531,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF6B35',
     borderRadius: 14,
   },
-  loginButtonText: {
+  submitButtonText: {
     fontSize: 17,
     fontWeight: '700' as const,
     color: '#FFFFFF',
     marginRight: 8,
   },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E5E7EB',
-  },
-  dividerText: {
-    fontSize: 14,
-    color: '#9CA3AF',
-    marginHorizontal: 16,
-  },
-  socialContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-  },
-  socialButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 14,
-    backgroundColor: '#F9FAFB',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  registerContainer: {
+  backToLoginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  registerText: {
+  backToLoginText: {
     fontSize: 15,
-    color: '#FFFFFF',
-    opacity: 0.9,
+    color: '#6B7280',
   },
-  registerLink: {
+  backToLoginLink: {
     fontSize: 15,
-    color: '#FFFFFF',
+    color: '#FF6B35',
     fontWeight: '700' as const,
-    textDecorationLine: 'underline',
   },
 });
 
-export default LoginScreen;
+export default ResetPasswordScreen;
+

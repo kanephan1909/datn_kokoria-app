@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { login } from '../api/apiClient';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
+import { handleApiError } from '../utils/errorHandler';
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -36,22 +37,14 @@ const LoginScreen = () => {
       }
     },
     onError: (error: any) => {
-      // Xử lý lỗi rate limiting (429)
-      if (error?.response?.status === 429) {
-        Alert.alert(
-          'Quá nhiều yêu cầu',
-          'Bạn đã gửi quá nhiều yêu cầu đăng nhập. Vui lòng đợi vài phút trước khi thử lại.',
-          [{ text: 'OK' }]
-        );
-        return;
-      }
-
-      // Xử lý các lỗi khác
-      const errorMessage =
-        error?.response?.data?.message || 
-        error?.message || 
-        'Đăng nhập thất bại. Vui lòng thử lại.';
-      Alert.alert('Lỗi', errorMessage);
+      // Sử dụng error handler để hiển thị thông báo lỗi thân thiện
+      // Error handler sẽ tự động xử lý tất cả các loại lỗi bao gồm:
+      // - Backend offline (ERR_NETWORK, ECONNREFUSED)
+      // - Rate limiting (429)
+      // - Authentication errors (401)
+      // - Server errors (500, 503)
+      // - Các lỗi khác
+      handleApiError(error, 'Đăng nhập thất bại. Vui lòng thử lại.');
     },
   });
 
