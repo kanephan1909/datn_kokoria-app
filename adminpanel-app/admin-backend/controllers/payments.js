@@ -702,12 +702,17 @@ async function vnPayReturn(req, res) {
     const transactionNo =
       typeof vnp_TransactionNo === "string" ? vnp_TransactionNo : undefined;
 
-    // Tìm order để lấy thông tin redirect
+    // Tìm order qua Payment table theo gatewayOrderId (vnp_TxnRef)
     let order = null;
     if (orderId) {
-      order = await prisma.order.findFirst({
-        where: { paymentId: orderId },
+      const payment = await prisma.payment.findFirst({
+        where: {
+          gatewayOrderId: orderId,
+          provider: 'VNPAY',
+        },
+        include: {order: true},
       });
+      order = payment?.order || null;
     }
 
     // Redirect dựa trên response code

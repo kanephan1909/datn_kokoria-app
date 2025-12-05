@@ -20,12 +20,14 @@ class VNPayConfiguration {
         'http://localhost:5000/v1/api/payments/vnpay/return',
       vnp_IpnUrl:
         process.env.VNPAY_IPN_URL ||
-        'https://4d2e1111d04b.ngrok-free.app/api/v1/payments/vnpay/callback',
+        (process.env.BASE_URL
+          ? `${process.env.BASE_URL}/api/v1/payments/vnpay/callback`
+          : 'http://localhost:3000/api/v1/payments/vnpay/callback'),
       vnp_IpAddr: process.env.VNPAY_IP_ADDR || '127.0.0.1',
       environment:
-        (process.env.VNPAY_ENVIRONMENT === 'production'
+        process.env.VNPAY_ENVIRONMENT === 'production'
           ? 'production'
-          : 'sandbox') || 'sandbox',
+          : 'sandbox',
     };
     this.validateConfig();
   }

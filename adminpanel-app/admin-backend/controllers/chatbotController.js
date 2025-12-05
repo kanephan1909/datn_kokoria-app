@@ -75,7 +75,7 @@ async function clearChatbotSession(req, res) {
   try {
     const userId = req.user?.id || 'anonymous';
     
-    geminiService.clearChatSession(userId);
+    await Promise.resolve(geminiService.clearChatSession(userId));
 
     res.json({
       success: true,

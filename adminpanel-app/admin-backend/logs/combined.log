@@ -669,3 +669,19 @@
 {"level":"info","message":"Socket disconnected: O_x00ygm0Qs_vsllAAAf - Reason: client namespace disconnect","timestamp":"2025-12-05T11:52:17.586Z"}
 {"level":"info","message":"Socket connected: y-i2G0sIPhEtuB6nAAAh (User: admin@gmail.com)","timestamp":"2025-12-05T11:52:17.657Z"}
 {"level":"info","message":"Socket disconnected: y-i2G0sIPhEtuB6nAAAh - Reason: transport close","timestamp":"2025-12-05T12:23:14.033Z"}
+{"level":"info","message":"SocketService initialized","timestamp":"2025-12-05T12:39:20.287Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T12:39:20.295Z"}
+{"level":"info","message":"Socket.IO server is ready for connections","timestamp":"2025-12-05T12:39:20.295Z"}
+{"level":"info","message":"Socket connected: grOsNZJdbXzVQomMAAAB (User: admin@gmail.com)","timestamp":"2025-12-05T12:39:20.467Z"}
+{"level":"info","message":"SocketService initialized","timestamp":"2025-12-05T12:39:41.047Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T12:39:41.055Z"}
+{"level":"info","message":"Socket.IO server is ready for connections","timestamp":"2025-12-05T12:39:41.056Z"}
+{"level":"info","message":"Socket connected: 1HAn1eDexxCQ4xqfAAAB (User: admin@gmail.com)","timestamp":"2025-12-05T12:39:41.178Z"}
+{"level":"info","message":"SocketService initialized","timestamp":"2025-12-05T12:39:54.491Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T12:39:54.498Z"}
+{"level":"info","message":"Socket.IO server is ready for connections","timestamp":"2025-12-05T12:39:54.498Z"}
+{"level":"info","message":"Socket connected: lYzQ5YvvMi8ttPTmAAAB (User: admin@gmail.com)","timestamp":"2025-12-05T12:39:54.546Z"}
+{"level":"info","message":"SocketService initialized","timestamp":"2025-12-05T12:40:38.364Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T12:40:38.370Z"}
+{"level":"info","message":"Socket.IO server is ready for connections","timestamp":"2025-12-05T12:40:38.371Z"}
+{"level":"info","message":"Socket connected: Rg2NuXjJkD0MBskmAAAB (User: admin@gmail.com)","timestamp":"2025-12-05T12:40:39.030Z"}

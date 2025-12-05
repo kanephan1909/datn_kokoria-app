@@ -238,15 +238,21 @@ class VNPayService {
         ? parseInt(callbackData.vnp_Amount) / 100
         : 0;
 
-      // Tìm order theo paymentId (vnp_TxnRef)
-      const order = await prisma.order.findFirst({
-        where: {paymentId: orderId},
+      // Tìm order qua Payment table theo gatewayOrderId (vnp_TxnRef)
+      const payment = await prisma.payment.findFirst({
+        where: {
+          gatewayOrderId: orderId,
+          provider: 'VNPAY',
+        },
+        include: {order: true},
       });
 
-      if (!order) {
+      if (!payment || !payment.order) {
         logger.error(`Order not found for vnp_TxnRef: ${orderId}`);
         return {status: 'error', message: 'Order not found'};
       }
+
+      const order = payment.order;
 
       // Cập nhật payment và order status
       if (responseCode === '00') {
@@ -258,10 +264,19 @@ class VNPayService {
               paymentStatus: 'PAYMENT_SUCCESS',
               status: 'CONFIRMED',
               confirmedAt: new Date(),
-              paymentId: orderId,
               note: order.note
                 ? `${order.note}\nVNPay Transaction: ${transactionNo}`
                 : `VNPay Transaction: ${transactionNo}`,
+            },
+          }),
+          prisma.payment.update({
+            where: {id: payment.id},
+            data: {
+              status: 'PAYMENT_SUCCESS',
+              gatewayTransId: transactionNo,
+              gatewayCode: responseCode,
+              gatewayMessage: 'Payment successful',
+              paidAt: new Date(),
             },
           }),
         ]);
@@ -276,15 +291,26 @@ class VNPayService {
         };
       } else {
         // Thanh toán thất bại
-        await prisma.order.update({
-          where: {id: order.id},
-          data: {
-            paymentStatus: 'PAYMENT_FAILED',
-            note: order.note
-              ? `${order.note}\nVNPay Error: ${responseCode}`
-              : `VNPay Error: ${responseCode}`,
-          },
-        });
+        await Promise.all([
+          prisma.order.update({
+            where: {id: order.id},
+            data: {
+              paymentStatus: 'PAYMENT_FAILED',
+              note: order.note
+                ? `${order.note}\nVNPay Error: ${responseCode}`
+                : `VNPay Error: ${responseCode}`,
+            },
+          }),
+          prisma.payment.update({
+            where: {id: payment.id},
+            data: {
+              status: 'PAYMENT_FAILED',
+              gatewayTransId: transactionNo,
+              gatewayCode: responseCode,
+              gatewayMessage: `Payment failed with code: ${responseCode}`,
+            },
+          }),
+        ]);
 
         logger.warn(
           `❌ VNPay: Order ${order.id} payment failed (Code: ${responseCode})`
