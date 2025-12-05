@@ -420,3 +420,130 @@
 {"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T12:55:04.386Z"}
 {"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T13:14:21.228Z"}
 {"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T13:17:50.142Z"}
+{"body":{"address":{"name":"Phan Lam Nhat Khang"},"items":[{"price":250000,"productId":"692dd90c289e96626e437871","quantity":1}],"paymentMethod":"MOMO","totalAmount":284000,"userId":"691d7a8cc72e36faabede69a"},"errors":[{"field":"paymentMethod","message":"Invalid option: expected one of \"ONLINE\"|\"COD\""}],"level":"error","message":"Validation failed for POST /:","timestamp":"2025-12-04T14:16:12.905Z"}
+{"body":{"address":{"name":"Phan Lam Nhat Khang"},"items":[{"price":250000,"productId":"692dd90c289e96626e437871","quantity":1}],"paymentMethod":"MOMO","totalAmount":284000,"userId":"691d7a8cc72e36faabede69a"},"errors":[{"field":"paymentMethod","message":"Invalid option: expected one of \"ONLINE\"|\"COD\""}],"level":"error","message":"Validation failed for POST /:","timestamp":"2025-12-04T14:16:27.424Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:25:25.553Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:26:56.136Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:29:49.961Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:30:01.738Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:30:03.845Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:30:26.600Z"}
+{"level":"error","message":"Error creating MoMo payment: \nInvalid `prisma.order.update()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\payments.js:100:26\n\n   97 \n   98 if (response.data.resultCode === 0) {\n   99   // Lưu thông tin payment vào order\n→ 100   await prisma.order.update({\n          where: {\n            id: \"69319b0e14085a8219581026\"\n          },\n          data: {\n            paymentMethod: \"MOMO\",\n                           ~~~~~~\n            momopayOrderId: \"251204_213039_19581026\",\n            momopayPaymentStatus: \"PENDING\"\n          }\n        })\n\nInvalid value for argument `paymentMethod`. Expected PaymentMethod.","timestamp":"2025-12-04T14:30:39.629Z"}
+{"level":"error","message":"Error creating MoMo payment: \nInvalid `prisma.order.update()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\payments.js:100:26\n\n   97 \n   98 if (response.data.resultCode === 0) {\n   99   // Lưu thông tin payment vào order\n→ 100   await prisma.order.update({\n          where: {\n            id: \"69319b2914085a821958102b\"\n          },\n          data: {\n            paymentMethod: \"MOMO\",\n                           ~~~~~~\n            momopayOrderId: \"251204_213106_1958102b\",\n            momopayPaymentStatus: \"PENDING\"\n          }\n        })\n\nInvalid value for argument `paymentMethod`. Expected PaymentMethod.","timestamp":"2025-12-04T14:31:06.091Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:33:11.054Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:33:30.568Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:33:50.483Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:34:14.699Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:34:37.345Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:34:41.383Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:35:59.048Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:37:13.794Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:37:22.421Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:37:42.863Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:38:07.340Z"}
+{"amount":284000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_213931_3f10fd97","partnerCode":"MOMO","requestId":"251204_213931_qrqdjx","timestamp":"2025-12-04T14:39:31.613Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T14:39:31.744Z"}
+{"level":"error","message":"Error creating MoMo payment: \nInvalid `prisma.order.update()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\payments.js:131:26\n\n  128 \n  129 if (response.data.resultCode === 0) {\n  130   // Lưu thông tin payment vào order\n→ 131   await prisma.order.update({\n          where: {\n            id: \"69319d229656325b3f10fd97\"\n          },\n          data: {\n            paymentMethod: \"MOMO\",\n                           ~~~~~~\n            momopayOrderId: \"251204_213931_3f10fd97\",\n            momopayPaymentStatus: \"PENDING\"\n          }\n        })\n\nInvalid value for argument `paymentMethod`. Expected PaymentMethod.","timestamp":"2025-12-04T14:39:31.749Z"}
+{"level":"error","message":"Error stack:","timestamp":"2025-12-04T14:39:31.750Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:39:57.433Z"}
+{"amount":284000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_214416_8f0064f9","partnerCode":"MOMO","requestId":"251204_214416_jb4iab","timestamp":"2025-12-04T14:44:16.793Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T14:44:16.948Z"}
+{"level":"error","message":"Error creating MoMo payment: \nInvalid `prisma.order.update()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\payments.js:131:26\n\n  128 \n  129 if (response.data.resultCode === 0) {\n  130   // Lưu thông tin payment vào order\n→ 131   await prisma.order.update({\n          where: {\n            id: \"69319e3fca9264c78f0064f9\"\n          },\n          data: {\n            paymentMethod: \"MOMO\",\n                           ~~~~~~\n            momopayOrderId: \"251204_214416_8f0064f9\",\n            momopayPaymentStatus: \"PENDING\"\n          }\n        })\n\nInvalid value for argument `paymentMethod`. Expected PaymentMethod.","timestamp":"2025-12-04T14:44:16.956Z"}
+{"level":"error","message":"Error stack:","timestamp":"2025-12-04T14:44:16.956Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:44:38.790Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:45:31.803Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:46:01.825Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:46:19.378Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:46:45.684Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:46:52.510Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:46:53.274Z"}
+{"amount":284000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_214701_fbb3d6a7","partnerCode":"MOMO","requestId":"251204_214701_1yj014","timestamp":"2025-12-04T14:47:01.201Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T14:47:01.377Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:47:23.287Z"}
+{"amount":284000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_214748_e54c99f4","partnerCode":"MOMO","requestId":"251204_214748_z02ku7","timestamp":"2025-12-04T14:47:48.977Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T14:47:49.115Z"}
+{"amount":284000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_215214_e54c99f8","partnerCode":"MOMO","requestId":"251204_215214_tgrtg4","timestamp":"2025-12-04T14:52:14.814Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T14:52:14.942Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T14:58:06.862Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T15:58:49.722Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T16:59:04.998Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T17:00:06.366Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T17:00:07.154Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T17:01:08.690Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T17:01:26.133Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T17:01:58.423Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T17:02:02.350Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T17:02:03.554Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T17:03:22.464Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T17:11:17.976Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T17:11:23.241Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T17:21:39.580Z"}
+{"amount":354000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_003958_cf996e6a","partnerCode":"MOMO","requestId":"251204_003958_hbyutr","timestamp":"2025-12-04T17:39:58.643Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T17:39:58.864Z"}
+{"amount":354000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_004625_cf996e6e","partnerCode":"MOMO","requestId":"251204_004625_07z3ha","timestamp":"2025-12-04T17:46:25.400Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T17:46:25.458Z"}
+{"amount":354000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_004646_cf996e71","partnerCode":"MOMO","requestId":"251204_004646_b9kd9d","timestamp":"2025-12-04T17:46:46.705Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T17:46:46.744Z"}
+{"amount":354000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_004655_cf996e74","partnerCode":"MOMO","requestId":"251204_004655_j88mmw","timestamp":"2025-12-04T17:46:55.756Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T17:46:55.841Z"}
+{"amount":284000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_004729_cf996e77","partnerCode":"MOMO","requestId":"251204_004729_sspneo","timestamp":"2025-12-04T17:47:29.332Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T17:47:29.374Z"}
+{"amount":284000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_011658_cf996e7a","partnerCode":"MOMO","requestId":"251204_011658_p6ezq7","timestamp":"2025-12-04T18:16:58.523Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T18:16:58.592Z"}
+{"amount":284000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_011754_cf996e7d","partnerCode":"MOMO","requestId":"251204_011754_ru6woe","timestamp":"2025-12-04T18:17:54.163Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T18:17:54.224Z"}
+{"amount":284000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_012347_cf996e80","partnerCode":"MOMO","requestId":"251204_012347_ee3nc4","timestamp":"2025-12-04T18:23:47.253Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T18:23:47.304Z"}
+{"amount":284000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_012422_cf996e83","partnerCode":"MOMO","requestId":"251204_012422_w93p2l","timestamp":"2025-12-04T18:24:22.949Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T18:24:22.984Z"}
+{"level":"info","message":"VNPay params: {\"vnp_Version\":\"2.1.0\",\"vnp_Command\":\"pay\",\"vnp_TmnCode\":\"8N88RRGE\",\"vnp_Locale\":\"vn\",\"vnp_CurrCode\":\"VND\",\"vnp_TxnRef\":\"2025120501274996356\",\"vnp_OrderInfo\":\"Thanh toan don hang 6931d2a4db9722f8cf996e86\",\"vnp_OrderType\":\"other\",\"vnp_Amount\":\"28400000\",\"vnp_ReturnUrl\":\"kokoriaapp://payment/return?orderId=6931d2a4db9722f8cf996e86\",\"vnp_IpAddr\":\"127.0.0.1\",\"vnp_CreateDate\":\"20251205012749\",\"vnp_ExpireDate\":\"20251205014249\",\"vnp_SecureHash\":\"90e8dcff62fdb8ca72e3d9c913b6eb6f786ef5536ef674f88fcdebba62e0dce1\"}","timestamp":"2025-12-04T18:27:49.453Z"}
+{"level":"info","message":"VNPay signData: vnp_Amount=28400000&vnp_Command=pay&vnp_CreateDate=20251205012749&vnp_CurrCode=VND&vnp_ExpireDate=20251205014249&vnp_IpAddr=127.0.0.1&vnp_Locale=vn&vnp_OrderInfo=Thanh toan don hang 6931d2a4db9722f8cf996e86&vnp_OrderType=other&vnp_ReturnUrl=kokoriaapp://payment/return?orderId=6931d2a4db9722f8cf996e86&vnp_TmnCode=8N88RRGE&vnp_TxnRef=2025120501274996356&vnp_Version=2.1.0","timestamp":"2025-12-04T18:27:49.454Z"}
+{"level":"info","message":"VNPay signature: 90e8dcff62fdb8ca72e3d9c913b6eb6f786ef5536ef674f88fcdebba62e0dce1","timestamp":"2025-12-04T18:27:49.454Z"}
+{"level":"info","message":"VNPay URL length: 704","timestamp":"2025-12-04T18:27:49.455Z"}
+{"level":"info","message":"VNPay TMN Code: 8N88RRGE","timestamp":"2025-12-04T18:27:49.455Z"}
+{"level":"info","message":"VNPay Secret Key length: 32","timestamp":"2025-12-04T18:27:49.455Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T18:39:29.972Z"}
+{"amount":209000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_014129_d12b2a96","partnerCode":"MOMO","requestId":"251204_014129_rtfiuv","timestamp":"2025-12-04T18:41:29.250Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T18:41:29.421Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T18:42:42.585Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T18:42:48.196Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-04T18:49:10.056Z"}
+{"amount":209000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251204_015010_c8b53a33","partnerCode":"MOMO","requestId":"251204_015010_jq2cp8","timestamp":"2025-12-04T18:50:10.190Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-04T18:50:10.278Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T03:54:51.138Z"}
+{"amount":209000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"MoMo payment request:","orderId":"251205_110154_0029f764","partnerCode":"MOMO","requestId":"251205_110154_vhmmeu","timestamp":"2025-12-05T04:01:54.803Z"}
+{"hasPayUrl":true,"level":"info","message":"MoMo API response: Thành công.","resultCode":0,"timestamp":"2025-12-05T04:01:55.093Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:05:30.935Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:08:13.500Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:08:58.136Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:09:21.734Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:09:23.014Z"}
+{"amount":209000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"📤 MoMo REQUEST:","momoOrderId":"251205_110935_2aa59429","partnerCode":"MOMO","requestId":"251205_110935_8uimu3","timestamp":"2025-12-05T04:09:35.715Z"}
+{"deeplink":"momo://app?action=payWithApp&isScanQR=false&serviceType=app&sid=TU9NT3wyNTEyMDVfMTEwOTM1XzJhYTU5NDI5&v=3.0","level":"info","message":"📥 MoMo RESPONSE FULL: Thành công.","payUrl":"https://test-payment.momo.vn/v2/gateway/pay?t=TU9NT3wyNTEyMDVfMTEwOTM1XzJhYTU5NDI5&s=ca7cbd45a746d1db8e40a2cc434b88e91ec2a9885b6ebbd58fda4f9d84504d3c","qrCodeUrl":"momo://app?action=payWithApp&isScanQR=true&serviceType=qr&sid=TU9NT3wyNTEyMDVfMTEwOTM1XzJhYTU5NDI5&v=3.0&sr=0","resultCode":0,"timestamp":"2025-12-05T04:09:35.850Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:24:12.892Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:24:16.329Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:24:23.155Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:24:26.323Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:25:20.427Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:25:40.800Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:25:59.080Z"}
+{"amount":209000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"📤 MoMo REQUEST:","momoOrderId":"251205_112633_f33055a2","partnerCode":"MOMO","requestId":"251205_112633_4k6ld4","timestamp":"2025-12-05T04:26:33.015Z"}
+{"deeplink":"momo://app?action=payWithApp&isScanQR=false&serviceType=app&sid=TU9NT3wyNTEyMDVfMTEyNjMzX2YzMzA1NWEy&v=3.0","level":"info","message":"📥 MoMo RESPONSE FULL: Thành công.","payUrl":"https://test-payment.momo.vn/v2/gateway/pay?t=TU9NT3wyNTEyMDVfMTEyNjMzX2YzMzA1NWEy&s=8118adf1c4a4903148a5c2e6f1a5351cb3cf57e186a4400813c6a704d9a1cf48","qrCodeUrl":"momo://app?action=payWithApp&isScanQR=true&serviceType=qr&sid=TU9NT3wyNTEyMDVfMTEyNjMzX2YzMzA1NWEy&v=3.0&sr=0","resultCode":0,"timestamp":"2025-12-05T04:26:33.143Z"}
+{"level":"info","message":"Payment verified and updated for order 69325ef80f3496acf33055a2","timestamp":"2025-12-05T04:26:37.178Z"}
+{"amount":293000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"📤 MoMo REQUEST:","momoOrderId":"251205_113512_f33055a9","partnerCode":"MOMO","requestId":"251205_113512_63udz7","timestamp":"2025-12-05T04:35:12.504Z"}
+{"deeplink":"momo://app?action=payWithApp&isScanQR=false&serviceType=app&sid=TU9NT3wyNTEyMDVfMTEzNTEyX2YzMzA1NWE5&v=3.0","level":"info","message":"📥 MoMo RESPONSE FULL: Thành công.","payUrl":"https://test-payment.momo.vn/v2/gateway/pay?t=TU9NT3wyNTEyMDVfMTEzNTEyX2YzMzA1NWE5&s=442b8752a31e7cc88ef0cf933650b9763b0c61e95e529a0a9f8265b408df4ebf","qrCodeUrl":"momo://app?action=payWithApp&isScanQR=true&serviceType=qr&sid=TU9NT3wyNTEyMDVfMTEzNTEyX2YzMzA1NWE5&v=3.0&sr=0","resultCode":0,"timestamp":"2025-12-05T04:35:12.585Z"}
+{"level":"info","message":"Payment verified and updated for order 693261000f3496acf33055a9","timestamp":"2025-12-05T04:35:16.674Z"}
+{"amount":284000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"📤 MoMo REQUEST:","momoOrderId":"251205_113832_f33055ad","partnerCode":"MOMO","requestId":"251205_113832_g3tdff","timestamp":"2025-12-05T04:38:32.976Z"}
+{"deeplink":"momo://app?action=payWithApp&isScanQR=false&serviceType=app&sid=TU9NT3wyNTEyMDVfMTEzODMyX2YzMzA1NWFk&v=3.0","level":"info","message":"📥 MoMo RESPONSE FULL: Thành công.","payUrl":"https://test-payment.momo.vn/v2/gateway/pay?t=TU9NT3wyNTEyMDVfMTEzODMyX2YzMzA1NWFk&s=0b2547df8a07c26a0be409d4fafb8bf6be02c8ce94561bf1cb7f905fffe3b7d9","qrCodeUrl":"momo://app?action=payWithApp&isScanQR=true&serviceType=qr&sid=TU9NT3wyNTEyMDVfMTEzODMyX2YzMzA1NWFk&v=3.0&sr=0","resultCode":0,"timestamp":"2025-12-05T04:38:33.015Z"}
+{"level":"info","message":"Payment verified and updated for order 693261c80f3496acf33055ad","timestamp":"2025-12-05T04:38:46.204Z"}
+{"amount":214000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"📤 MoMo REQUEST:","momoOrderId":"251205_114210_f33055b0","partnerCode":"MOMO","requestId":"251205_114210_tfowad","timestamp":"2025-12-05T04:42:10.683Z"}
+{"deeplink":"momo://app?action=payWithApp&isScanQR=false&serviceType=app&sid=TU9NT3wyNTEyMDVfMTE0MjEwX2YzMzA1NWIw&v=3.0","level":"info","message":"📥 MoMo RESPONSE FULL: Thành công.","payUrl":"https://test-payment.momo.vn/v2/gateway/pay?t=TU9NT3wyNTEyMDVfMTE0MjEwX2YzMzA1NWIw&s=c6672389e8fff9228c9c6b4874d38a68a85c77e50f566cf0c13c56b4662154a7","qrCodeUrl":"momo://app?action=payWithApp&isScanQR=true&serviceType=qr&sid=TU9NT3wyNTEyMDVfMTE0MjEwX2YzMzA1NWIw&v=3.0&sr=0","resultCode":0,"timestamp":"2025-12-05T04:42:10.720Z"}
+{"amount":214000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"📤 MoMo REQUEST:","momoOrderId":"251205_114550_f33055b3","partnerCode":"MOMO","requestId":"251205_114550_6lzdz5","timestamp":"2025-12-05T04:45:50.965Z"}
+{"deeplink":"momo://app?action=payWithApp&isScanQR=false&serviceType=app&sid=TU9NT3wyNTEyMDVfMTE0NTUwX2YzMzA1NWIz&v=3.0","level":"info","message":"📥 MoMo RESPONSE FULL: Thành công.","payUrl":"https://test-payment.momo.vn/v2/gateway/pay?t=TU9NT3wyNTEyMDVfMTE0NTUwX2YzMzA1NWIz&s=ba2061beab8870e4b3abd12f44ef460fbbdfa2b33359636fb42a8569e3a88f2e","qrCodeUrl":"momo://app?action=payWithApp&isScanQR=true&serviceType=qr&sid=TU9NT3wyNTEyMDVfMTE0NTUwX2YzMzA1NWIz&v=3.0&sr=0","resultCode":0,"timestamp":"2025-12-05T04:45:51.001Z"}
+{"amount":214000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"📤 MoMo REQUEST:","momoOrderId":"251205_114816_f33055b6","partnerCode":"MOMO","requestId":"251205_114816_x54kn7","timestamp":"2025-12-05T04:48:16.281Z"}
+{"deeplink":"momo://app?action=payWithApp&isScanQR=false&serviceType=app&sid=TU9NT3wyNTEyMDVfMTE0ODE2X2YzMzA1NWI2&v=3.0","level":"info","message":"📥 MoMo RESPONSE FULL: Thành công.","payUrl":"https://test-payment.momo.vn/v2/gateway/pay?t=TU9NT3wyNTEyMDVfMTE0ODE2X2YzMzA1NWI2&s=80f12c4aad78e09933ea66727c0300380c9ea7e172d5e17212845a994ab7b671","qrCodeUrl":"momo://app?action=payWithApp&isScanQR=true&serviceType=qr&sid=TU9NT3wyNTEyMDVfMTE0ODE2X2YzMzA1NWI2&v=3.0&sr=0","resultCode":0,"timestamp":"2025-12-05T04:48:16.321Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-05T04:51:50.763Z"}
+{"amount":214000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"📤 MoMo REQUEST:","momoOrderId":"251205_115204_e1ee54bc","partnerCode":"MOMO","requestId":"251205_115204_xnzedg","timestamp":"2025-12-05T04:52:04.182Z"}
+{"deeplink":"momo://app?action=payWithApp&isScanQR=false&serviceType=app&sid=TU9NT3wyNTEyMDVfMTE1MjA0X2UxZWU1NGJj&v=3.0","level":"info","message":"📥 MoMo RESPONSE FULL: Thành công.","payUrl":"https://test-payment.momo.vn/v2/gateway/pay?t=TU9NT3wyNTEyMDVfMTE1MjA0X2UxZWU1NGJj&s=b4df51439eb98f77fda69bc55f294a1a46530192df9971e63127f15b15d8032d","qrCodeUrl":"momo://app?action=payWithApp&isScanQR=true&serviceType=qr&sid=TU9NT3wyNTEyMDVfMTE1MjA0X2UxZWU1NGJj&v=3.0&sr=0","resultCode":0,"timestamp":"2025-12-05T04:52:04.280Z"}
+{"level":"info","message":"Payment confirmed for order 693264f3afeee25fe1ee54bc from frontend","timestamp":"2025-12-05T04:52:34.586Z"}
+{"level":"info","message":"Payment confirmed for order 693264f3afeee25fe1ee54bc from frontend","timestamp":"2025-12-05T04:52:34.879Z"}

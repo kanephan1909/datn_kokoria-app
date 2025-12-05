@@ -19,6 +19,7 @@ const cartsRoutes = require('./routes/carts');
 const messagesRoutes = require('./routes/messages');
 const dashboardRoutes = require('./routes/dashboard');
 const uploadRoutes = require('./routes/upload');
+const paymentsRoutes = require('./routes/payments');
 
 const app = express();
 
@@ -82,8 +83,6 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
  */
 // app.use(bodyParser.raw({ type: 'application/json' }));
 
-app.use(errorHandler);
-
 // Routes with API VERSIONING
 app.use('/api/v1/auth', authRateLimit, authRoutes);
 app.use('/api/v1/categories', categoriesRoutes);
@@ -98,7 +97,10 @@ app.use('/api/v1/carts', cartsRoutes);
 app.use('/api/v1/messages', messagesRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/upload', uploadRoutes);
+app.use('/api/v1/payments', paymentsRoutes);
 
+// Error handler phải đặt sau tất cả routes
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
