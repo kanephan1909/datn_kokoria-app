@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Image,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useState, useCallback} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -19,6 +20,8 @@ interface Order {
   id: string;
   orderNumber: string;
   status: string;
+  paymentStatus?: string;
+  paymentMethod?: string;
   total: number;
   items: Array<{
     product: {
@@ -45,7 +48,7 @@ interface Order {
 const OrderHistoryScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const {cartItems, totalPrice, updateItem} = useCart();
+  const {cartItems, totalPrice, updateItem, removeItem} = useCart();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -59,9 +62,42 @@ const OrderHistoryScreen = () => {
         limit: 10,
       });
       if (response.success && response.data) {
-        const ordersList = Array.isArray(response.data)
+        let ordersList = Array.isArray(response.data)
           ? response.data
           : response.data.orders || response.data.data || [];
+
+        // Lọc chỉ hiển thị đơn hàng đã thanh toán thành công hoặc đã được xác nhận
+        ordersList = ordersList.filter((order: Order) => {
+          const paymentStatus = order.paymentStatus?.toUpperCase();
+          const paymentMethod = order.paymentMethod?.toUpperCase();
+          const orderStatus = order.status?.toUpperCase();
+
+          // Đơn COD/CASH: hiển thị nếu đã được xác nhận (status không phải PENDING)
+          if (paymentMethod === 'COD' || paymentMethod === 'CASH') {
+            // COD được xác nhận khi status không phải PENDING
+            if (orderStatus &&
+                orderStatus !== 'PENDING' &&
+                orderStatus !== 'CANCELED' &&
+                orderStatus !== 'CANCELLED') {
+              return true;
+            }
+            return false;
+          }
+
+          // Đơn ONLINE: chỉ hiển thị nếu đã thanh toán thành công
+          // Bỏ qua đơn ONLINE đang chờ thanh toán
+          if (paymentStatus === 'PAYMENT_PENDING' || paymentStatus === 'PENDING') {
+            return false;
+          }
+
+          // Hiển thị đơn ONLINE đã thanh toán thành công
+          if (paymentStatus === 'PAYMENT_SUCCESS' || paymentStatus === 'SUCCESS') {
+            return true;
+          }
+
+          return false;
+        });
+
         setOrders(ordersList);
       }
     } catch (error) {
@@ -104,9 +140,35 @@ const OrderHistoryScreen = () => {
 
   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) {
+      // Nếu số lượng về 0 hoặc nhỏ hơn 1, xóa sản phẩm khỏi giỏ hàng
+      handleRemoveItem(itemId);
       return;
     }
     await updateItem(itemId, newQuantity);
+  };
+
+  const handleRemoveItem = async (itemId: string) => {
+    Alert.alert(
+      'Xác nhận',
+      'Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?',
+      [
+        {
+          text: 'Hủy',
+          style: 'cancel',
+        },
+        {
+          text: 'Xóa',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await removeItem(itemId);
+            } catch (error) {
+              Alert.alert('Lỗi', 'Không thể xóa sản phẩm');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -152,12 +214,25 @@ const OrderHistoryScreen = () => {
                     )}
                   </View>
                   <View style={styles.itemInfo}>
-                    <Text style={styles.itemName} numberOfLines={1}>
-                      {item.product.name}
-                    </Text>
+                    <TouchableOpacity
+                      onPress={() => handleRemoveItem(item.id)}
+                      style={styles.deleteButton}
+                      hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                      <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                    </TouchableOpacity>
+                    <View style={styles.itemHeader}>
+                      <Text style={styles.itemName} numberOfLines={1}>
+                        {item.product.name}
+                      </Text>
+                    </View>
                     {item.product.description && (
                       <Text style={styles.itemDescription} numberOfLines={1}>
                         {item.product.description}
+                      </Text>
+                    )}
+                    {item.note && (
+                      <Text style={styles.itemNote} numberOfLines={1}>
+                        {item.note}
                       </Text>
                     )}
                     <View style={styles.itemFooter}>
@@ -178,11 +253,11 @@ const OrderHistoryScreen = () => {
                           <Ionicons name="add" size={16} color="#000" />
                         </TouchableOpacity>
                       </View>
+                      <Text style={styles.itemPrice}>
+                        {formatPrice(item.price)}
+                      </Text>
                     </View>
                   </View>
-                  <Text style={styles.itemPrice}>
-                    {formatPrice(item.price)}
-                  </Text>
                 </View>
               ))}
               <View style={styles.summaryTotal}>
@@ -227,62 +302,63 @@ const OrderHistoryScreen = () => {
             </View>
           ) : (
             orders.map((order) => (
-              <TouchableOpacity
-                key={order.id}
-                activeOpacity={0.7}
-                onPress={() => {
-                  (navigation as any).navigate(MainRoutes.OrderDetails, {
-                    orderId: order.id,
-                  });
-                }}
-                style={styles.orderCard}>
-                <View style={styles.orderImageContainer}>
-                  {order.items[0]?.product?.imageUrl ? (
-                    <Image
-                      source={{uri: order.items[0].product.imageUrl}}
-                      style={styles.orderImage}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <View style={styles.placeholderImage}>
-                      <Ionicons name="restaurant" size={24} color="#9CA3AF" />
-                    </View>
-                  )}
-                </View>
-                <View style={styles.orderInfo}>
-                  <Text style={styles.orderName} numberOfLines={1}>
-                    {order.items[0]?.product?.name || 'Đơn hàng'}
-                  </Text>
-                  <Text style={styles.orderDetail}>
-                    Giao hàng ·{' '}
-                    {order.address
-                      ? `${order.address.address}, ${order.address.ward}`
-                      : 'Chưa có địa chỉ'}
-                  </Text>
-                  <Text style={styles.orderDetail}>
-                    Từ {order.restaurant?.name || 'Nhà hàng'}
-                  </Text>
-                  <View style={styles.orderFooter}>
-                    <Text
-                      style={[
-                        styles.orderStatus,
-                        {color: getStatusColor(order.status)},
-                      ]}>
-                      {getStatusText(order.status)}
-                    </Text>
-                    <TouchableOpacity
-                      style={styles.trackButton}
-                      activeOpacity={0.7}
-                      onPress={() => {
-                        (navigation as any).navigate(MainRoutes.OrderDetails, {
-                          orderId: order.id,
-                        });
-                      }}>
-                      <Text style={styles.trackButtonText}>Theo dõi</Text>
-                    </TouchableOpacity>
+              <View key={order.id} style={styles.orderCard}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    (navigation as any).navigate(MainRoutes.OrderDetails, {
+                      orderId: order.id,
+                    });
+                  }}
+                  style={styles.orderCardContent}>
+                  <View style={styles.orderImageContainer}>
+                    {order.items[0]?.product?.imageUrl ? (
+                      <Image
+                        source={{uri: order.items[0].product.imageUrl}}
+                        style={styles.orderImage}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={styles.placeholderImage}>
+                        <Ionicons name="restaurant" size={24} color="#9CA3AF" />
+                      </View>
+                    )}
                   </View>
-                </View>
-              </TouchableOpacity>
+                  <View style={styles.orderInfo}>
+                    <Text style={styles.orderName} numberOfLines={1}>
+                      {order.items[0]?.product?.name || 'Đơn hàng'}
+                    </Text>
+                    <Text style={styles.orderDetail}>
+                      Giao hàng ·{' '}
+                      {order.address
+                        ? `${order.address.address}, ${order.address.ward}`
+                        : 'Chưa có địa chỉ'}
+                    </Text>
+                    <Text style={styles.orderDetail}>
+                      Từ {order.restaurant?.name || 'Nhà hàng'}
+                    </Text>
+                    <View style={styles.orderFooter}>
+                      <Text
+                        style={[
+                          styles.orderStatus,
+                          {color: getStatusColor(order.status)},
+                        ]}>
+                        {getStatusText(order.status)}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.trackButton}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    (navigation as any).navigate(MainRoutes.LiveTrackingMap, {
+                      orderId: order.id,
+                    });
+                  }}>
+                  <Text style={styles.trackButtonText}>Theo dõi</Text>
+                </TouchableOpacity>
+              </View>
             ))
           )}
         </View>
@@ -383,21 +459,44 @@ const styles = StyleSheet.create({
   itemInfo: {
     flex: 1,
     marginRight: 12,
+    position: 'relative',
+  },
+  itemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
   },
   itemName: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#000000',
-    marginBottom: 4,
+    flex: 1,
+    marginRight: 8,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    padding: 4,
+    zIndex: 1,
   },
   itemDescription: {
     fontSize: 12,
     color: '#9CA3AF',
     marginBottom: 8,
   },
+  itemNote: {
+    fontSize: 11,
+    color: '#6B7280',
+    fontStyle: 'italic',
+    marginBottom: 8,
+  },
   itemFooter: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 8,
   },
   quantitySelector: {
     flexDirection: 'row',
@@ -423,7 +522,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#000000',
-    alignSelf: 'flex-start',
   },
   summaryTotal: {
     flexDirection: 'row',
@@ -469,6 +567,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    alignItems: 'center',
+  },
+  orderCardContent: {
+    flexDirection: 'row',
+    flex: 1,
   },
   orderImageContainer: {
     width: 100,
@@ -511,6 +614,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 16,
+    marginLeft: 12,
+    alignSelf: 'flex-start',
   },
   trackButtonText: {
     fontSize: 14,

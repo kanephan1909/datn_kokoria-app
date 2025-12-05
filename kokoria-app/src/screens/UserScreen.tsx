@@ -20,16 +20,49 @@ const UserScreen = () => {
   const navigation = useNavigation();
   const [ordersCount, setOrdersCount] = useState(0);
 
-  // Fetch orders count
+  // Fetch orders count - chỉ đếm đơn hàng đã thanh toán thành công
   useQuery({
     queryKey: ['userOrders'],
     queryFn: async () => {
       try {
         const response = await fetchOrders({limit: 100});
         if (response.success && response.data) {
-          const ordersList = Array.isArray(response.data)
+          let ordersList = Array.isArray(response.data)
             ? response.data
             : response.data.orders || response.data.data || [];
+
+          // Lọc chỉ đếm đơn hàng đã thanh toán thành công hoặc đã được xác nhận
+          ordersList = ordersList.filter((order: any) => {
+            const paymentStatus = order.paymentStatus?.toUpperCase();
+            const paymentMethod = order.paymentMethod?.toUpperCase();
+            const orderStatus = order.status?.toUpperCase();
+
+            // Đơn COD/CASH: chỉ đếm nếu đã được xác nhận (status không phải PENDING)
+            if (paymentMethod === 'COD' || paymentMethod === 'CASH') {
+              // COD được xác nhận khi status không phải PENDING
+              if (orderStatus &&
+                  orderStatus !== 'PENDING' &&
+                  orderStatus !== 'CANCELED' &&
+                  orderStatus !== 'CANCELLED') {
+                return true;
+              }
+              return false;
+            }
+
+            // Đơn ONLINE: chỉ đếm nếu đã thanh toán thành công
+            // Bỏ qua đơn ONLINE đang chờ thanh toán
+            if (paymentStatus === 'PAYMENT_PENDING' || paymentStatus === 'PENDING') {
+              return false;
+            }
+
+            // Đếm đơn ONLINE đã thanh toán thành công
+            if (paymentStatus === 'PAYMENT_SUCCESS' || paymentStatus === 'SUCCESS') {
+              return true;
+            }
+
+            return false;
+          });
+
           setOrdersCount(ordersList.length);
           return ordersList;
         }
@@ -81,14 +114,14 @@ const UserScreen = () => {
 
   const handleMenuPress = (route: string | null) => {
     if (route) {
-      // If route is a tab (Home, Menu, Order, Profile), navigate to MainTabs
+      // If route is a tab (Home, Menu, Order, Profile), navigate to TabNavigator
       if (
         route === MainRoutes.Home ||
         route === MainRoutes.Menu ||
         route === MainRoutes.Order ||
         route === MainRoutes.Profile
       ) {
-        (navigation as any).navigate('MainTabs', {
+        (navigation as any).navigate('TabNavigator', {
           screen: route,
         });
       } else {
@@ -121,8 +154,7 @@ const UserScreen = () => {
           style={styles.settingsButton}
           activeOpacity={0.7}
           onPress={() => {
-            // Settings screen not implemented yet
-            Alert.alert('Thông báo', 'Tính năng này đang được phát triển');
+            (navigation as any).navigate(MainRoutes.Settings);
           }}>
           <Ionicons name="settings-outline" size={24} color="#000" />
         </TouchableOpacity>

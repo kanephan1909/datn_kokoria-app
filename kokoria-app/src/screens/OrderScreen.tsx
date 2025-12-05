@@ -29,7 +29,7 @@ interface Address {
 
 const OrderScreen = () => {
   const navigation = useNavigation();
-  const {cartItems, totalPrice, updateItem} = useCart();
+  const {cartItems, totalPrice, updateItem, removeItem} = useCart();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
@@ -71,9 +71,35 @@ const OrderScreen = () => {
 
   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) {
+      // Nếu số lượng về 0 hoặc nhỏ hơn 1, xóa sản phẩm khỏi giỏ hàng
+      handleRemoveItem(itemId);
       return;
     }
     await updateItem(itemId, newQuantity);
+  };
+
+  const handleRemoveItem = async (itemId: string) => {
+    Alert.alert(
+      'Xác nhận',
+      'Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?',
+      [
+        {
+          text: 'Hủy',
+          style: 'cancel',
+        },
+        {
+          text: 'Xóa',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await removeItem(itemId);
+            } catch (error) {
+              Alert.alert('Lỗi', 'Không thể xóa sản phẩm');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handlePlaceOrder = () => {
@@ -156,33 +182,46 @@ const OrderScreen = () => {
                 )}
               </View>
               <View style={styles.itemInfo}>
+                <TouchableOpacity
+                  onPress={() => handleRemoveItem(item.id)}
+                  style={styles.deleteButton}
+                  hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                  <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                </TouchableOpacity>
                 <View style={styles.itemHeader}>
                   <Text style={styles.itemName} numberOfLines={1}>
                     {item.product.name}
                   </Text>
-                  <Text style={styles.itemPrice}>{formatPrice(item.price)}</Text>
                 </View>
                 {item.product.description && (
                   <Text style={styles.itemDescription} numberOfLines={1}>
                     {item.product.description}
                   </Text>
                 )}
-                <View style={styles.quantitySelector}>
-                  <TouchableOpacity
-                    onPress={() =>
-                      handleQuantityChange(item.id, item.quantity - 1)
-                    }
-                    style={styles.quantityButton}>
-                    <Ionicons name="remove" size={16} color="#000" />
-                  </TouchableOpacity>
-                  <Text style={styles.quantityText}>{item.quantity}</Text>
-                  <TouchableOpacity
-                    onPress={() =>
-                      handleQuantityChange(item.id, item.quantity + 1)
-                    }
-                    style={styles.quantityButton}>
-                    <Ionicons name="add" size={16} color="#000" />
-                  </TouchableOpacity>
+                {item.note && (
+                  <Text style={styles.itemNote} numberOfLines={1}>
+                    {item.note}
+                  </Text>
+                )}
+                <View style={styles.itemFooter}>
+                  <View style={styles.quantitySelector}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        handleQuantityChange(item.id, item.quantity - 1)
+                      }
+                      style={styles.quantityButton}>
+                      <Ionicons name="remove" size={16} color="#000" />
+                    </TouchableOpacity>
+                    <Text style={styles.quantityText}>{item.quantity}</Text>
+                    <TouchableOpacity
+                      onPress={() =>
+                        handleQuantityChange(item.id, item.quantity + 1)
+                      }
+                      style={styles.quantityButton}>
+                      <Ionicons name="add" size={16} color="#000" />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.itemPrice}>{formatPrice(item.price)}</Text>
                 </View>
               </View>
             </View>
@@ -330,6 +369,14 @@ const styles = StyleSheet.create({
   },
   itemInfo: {
     flex: 1,
+    position: 'relative',
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    padding: 4,
+    zIndex: 1,
   },
   itemHeader: {
     flexDirection: 'row',
@@ -353,6 +400,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#9CA3AF',
     marginBottom: 8,
+  },
+  itemNote: {
+    fontSize: 11,
+    color: '#6B7280',
+    fontStyle: 'italic',
+    marginBottom: 8,
+  },
+  itemFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
   },
   quantitySelector: {
     flexDirection: 'row',

@@ -187,7 +187,11 @@ const MenuScreen = () => {
               </Text>
             </View>
             <View style={styles.bannerImagePlaceholder}>
-              <Ionicons name="restaurant" size={60} color="#fff" />
+              <Image
+                source={require('../assets/images/Menu/done/bannermenu.png')}
+                style={styles.bannerImage}
+                resizeMode="contain"
+              />
             </View>
           </View>
         </View>
@@ -287,8 +291,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 24,
     borderRadius: 16,
-    backgroundColor: '#FED7AA',
+    backgroundColor: '#F6C5A3',
     overflow: 'hidden',
+    zIndex: 1000,
   },
   bannerContent: {
     flexDirection: 'row',
@@ -306,6 +311,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#FFFFFF',
     opacity: 0.9,
+  },
+  bannerImage: {
+    width: 180,
+    height: 180,
+    right: 30,
   },
   bannerImagePlaceholder: {
     width: 80,

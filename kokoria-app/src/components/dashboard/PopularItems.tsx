@@ -1,9 +1,16 @@
-import {View, Text, TouchableOpacity, FlatList, ActivityIndicator, Alert} from 'react-native';
-import React, {useMemo} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+} from 'react-native';
+import React, {useMemo, useState} from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {useQuery} from '@tanstack/react-query';
 import {fetchProducts, fetchCategories} from '../../../api/apiClient';
-import {useCart} from '../../store/useCartStore';
 import {useNavigation} from '@react-navigation/native';
 import {MainRoutes} from '../../navigation/Routes';
 
@@ -26,8 +33,97 @@ interface PopularItemsProps {
   searchQuery?: string;
 }
 
+// Product Card Component
+const ProductCard = ({
+  item,
+  navigation,
+  formatPrice,
+}: {
+  item: Product;
+  navigation: any;
+  formatPrice: (price: number) => string;
+}) => {
+  const [isFavorite, setIsFavorite] = useState(false);
+  // Mock rating và delivery time (có thể lấy từ API sau)
+  // Sử dụng hash của item.id để tạo stable rating và deliveryTime
+  const itemHash = useMemo(
+    () => item.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0),
+    [item.id],
+  );
+  const rating = useMemo(() => 4.5 + (itemHash % 50) / 100, [itemHash]); // 4.5-5.0
+  const deliveryTime = useMemo(() => 20 + (itemHash % 15), [itemHash]); // 20-35 mins
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={() => {
+        navigation.navigate(MainRoutes.ProductDetails, {productId: item.id});
+      }}
+      className="bg-white rounded-2xl overflow-hidden mb-4"
+      style={styles.cardContainer}>
+      {/* Image Container */}
+      <View className="w-full h-40 bg-gray-100 relative">
+        {item.imageUrl ? (
+          <Image
+            source={{uri: item.imageUrl}}
+            className="w-full h-full"
+            resizeMode="cover"
+          />
+        ) : (
+          <View className="w-full h-full items-center justify-center bg-gray-100">
+            <Ionicons name="image-outline" size={48} color="#9CA3AF" />
+          </View>
+        )}
+
+        {/* Favorite Button */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={(e) => {
+            e.stopPropagation();
+            setIsFavorite(!isFavorite);
+          }}
+          className="absolute top-2 right-2 bg-white rounded-full p-2"
+          style={styles.favoriteButton}>
+          <Ionicons
+            name={isFavorite ? 'heart' : 'heart-outline'}
+            size={20}
+            color={isFavorite ? '#F97316' : '#6B7280'}
+          />
+        </TouchableOpacity>
+      </View>
+
+      {/* Content */}
+      <View className="p-3">
+        {/* Product Name */}
+        <View className="flex-row items-start justify-between mb-2">
+          <Text
+            className="text-base font-bold text-gray-800 flex-1"
+            numberOfLines={1}
+            style={styles.productName}>
+            {item.name}
+          </Text>
+        </View>
+
+        {/* Rating & Delivery Time */}
+        <View className="flex-row items-center mb-2">
+          <Ionicons name="star" size={14} color="#F97316" />
+          <Text className="text-sm text-gray-800 font-semibold ml-1">
+            {rating.toFixed(1)}
+          </Text>
+          <View className="w-1 h-1 bg-gray-400 rounded-full mx-2" />
+          <Text className="text-xs text-gray-500">{deliveryTime} mins</Text>
+        </View>
+
+        {/* Price */}
+        <Text className="text-orange-500 font-bold text-base">
+          {formatPrice(item.price)}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 const PopularItems = ({searchQuery = ''}: PopularItemsProps) => {
-  const {addItem} = useCart();
   const navigation = useNavigation();
 
   // Lấy danh sách categories để tìm category "Gà"
@@ -130,83 +226,13 @@ const PopularItems = ({searchQuery = ''}: PopularItemsProps) => {
     }).format(price);
   };
 
-  const getProductIcon = (name: string): string => {
-    const nameLower = name.toLowerCase();
-    if (nameLower.includes('combo')) {
-      return 'basket';
-    }
-    if (nameLower.includes('hot') || nameLower.includes('plate')) {
-      return 'flame';
-    }
-    if (nameLower.includes('tokbokki')) {
-      return 'disc';
-    }
-    if (nameLower.includes('gà') || nameLower.includes('chicken')) {
-      return 'restaurant';
-    }
-    return 'layers';
-  };
-
-  const handleAddToCart = async (product: Product) => {
-    try {
-      await addItem(product.id, 1);
-      Alert.alert('Thành công', 'Đã thêm sản phẩm vào giỏ hàng');
-    } catch (error: any) {
-      Alert.alert('Lỗi', error.response?.data?.message || 'Không thể thêm vào giỏ hàng');
-    }
-  };
-
   const renderItem = ({item}: {item: Product}) => {
-    const icon = getProductIcon(item.name);
-
     return (
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={() => {
-          (navigation as any).navigate(MainRoutes.ProductDetails, {productId: item.id});
-        }}
-        className="bg-white rounded-xl mb-3 overflow-hidden shadow-sm"
-        style={{
-          elevation: 2,
-        }}>
-        <View className="flex-row p-4">
-          {/* Icon */}
-          <View
-            className="rounded-full items-center justify-center mr-3"
-            style={{
-              width: 60,
-              height: 60,
-              backgroundColor: '#F9731620',
-            }}>
-            <Ionicons name={icon as any} size={28} color="#F97316" />
-          </View>
-
-          {/* Content */}
-          <View className="flex-1">
-            <View className="flex-row items-center mb-1">
-              <Text className="text-base font-bold text-gray-800 flex-1" numberOfLines={1}>
-                {item.name}
-              </Text>
-            </View>
-            {item.description && (
-              <Text className="text-xs text-gray-500 mb-2" numberOfLines={1}>
-                {item.description}
-              </Text>
-            )}
-            <Text className="text-orange-500 font-bold text-lg">
-              {formatPrice(item.price)}
-            </Text>
-          </View>
-
-          {/* Add button */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            className="bg-orange-500 rounded-full w-10 h-10 items-center justify-center ml-2"
-            onPress={() => handleAddToCart(item)}>
-            <Ionicons name="add" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
+      <ProductCard
+        item={item}
+        navigation={navigation}
+        formatPrice={formatPrice}
+      />
     );
   };
 
@@ -237,9 +263,39 @@ const PopularItems = ({searchQuery = ''}: PopularItemsProps) => {
         renderItem={renderItem}
         keyExtractor={item => item.id}
         scrollEnabled={false}
+        numColumns={2}
+        columnWrapperStyle={styles.columnWrapper}
+        contentContainerStyle={styles.contentContainer}
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    width: '48%',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  favoriteButton: {
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  productName: {
+    flexShrink: 1,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+  },
+  contentContainer: {
+    paddingBottom: 8,
+  },
+});
 
 export default PopularItems;

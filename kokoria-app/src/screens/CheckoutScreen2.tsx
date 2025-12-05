@@ -7,13 +7,18 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useRef, useEffect} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation, useRoute, useFocusEffect} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {useCart} from '../store/useCartStore';
 import {useAuth} from '../context/AuthContext';
-import {fetchAddresses, createOrder} from '../../api/apiClient';
+import {
+  fetchAddresses,
+  createOrder,
+  createMoMoPayment,
+  createVNPayPayment,
+} from '../../api/apiClient';
 import {MainRoutes} from '../navigation/Routes';
 
 interface Address {
@@ -27,7 +32,7 @@ interface Address {
   isDefault: boolean;
 }
 
-type PaymentMethod = 'CASH' | 'MOMO' | 'ZALOPAY' | 'VNPAY';
+type PaymentMethod = 'CASH' | 'MOMO' | 'VNPAY';
 
 const CheckoutScreen2 = () => {
   const navigation = useNavigation();
@@ -40,6 +45,37 @@ const CheckoutScreen2 = () => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
+  const isProcessingRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const orderRequestIdRef = useRef<string | null>(null); // Unique ID cho mỗi request đặt hàng
+
+  // Reset processing state khi component unmount
+  useEffect(() => {
+    return () => {
+      isProcessingRef.current = false;
+      setIsLoading(false);
+      setIsSubmitting(false);
+      orderRequestIdRef.current = null;
+    };
+  }, []);
+
+  // Reset processing state khi quay lại màn hình (nếu bị stuck)
+  useFocusEffect(
+    useCallback(() => {
+      // Nếu đã quá 30 giây mà vẫn đang processing, reset lại
+      const timeoutId = setTimeout(() => {
+        if (isProcessingRef.current) {
+          console.warn('⚠️ Processing state đã quá lâu, tự động reset');
+          isProcessingRef.current = false;
+          setIsLoading(false);
+          setIsSubmitting(false);
+          orderRequestIdRef.current = null;
+        }
+      }, 30000); // 30 giây
+
+      return () => clearTimeout(timeoutId);
+    }, []),
+  );
 
   const loadAddresses = useCallback(async () => {
     try {
@@ -67,6 +103,19 @@ const CheckoutScreen2 = () => {
   useFocusEffect(
     useCallback(() => {
       loadAddresses();
+
+      // Reset processing state nếu bị stuck từ lần trước (sau 5 giây)
+      const resetTimeout = setTimeout(() => {
+        if (isProcessingRef.current) {
+          console.warn('⚠️ Phát hiện stuck state khi vào màn hình, reset lại...');
+          isProcessingRef.current = false;
+          setIsLoading(false);
+          setIsSubmitting(false);
+          orderRequestIdRef.current = null;
+        }
+      }, 5000); // 5 giây sau khi vào màn hình
+
+      return () => clearTimeout(resetTimeout);
     }, [loadAddresses]),
   );
 
@@ -81,6 +130,16 @@ const CheckoutScreen2 = () => {
   const finalTotal = totalPrice + deliveryFee;
 
   const handlePlaceOrder = async () => {
+    // Prevent multiple submissions - kiểm tra ngay từ đầu
+    if (isProcessingRef.current || isLoading || isSubmitting) {
+      console.warn('⚠️ Đã có request đang xử lý, bỏ qua', {
+        isProcessingRef: isProcessingRef.current,
+        isLoading,
+        isSubmitting,
+      });
+      return;
+    }
+
     if (!selectedAddress) {
       Alert.alert('Lỗi', 'Vui lòng chọn địa chỉ giao hàng');
       return;
@@ -96,6 +155,12 @@ const CheckoutScreen2 = () => {
       return;
     }
 
+    // Tạo unique ID cho request này
+    const requestId = `${Date.now()}-${Math.random()}`;
+    orderRequestIdRef.current = requestId;
+    isProcessingRef.current = true;
+    setIsSubmitting(true);
+
     Alert.alert(
       'Xác nhận đặt hàng',
       `Bạn có chắc chắn muốn đặt hàng với tổng tiền ${formatPrice(finalTotal)}?`,
@@ -103,12 +168,36 @@ const CheckoutScreen2 = () => {
         {
           text: 'Hủy',
           style: 'cancel',
+          onPress: () => {
+            // Chỉ reset nếu đây vẫn là request hiện tại
+            if (orderRequestIdRef.current === requestId) {
+              isProcessingRef.current = false;
+              setIsSubmitting(false);
+              orderRequestIdRef.current = null;
+            }
+          },
         },
         {
           text: 'Đặt hàng',
           onPress: async () => {
+            // Kiểm tra xem request này có còn hợp lệ không
+            if (orderRequestIdRef.current !== requestId) {
+              console.warn('⚠️ Request đã bị hủy hoặc có request mới hơn, bỏ qua');
+              return;
+            }
+
+            // Kiểm tra lại một lần nữa để đảm bảo không có request nào khác đang xử lý
+            if (orderRequestIdRef.current !== requestId) {
+              console.warn('⚠️ Request đã bị hủy hoặc có request mới hơn, bỏ qua');
+              return;
+            }
+
+            console.log('=== BẮT ĐẦU ĐẶT HÀNG ===', {requestId});
             setIsLoading(true);
+            console.log('✅ Đã set loading state');
+
             try {
+              console.log('📦 Bắt đầu tạo order data...');
               const addressObject = {
                 name: selectedAddress.name,
                 phone: selectedAddress.phone,
@@ -117,6 +206,10 @@ const CheckoutScreen2 = () => {
                 district: selectedAddress.district,
                 city: selectedAddress.city,
               };
+
+              // Map payment method để gửi đúng format cho backend
+              const backendPaymentMethod =
+                paymentMethod === 'CASH' ? 'COD' : 'ONLINE';
 
               const orderData = {
                 userId: user.id,
@@ -127,34 +220,241 @@ const CheckoutScreen2 = () => {
                 })),
                 totalAmount: finalTotal,
                 address: addressObject,
-                paymentMethod: paymentMethod === 'CASH' ? 'COD' : paymentMethod,
+                paymentMethod: backendPaymentMethod,
               };
 
+              console.log('📤 Gửi request createOrder...', {
+                userId: user.id,
+                itemsCount: orderData.items.length,
+                totalAmount: orderData.totalAmount,
+                paymentMethod: orderData.paymentMethod,
+              });
+
               const response = await createOrder(orderData);
+              console.log('📥 Nhận response từ createOrder:', {
+                success: response.success,
+                hasOrderId: !!response.data?.id,
+              });
               if (response.success) {
-                Alert.alert('Thành công', 'Đơn hàng đã được tạo thành công', [
-                  {
-                    text: 'OK',
-                    onPress: async () => {
-                      await clear();
-                      await loadCart();
-                      (navigation as any).navigate(MainRoutes.OrderDetails, {
-                        orderId: response.data.id,
-                      });
+                const orderId = response.data.id;
+                console.log('✅ Order created successfully! OrderId:', orderId);
+
+                // Nếu là thanh toán online, tạo payment link
+                if (paymentMethod !== 'CASH' && backendPaymentMethod === 'ONLINE') {
+                  console.log('💳 Bắt đầu tạo payment link...', {
+                    paymentMethod,
+                    orderId,
+                  });
+                  try {
+                    console.log('Creating payment for method:', paymentMethod);
+                    let paymentResponse;
+                    const returnUrl = `kokoriaapp://payment/return?orderId=${orderId}`;
+
+                    switch (paymentMethod) {
+                      case 'MOMO':
+                        console.log('📞 Calling createMoMoPayment API...', {
+                          orderId,
+                          amount: finalTotal,
+                          returnUrl,
+                        });
+                        console.log('⏳ Đang đợi response từ backend...');
+                        paymentResponse = await createMoMoPayment({
+                          orderId,
+                          amount: finalTotal,
+                          orderInfo: `Thanh toan don hang ${orderId}`,
+                          returnUrl,
+                        });
+                        console.log('✅ Received MoMo payment response:', JSON.stringify(paymentResponse, null, 2));
+                        console.log('Has payUrl:', !!paymentResponse.data?.payUrl);
+                        console.log('Has deeplink:', !!paymentResponse.data?.deeplink);
+                        break;
+                      case 'VNPAY':
+                        paymentResponse = await createVNPayPayment({
+                          orderId,
+                          amount: finalTotal,
+                          orderInfo: `Thanh toan don hang ${orderId}`,
+                          returnUrl,
+                        });
+                        break;
+                      default:
+                        throw new Error('Phương thức thanh toán không hợp lệ');
+                    }
+
+                    // MoMo có thể trả về payUrl hoặc deeplink
+                    const paymentUrl =
+                      paymentResponse.data?.payUrl ||
+                      paymentResponse.data?.deeplink ||
+                      null;
+
+                    if (paymentResponse.success && paymentUrl) {
+                      console.log('Navigating to PaymentWebView with URL:', paymentUrl);
+                      // Kiểm tra request vẫn hợp lệ trước khi reset
+                      if (orderRequestIdRef.current === requestId) {
+                        isProcessingRef.current = false;
+                        setIsLoading(false);
+                        setIsSubmitting(false);
+                        orderRequestIdRef.current = null;
+                      }
+
+                      // Navigate đến PaymentWebView
+                      setTimeout(() => {
+                        (navigation as any).navigate(MainRoutes.PaymentWebView, {
+                          paymentUrl,
+                          orderId,
+                          paymentMethod,
+                        });
+                      }, 100);
+                    } else {
+                      // Kiểm tra request vẫn hợp lệ trước khi reset
+                      if (orderRequestIdRef.current === requestId) {
+                        isProcessingRef.current = false;
+                        setIsLoading(false);
+                        setIsSubmitting(false);
+                        orderRequestIdRef.current = null;
+                      }
+                      console.error('Payment response error:', paymentResponse);
+                      Alert.alert(
+                        'Lỗi',
+                        paymentResponse.message ||
+                          'Không thể tạo link thanh toán. Vui lòng thử lại.',
+                        [
+                          {
+                            text: 'OK',
+                            onPress: () => {
+                              // Quay lại màn hình checkout
+                            },
+                          },
+                        ],
+                      );
+                    }
+                  } catch (paymentError: any) {
+                    console.error('Error creating payment:', paymentError);
+
+                    // Xử lý lỗi 404 - endpoint chưa tồn tại
+                    if (paymentError.response?.status === 404) {
+                      Alert.alert(
+                        'Chức năng chưa sẵn sàng',
+                        `Chức năng thanh toán ${paymentMethod} chưa được triển khai trên server.\n\nVui lòng:\n• Liên hệ admin để kích hoạt\n• Hoặc chọn phương thức thanh toán khác`,
+                        [
+                          {
+                            text: 'Quay lại',
+                            onPress: () => {
+                              // Kiểm tra request vẫn hợp lệ trước khi reset
+                              if (orderRequestIdRef.current === requestId) {
+                                isProcessingRef.current = false;
+                                setIsLoading(false);
+                                setIsSubmitting(false);
+                                orderRequestIdRef.current = null;
+                              }
+                              navigation.goBack();
+                            },
+                          },
+                          {
+                            text: 'Thanh toán tiền mặt',
+                            onPress: async () => {
+                              // Kiểm tra request vẫn hợp lệ trước khi reset
+                              if (orderRequestIdRef.current === requestId) {
+                                isProcessingRef.current = false;
+                                setIsLoading(false);
+                                setIsSubmitting(false);
+                                orderRequestIdRef.current = null;
+                              }
+                              Alert.alert(
+                                'Thông báo',
+                                'Đơn hàng đã được tạo với phương thức thanh toán online. Vui lòng quay lại và chọn thanh toán tiền mặt ngay từ đầu.',
+                                [
+                                  {
+                                    text: 'OK',
+                                    onPress: () => navigation.goBack(),
+                                  },
+                                ]
+                              );
+                            },
+                          },
+                        ]
+                      );
+                    } else {
+                      // Kiểm tra request vẫn hợp lệ trước khi reset
+                      if (orderRequestIdRef.current === requestId) {
+                        isProcessingRef.current = false;
+                        setIsLoading(false);
+                        setIsSubmitting(false);
+                        orderRequestIdRef.current = null;
+                      }
+
+                      // Kiểm tra nếu là timeout hoặc network error
+                      if (paymentError.code === 'ECONNABORTED' || paymentError.message?.includes('timeout')) {
+                        Alert.alert(
+                          'Lỗi kết nối',
+                          'Kết nối đến server bị timeout. Vui lòng kiểm tra kết nối mạng và thử lại.',
+                        );
+                      } else if (!paymentError.response) {
+                        Alert.alert(
+                          'Lỗi kết nối',
+                          'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và thử lại.',
+                        );
+                      } else {
+                        Alert.alert(
+                          'Lỗi',
+                          paymentError.response?.data?.message ||
+                            paymentError.message ||
+                            'Không thể tạo link thanh toán. Vui lòng thử lại.',
+                        );
+                      }
+                    }
+                  }
+                } else {
+                  // Thanh toán tiền mặt - chuyển đến OrderDetails
+                  Alert.alert('Thành công', 'Đơn hàng đã được tạo thành công', [
+                    {
+                      text: 'OK',
+                      onPress: async () => {
+                        // Kiểm tra request vẫn hợp lệ trước khi reset
+                        if (orderRequestIdRef.current === requestId) {
+                          isProcessingRef.current = false;
+                          setIsLoading(false);
+                          setIsSubmitting(false);
+                          orderRequestIdRef.current = null;
+                        }
+                        await clear();
+                        await loadCart();
+                        (navigation as any).navigate(MainRoutes.OrderDetails, {
+                          orderId,
+                        });
+                      },
                     },
-                  },
-                ]);
+                  ]);
+                }
               } else {
+                // Kiểm tra request vẫn hợp lệ trước khi reset
+                if (orderRequestIdRef.current === requestId) {
+                  isProcessingRef.current = false;
+                  setIsLoading(false);
+                  setIsSubmitting(false);
+                  orderRequestIdRef.current = null;
+                }
                 Alert.alert('Lỗi', response.message || 'Không thể tạo đơn hàng');
               }
             } catch (error: any) {
-              console.error('Error creating order:', error);
+              console.error('❌ ERROR creating order:', error);
+              console.error('Error details:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                code: error.code,
+              });
+              // Kiểm tra request vẫn hợp lệ trước khi reset
+              if (orderRequestIdRef.current === requestId) {
+                isProcessingRef.current = false;
+                setIsLoading(false);
+                setIsSubmitting(false);
+                orderRequestIdRef.current = null;
+              }
+
               Alert.alert(
                 'Lỗi',
-                error.response?.data?.message || 'Không thể tạo đơn hàng',
+                error.response?.data?.message || error.message || 'Không thể tạo đơn hàng',
               );
-            } finally {
-              setIsLoading(false);
             }
           },
         },
@@ -314,21 +614,21 @@ const CheckoutScreen2 = () => {
 
             <TouchableOpacity
               style={styles.paymentItem}
-              onPress={() => setPaymentMethod('ZALOPAY')}>
+              onPress={() => setPaymentMethod('VNPAY')}>
               <View style={styles.paymentIconCircle}>
-                <View style={styles.zalopayLogo}>
-                  <Text style={styles.zalopayText}>Zalo</Text>
+                <View style={styles.vnpayLogo}>
+                  <Text style={styles.vnpayText}>VNPay</Text>
                 </View>
               </View>
               <View style={styles.paymentContent}>
-                <Text style={styles.paymentLabel}>ZaloPay</Text>
+                <Text style={styles.paymentLabel}>VNPay</Text>
               </View>
               <View
                 style={[
                   styles.radioButton,
-                  paymentMethod === 'ZALOPAY' && styles.radioButtonSelected,
+                  paymentMethod === 'VNPAY' && styles.radioButtonSelected,
                 ]}>
-                {paymentMethod === 'ZALOPAY' && (
+                {paymentMethod === 'VNPAY' && (
                   <View style={styles.radioButtonInner} />
                 )}
               </View>
@@ -345,9 +645,9 @@ const CheckoutScreen2 = () => {
           <Text style={styles.totalValue}>{formatPrice(finalTotal)}</Text>
         </View>
         <TouchableOpacity
-          style={[styles.placeOrderButton, isLoading && styles.placeOrderButtonDisabled]}
+          style={[styles.placeOrderButton, (isLoading || isSubmitting || !selectedAddress) && styles.placeOrderButtonDisabled]}
           onPress={handlePlaceOrder}
-          disabled={isLoading || !selectedAddress}>
+          disabled={isProcessingRef.current || isLoading || isSubmitting || !selectedAddress}>
           {isLoading ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
@@ -568,22 +868,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  zalopayLogo: {
+  vnpayLogo: {
     width: 40,
     height: 40,
-    borderRadius: 50,
-    backgroundColor: '#0068FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  zalopayText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  vnpayLogo: {
-    width: 28,
-    height: 28,
     borderRadius: 6,
     backgroundColor: '#E50112',
     alignItems: 'center',
@@ -591,7 +878,7 @@ const styles = StyleSheet.create({
   },
   vnpayText: {
     color: '#FFFFFF',
-    fontSize: 8,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   radioButton: {

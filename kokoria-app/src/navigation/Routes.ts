@@ -32,7 +32,12 @@ export enum MainRoutes {
     Notifications = 'Thông báo',
     AddressList = 'Danh sách địa chỉ',
     AddAddress = 'Thêm địa chỉ',
-    EditAddress = 'Sửa địa chỉ'
+    EditAddress = 'Sửa địa chỉ',
+    Payment = 'Phương thức thanh toán',
+    PaymentWebView = 'Thanh toán WebView',
+    OrderConfirmation = 'Xác nhận đơn hàng',
+    LiveTrackingMap = 'Theo dõi đơn hàng',
+    Chatbot = 'Chatbot'
 }
 
 // Type for the root stack param list
@@ -60,7 +65,7 @@ export type MainTabParamList = {
 
 // Type for the main stack param list
 export type MainStackParamList = {
-    MainTabs:NavigatorScreenParams<MainTabParamList>;
+    TabNavigator:NavigatorScreenParams<MainTabParamList>;
     [MainRoutes.ProductDetails]:{productId:string};
     [MainRoutes.Category]:{categoryId:string};
     [MainRoutes.Checkout]:undefined;
@@ -73,4 +78,13 @@ export type MainStackParamList = {
     [MainRoutes.AddressList]:undefined;
     [MainRoutes.AddAddress]:undefined;
     [MainRoutes.EditAddress]:{addressId:string};
+    [MainRoutes.Payment]:{orderDraft: any};
+    [MainRoutes.PaymentWebView]:{
+      paymentUrl: string;
+      orderId: string;
+      paymentMethod: string;
+    };
+    [MainRoutes.OrderConfirmation]:{orderId: string};
+    [MainRoutes.LiveTrackingMap]:{orderId: string};
+    [MainRoutes.Chatbot]:undefined;
 }

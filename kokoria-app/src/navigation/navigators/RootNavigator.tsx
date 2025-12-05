@@ -23,9 +23,17 @@ const RootNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       {isAuthenticated ? (
-        <Stack.Screen name={RootRoutes.MainTabs} component={MainNavigator} />
+        <Stack.Screen 
+          name={RootRoutes.MainTabs} 
+          component={MainNavigator}
+          key="main"
+        />
       ) : (
-        <Stack.Screen name={RootRoutes.AuthStack} component={AuthNavigator} />
+        <Stack.Screen 
+          name={RootRoutes.AuthStack} 
+          component={AuthNavigator}
+          key="auth"
+        />
       )}
     </Stack.Navigator>
   );

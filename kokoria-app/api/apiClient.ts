@@ -27,7 +27,7 @@ const API_BASE_URL = getApiBaseUrl();
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {'Content-Type': 'application/json'},
-  timeout: 10000, // 10 seconds timeout
+  timeout: 30000, // 30 seconds timeout (tăng lên cho payment API)
 });
 
 // Thêm token vào request nếu có
@@ -297,6 +297,36 @@ export const createOrder = async (data: {
 
 export const cancelOrder = async (id: string, reason?: string) =>
   (await api.put(`/orders/${id}/cancel`, {reason})).data;
+
+// ==================== PAYMENTS API ====================
+export const createMoMoPayment = async (data: {
+  orderId: string;
+  amount: number;
+  orderInfo?: string;
+  returnUrl?: string;
+  notifyUrl?: string;
+}) => (await api.post('/payments/momo/create', data)).data;
+
+export const createVNPayPayment = async (data: {
+  orderId: string;
+  amount: number;
+  orderInfo?: string;
+  returnUrl?: string;
+  bankCode?: string;
+}) => (await api.post('/payments/vnpay/create', data)).data;
+
+export const createZaloPayPayment = async (data: {
+  orderId: string;
+  amount: number;
+  description?: string;
+  callbackUrl?: string;
+}) => (await api.post('/payments/zalopay/create', data)).data;
+
+export const verifyPayment = async (orderId: string) =>
+  (await api.post('/payments/verify', {orderId})).data;
+
+export const confirmPaymentSuccess = async (orderId: string, paymentData?: any) =>
+  (await api.post('/payments/confirm-success', {orderId, paymentData})).data;
 
 // ==================== CARTS API ====================
 // Get current user's cart (creates if doesn't exist)
@@ -706,3 +736,42 @@ export interface Product {
   rating?: number;
   reviews?: number;
 }
+
+// ==================== CHATBOT API ====================
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp?: string;
+}
+
+/**
+ * Gửi message đến chatbot
+ * @param message - Nội dung tin nhắn
+ * @param chatHistory - Lịch sử chat (optional)
+ */
+export const sendChatbotMessage = async (
+  message: string,
+  chatHistory?: ChatMessage[],
+) => {
+  const response = await api.post('/chatbot/message', {
+    message,
+    chatHistory,
+  });
+  return response.data;
+};
+
+/**
+ * Xóa chat session của user hiện tại
+ */
+export const clearChatbotSession = async () => {
+  const response = await api.delete('/chatbot/session');
+  return response.data;
+};
+
+/**
+ * Kiểm tra trạng thái chatbot
+ */
+export const checkChatbotHealth = async () => {
+  const response = await api.get('/chatbot/health');
+  return response.data;
+};

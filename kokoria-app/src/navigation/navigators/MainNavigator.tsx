@@ -13,13 +13,18 @@ import AddressListScreen from '../../screens/AddressListScreen';
 import AddAddressScreen from '../../screens/AddAddressScreen';
 import EditAddressScreen from '../../screens/EditAddressScreen';
 import CategoryScreen from '../../screens/CatetoryScreen';
+import PaymentWebViewScreen from '../../screens/PaymentWebViewScreen';
+import OrderConfirmationScreen from '../../screens/OrderConfirmationScreen';
+import LiveTrackingMapScreen from '../../screens/LiveTrackingMapScreen';
+import ChatbotScreen from '../../screens/ChatbotScreen';
+import SettingsScreen from '../../screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator();
 
 const MainNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+      <Stack.Screen name="TabNavigator" component={MainTabNavigator} />
       <Stack.Screen name={MainRoutes.Order} component={OrderScreen} />
       <Stack.Screen name={MainRoutes.Checkout} component={CheckoutScreen} />
       <Stack.Screen name={MainRoutes.Checkout2} component={CheckoutScreen2} />
@@ -30,6 +35,26 @@ const MainNavigator = () => {
       <Stack.Screen name={MainRoutes.AddressList} component={AddressListScreen} />
       <Stack.Screen name={MainRoutes.AddAddress} component={AddAddressScreen} />
       <Stack.Screen name={MainRoutes.EditAddress} component={EditAddressScreen} />
+      <Stack.Screen
+        name={MainRoutes.PaymentWebView}
+        component={PaymentWebViewScreen}
+      />
+      <Stack.Screen
+        name={MainRoutes.OrderConfirmation}
+        component={OrderConfirmationScreen}
+      />
+      <Stack.Screen
+        name={MainRoutes.LiveTrackingMap}
+        component={LiveTrackingMapScreen}
+      />
+      <Stack.Screen
+        name={MainRoutes.Chatbot}
+        component={ChatbotScreen}
+      />
+      <Stack.Screen
+        name={MainRoutes.Settings}
+        component={SettingsScreen}
+      />
     </Stack.Navigator>
   );
 };

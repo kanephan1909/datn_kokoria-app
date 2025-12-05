@@ -15,7 +15,6 @@ import {useRoute, useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {fetchProductById, Product} from '../../api/apiClient';
 import {useCart} from '../store/useCartStore';
-import {MainRoutes} from '../navigation/Routes';
 import OptionSelector from '../components/OptionSelector';
 import CartBottomBar from '../components/CartBottomBar';
 
@@ -33,7 +32,7 @@ const ProductDetailsScreen = () => {
   const [selectedOptions, setSelectedOptions] = useState<{
     [key: string]: string;
   }>({});
-  const {addItem, cartItems, totalPrice} = useCart();
+  const {addItem, cartItems} = useCart();
 
   const loadProduct = useCallback(async () => {
     try {
@@ -360,36 +359,17 @@ const ProductDetailsScreen = () => {
           </View>
 
           {/* Total Price Preview */}
-          <View style={styles.totalPreview}>
+          {/* <View style={styles.totalPreview}>
             <Text style={styles.totalLabel}>Tổng cộng</Text>
             <Text style={styles.totalAmount}>
               {formatPrice(calculatedPrice * quantity)}
             </Text>
-          </View>
+          </View> */}
         </View>
       </ScrollView>
 
-      {/* Bottom Action Bar */}
-      {totalItems > 0 ? (
-        <View style={styles.bottomBar}>
-          <View style={styles.bottomBarLeft}>
-            <Text style={styles.cartTotalLabel}>Giỏ hàng</Text>
-            <Text style={styles.totalPrice}>{formatPrice(totalPrice)}</Text>
-            <Text style={styles.totalItems}>{totalItems} sản phẩm</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.goToOrdersButton}
-            activeOpacity={0.8}
-            onPress={() => {
-              (navigation as any).navigate('MainTabs', {
-                screen: MainRoutes.Order,
-              });
-            }}>
-            <Ionicons name="cart" size={20} color="#FFFFFF" />
-            <Text style={styles.goToOrdersText}>Xem giỏ hàng</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
+      {/* Nút Thêm vào giỏ - chỉ hiển thị khi chưa có items trong cart */}
+      {totalItems === 0 && (
         <View style={styles.bottomButtonContainer}>
           <TouchableOpacity
             style={[
@@ -418,6 +398,8 @@ const ProductDetailsScreen = () => {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* CartBottomBar - tự động hiển thị khi có items trong cart */}
       <CartBottomBar />
     </SafeAreaView>
   );
@@ -436,7 +418,7 @@ const styles = StyleSheet.create({
   },
   heroContainer: {
     width: '100%',
-    height: width * 0.75,
+    height: width * 0.7,
     position: 'relative',
     backgroundColor: '#FFFFFF',
   },
@@ -640,63 +622,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#EA580C',
-  },
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    paddingBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: -4},
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 10,
-  },
-  bottomBarLeft: {
-    flex: 1,
-  },
-  cartTotalLabel: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginBottom: 4,
-  },
-  totalPrice: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 2,
-  },
-  totalItems: {
-    fontSize: 13,
-    color: '#6B7280',
-  },
-  goToOrdersButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#EA580C',
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    shadowColor: '#EA580C',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  goToOrdersText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginLeft: 8,
   },
   bottomButtonContainer: {
     position: 'absolute',
