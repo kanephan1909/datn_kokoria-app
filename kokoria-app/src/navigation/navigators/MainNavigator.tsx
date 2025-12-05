@@ -18,6 +18,8 @@ import OrderConfirmationScreen from '../../screens/OrderConfirmationScreen';
 import LiveTrackingMapScreen from '../../screens/LiveTrackingMapScreen';
 import ChatbotScreen from '../../screens/ChatbotScreen';
 import SettingsScreen from '../../screens/SettingsScreen';
+import EditLocationScreen from '../../screens/EditLocationScreen';
+import NotificationsScreen from '../../screens/NotificationsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -54,6 +56,14 @@ const MainNavigator = () => {
       <Stack.Screen
         name={MainRoutes.Settings}
         component={SettingsScreen}
+      />
+      <Stack.Screen
+        name={MainRoutes.EditLocation}
+        component={EditLocationScreen}
+      />
+      <Stack.Screen
+        name={MainRoutes.Notifications}
+        component={NotificationsScreen}
       />
     </Stack.Navigator>
   );

@@ -1,0 +1,23 @@
+# Cursor IDE auto-generated assets
+# Thư mục này chứa các hình ảnh được Cursor tự động lưu khi paste vào chat
+assets/
+
+# OSX
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp

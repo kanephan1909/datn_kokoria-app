@@ -1,6 +1,16 @@
 import {useEffect, useRef, useState} from 'react';
-import {io, Socket} from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Import socket.io-client với fallback
+let io: any = null;
+let Socket: any = null;
+try {
+  const socketIOClient = require('socket.io-client');
+  io = socketIOClient.io || socketIOClient.default || socketIOClient;
+  Socket = socketIOClient.Socket;
+} catch (error) {
+  console.warn('socket.io-client not installed');
+}
 
 // Socket server URL - tương tự như API base URL
 const getSocketUrl = () => {
@@ -29,8 +39,10 @@ interface UseSocketOptions {
 export const useSocket = (options: UseSocketOptions = {}) => {
   const {autoConnect = true, events = {}} = options;
   const [isConnected, setIsConnected] = useState(false);
-  const [socketError, setSocketError] = useState<string | null>(null);
-  const socketRef = useRef<Socket | null>(null);
+  const [socketError, setSocketError] = useState<string | null>(
+    !io ? 'socket.io-client chưa được cài đặt' : null,
+  );
+  const socketRef = useRef<any>(null);
   const eventsRef = useRef(events);
 
   // Update events ref when events change
@@ -44,6 +56,12 @@ export const useSocket = (options: UseSocketOptions = {}) => {
     }
 
     const initSocket = async () => {
+      if (!io) {
+        setSocketError('socket.io-client chưa được cài đặt. Vui lòng chạy: npm install socket.io-client');
+        setIsConnected(false);
+        return;
+      }
+
       try {
         // Lấy token để authenticate
         const token = await AsyncStorage.getItem('accessToken');
@@ -135,6 +153,12 @@ export const useSocket = (options: UseSocketOptions = {}) => {
   };
 
   const connect = async () => {
+    if (!io) {
+      setSocketError('socket.io-client chưa được cài đặt. Vui lòng chạy: npm install socket.io-client');
+      setIsConnected(false);
+      return;
+    }
+
     if (socketRef.current?.connected) {
       return;
     }

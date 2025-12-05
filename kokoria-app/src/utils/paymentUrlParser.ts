@@ -10,6 +10,30 @@ export interface PaymentUrlParams {
 }
 
 /**
+ * Parse query parameters từ URL string (không dùng URLSearchParams)
+ */
+const parseQueryParams = (url: string): Record<string, string> => {
+  const params: Record<string, string> = {};
+  try {
+    const queryString = url.split('?')[1] || '';
+    if (!queryString) {
+      return params;
+    }
+
+    const pairs = queryString.split('&');
+    for (const pair of pairs) {
+      const [key, value] = pair.split('=').map(decodeURIComponent);
+      if (key) {
+        params[key] = value || '';
+      }
+    }
+  } catch (error) {
+    console.error('Error parsing query params:', error);
+  }
+  return params;
+};
+
+/**
  * Parse URL và extract payment parameters
  */
 export const parsePaymentUrl = (url: string): PaymentUrlParams | null => {
@@ -17,18 +41,26 @@ export const parsePaymentUrl = (url: string): PaymentUrlParams | null => {
     const urlString = url.startsWith('kokoriaapp://')
       ? url.replace('kokoriaapp://', 'https://')
       : url;
-    const urlObj = new URL(urlString);
+
+    const params = parseQueryParams(urlString);
 
     return {
-      resultCode: urlObj.searchParams.get('resultCode'),
-      message: urlObj.searchParams.get('message'),
-      orderId: urlObj.searchParams.get('orderId'),
-      status: urlObj.searchParams.get('status'),
+      resultCode: params.resultCode || null,
+      message: params.message || null,
+      orderId: params.orderId || null,
+      status: params.status || null,
     };
   } catch (error) {
     console.error('Error parsing payment URL:', error);
     return null;
   }
+};
+
+/**
+ * Parse VNPay URL parameters
+ */
+export const parseVNPayUrl = (url: string): Record<string, string> => {
+  return parseQueryParams(url);
 };
 
 /**
@@ -48,7 +80,18 @@ export const isMoMoRedirectUrl = (url: string): boolean => {
  * Kiểm tra nếu URL là VNPay callback URL
  */
 export const isVNPayCallbackUrl = (url: string): boolean => {
-  return url.includes('vnp_ResponseCode') || url.includes('vnpay');
+  return (
+    url.includes('vnp_ResponseCode') ||
+    url.includes('vnpay') ||
+    url.includes('vnpayment.vn')
+  );
+};
+
+/**
+ * Kiểm tra nếu URL là VNPay error page
+ */
+export const isVNPayErrorPage = (url: string): boolean => {
+  return url.includes('vnpayment.vn') && url.includes('Error.html');
 };
 
 /**

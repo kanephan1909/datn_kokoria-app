@@ -1703,6 +1703,11 @@
     prompts "^2.4.2"
     semver "^7.5.2"
 
+"@react-native-community/geolocation@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.npmjs.org/@react-native-community/geolocation/-/geolocation-3.4.0.tgz"
+  integrity sha512-bzZH89/cwmpkPMKKveoC72C4JH0yF4St5Ceg/ZM9pA1SqX9MlRIrIrrOGZ/+yi++xAvFDiYfihtn9TvXWU9/rA==
+
 "@react-native-vector-icons/ant-design@^12.3.0":
   version "12.4.0"
   resolved "https://registry.npmjs.org/@react-native-vector-icons/ant-design/-/ant-design-12.4.0.tgz"
@@ -2195,13 +2200,6 @@
   version "7.7.1"
   resolved "https://registry.npmjs.org/@types/semver/-/semver-7.7.1.tgz"
   integrity sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==
-
-"@types/socket.io-client@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.npmjs.org/@types/socket.io-client/-/socket.io-client-3.0.0.tgz"
-  integrity sha512-s+IPvFoEIjKA3RdJz/Z2dGR4gLgysKi8owcnrVwNjgvc01Lk68LJDDsG2GRqegFITcxmvCMYM7bhMpwEMlHmDg==
-  dependencies:
-    socket.io-client "*"
 
 "@types/stack-utils@^2.0.0":
   version "2.0.3"
@@ -6481,7 +6479,7 @@ react-native-linear-gradient@^2.8.3:
   resolved "https://registry.npmjs.org/react-native-linear-gradient/-/react-native-linear-gradient-2.8.3.tgz"
   integrity sha512-KflAXZcEg54PXkLyflaSZQ3PJp4uC4whM7nT/Uot9m0e/qxFV3p6uor1983D1YOBJbJN7rrWdqIjq0T42jOJyA==
 
-react-native-maps@^1.26.19:
+react-native-maps@^1.18.0:
   version "1.26.19"
   resolved "https://registry.npmjs.org/react-native-maps/-/react-native-maps-1.26.19.tgz"
   integrity sha512-Eg6f6roq5sAOjClagKz90eRpYrITZg6QPelLjtTLslZU4YZ/86c/wmVs9HR94eJCKg77zUGB6hjd2L5obAakxA==
@@ -7054,7 +7052,7 @@ slice-ansi@^2.0.0:
     astral-regex "^1.0.0"
     is-fullwidth-code-point "^2.0.0"
 
-socket.io-client@*, socket.io-client@^4.7.5:
+socket.io-client@^4.8.1:
   version "4.8.1"
   resolved "https://registry.npmjs.org/socket.io-client/-/socket.io-client-4.8.1.tgz"
   integrity sha512-hJVXfu3E28NmzGk8o1sHhN3om52tRvwYeidbj7xKy2eIIse5IoKX3USlS6Tqt3BHAtflLIkCQBkzVrEEfWUyYQ==

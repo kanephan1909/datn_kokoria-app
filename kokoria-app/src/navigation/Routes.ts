@@ -37,7 +37,8 @@ export enum MainRoutes {
     PaymentWebView = 'Thanh toán WebView',
     OrderConfirmation = 'Xác nhận đơn hàng',
     LiveTrackingMap = 'Theo dõi đơn hàng',
-    Chatbot = 'Chatbot'
+    Chatbot = 'Chatbot',
+    EditLocation = 'Chỉnh sửa vị trí'
 }
 
 // Type for the root stack param list
@@ -69,7 +70,15 @@ export type MainStackParamList = {
     [MainRoutes.ProductDetails]:{productId:string};
     [MainRoutes.Category]:{categoryId:string};
     [MainRoutes.Checkout]:undefined;
-    [MainRoutes.Checkout2]:{addressId?: string; voucherId?: string};
+    [MainRoutes.Checkout2]:{
+      addressId?: string;
+      voucherId?: string;
+      selectedLocation?: {
+        latitude: number;
+        longitude: number;
+        address: string;
+      };
+    };
     [MainRoutes.OrderDetails]:{orderId:string};
     [MainRoutes.OrderHistory]:undefined;
     [MainRoutes.Profile]:undefined;
@@ -87,4 +96,8 @@ export type MainStackParamList = {
     [MainRoutes.OrderConfirmation]:{orderId: string};
     [MainRoutes.LiveTrackingMap]:{orderId: string};
     [MainRoutes.Chatbot]:undefined;
+    [MainRoutes.EditLocation]:{
+      initialLocation?: {latitude: number; longitude: number};
+      address?: string;
+    };
 }
