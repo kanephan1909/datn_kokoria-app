@@ -30,7 +30,8 @@ interface Order {
   id: string;
   orderNumber: string;
   status: string;
-  total: number;
+  total?: number;
+  totalAmount?: number;
   items: OrderItem[];
   address?: {
     name: string;
@@ -282,7 +283,7 @@ const OrderDetailsScreen = () => {
             <View className="flex-row items-center justify-between">
               <Text className="text-gray-800 font-bold text-lg">Tổng cộng</Text>
               <Text className="text-orange-500 font-bold text-xl">
-                {formatPrice(order.total)}
+                {formatPrice(order.totalAmount || order.total || 0)}
               </Text>
             </View>
           </View>

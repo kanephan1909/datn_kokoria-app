@@ -33,7 +33,7 @@ const AddAddressScreen = () => {
 
     setIsLoading(true);
     try {
-      const response = await createAddress({
+      const addressData = {
         name: name.trim(),
         phone: phone.trim(),
         address: address.trim(),
@@ -41,8 +41,24 @@ const AddAddressScreen = () => {
         district: district.trim(),
         city: city.trim(),
         isDefault,
-      });
+      };
+      
+      console.log('Creating address with data:', addressData);
+      
+      const response = await createAddress(addressData);
+      
+      console.log('Create address response:', response);
+      
       if (response.success) {
+        // Reset form
+        setName('');
+        setPhone('');
+        setAddress('');
+        setWard('');
+        setDistrict('');
+        setCity('');
+        setIsDefault(false);
+        
         Alert.alert('Thành công', 'Đã thêm địa chỉ mới', [
           {
             text: 'OK',
@@ -53,7 +69,12 @@ const AddAddressScreen = () => {
         Alert.alert('Lỗi', response.message || 'Không thể thêm địa chỉ');
       }
     } catch (error: any) {
-      Alert.alert('Lỗi', error.response?.data?.message || 'Không thể thêm địa chỉ');
+      console.error('Error creating address:', error);
+      const errorMessage = 
+        error.response?.data?.message || 
+        error.message || 
+        'Không thể thêm địa chỉ. Vui lòng thử lại.';
+      Alert.alert('Lỗi', errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -6,12 +6,13 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {fetchAddresses, deleteAddress} from '../../api/apiClient';
 import {MainRoutes} from '../navigation/Routes';
+import {useCallback} from 'react';
 
 interface Address {
   id: string;
@@ -24,16 +25,32 @@ interface Address {
   isDefault: boolean;
 }
 
+// Map backend format to frontend format
+const mapBackendToFrontend = (backendAddress: any): Address => {
+  // Backend trả về: mobile, street, locality
+  // Frontend cần: phone, address, ward, district, city
+  const localityParts = backendAddress.locality
+    ? backendAddress.locality.split(',').map((s: string) => s.trim())
+    : [];
+  
+  return {
+    id: backendAddress.id,
+    name: backendAddress.name || '',
+    phone: backendAddress.mobile || backendAddress.phone || '',
+    address: backendAddress.street || backendAddress.address || '',
+    ward: localityParts[0] || '',
+    district: localityParts[1] || '',
+    city: localityParts[2] || localityParts.slice(2).join(', ') || '',
+    isDefault: backendAddress.isDefault || false,
+  };
+};
+
 const AddressListScreen = () => {
   const navigation = useNavigation();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadAddresses();
-  }, []);
-
-  const loadAddresses = async () => {
+  const loadAddresses = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetchAddresses();
@@ -41,14 +58,25 @@ const AddressListScreen = () => {
         const addressesList = Array.isArray(response.data)
           ? response.data
           : response.data.addresses || response.data.data || [];
-        setAddresses(addressesList);
+        // Map từ backend format sang frontend format
+        const mappedAddresses = addressesList.map(mapBackendToFrontend);
+        setAddresses(mappedAddresses);
       }
     } catch (error) {
       console.error('Error loading addresses:', error);
+      Alert.alert('Lỗi', 'Không thể tải danh sách địa chỉ');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  // Reload khi screen được focus (khi quay lại từ AddAddressScreen)
+  useFocusEffect(
+    useCallback(() => {
+      loadAddresses();
+    }, [loadAddresses])
+  );
+
 
   const handleDelete = (addressId: string) => {
     Alert.alert('Xóa địa chỉ', 'Bạn có chắc chắn muốn xóa địa chỉ này?', [

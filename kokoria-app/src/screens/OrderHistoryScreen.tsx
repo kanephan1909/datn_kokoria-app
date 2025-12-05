@@ -331,7 +331,17 @@ const OrderHistoryScreen = () => {
                     <Text style={styles.orderDetail}>
                       Giao hàng ·{' '}
                       {order.address
-                        ? `${order.address.address}, ${order.address.ward}`
+                        ? (() => {
+                            const addressParts = [
+                              order.address.address,
+                              order.address.ward,
+                              order.address.district,
+                              order.address.city,
+                            ].filter(Boolean);
+                            return addressParts.length > 0
+                              ? addressParts.join(', ')
+                              : 'Chưa có địa chỉ';
+                          })()
                         : 'Chưa có địa chỉ'}
                     </Text>
                     <Text style={styles.orderDetail}>

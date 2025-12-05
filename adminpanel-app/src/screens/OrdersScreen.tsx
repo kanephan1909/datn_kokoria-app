@@ -120,7 +120,7 @@ const OrdersScreen = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Orders</Text>
+        <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
         <TouchableOpacity style={styles.searchButton} activeOpacity={0.7}>
           <Ionicons name="search" size={24} color="#000" />
         </TouchableOpacity>
@@ -129,9 +129,9 @@ const OrdersScreen = () => {
       {/* Ordered Items Section */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Ordered Items</Text>
+          <Text style={styles.sectionTitle}>Đơn hàng đã đặt</Text>
           <TouchableOpacity activeOpacity={0.7}>
-            <Text style={styles.seeAllText}>See All</Text>
+            <Text style={styles.seeAllText}>Xem tất cả</Text>
           </TouchableOpacity>
         </View>
 

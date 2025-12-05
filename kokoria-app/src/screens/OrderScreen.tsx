@@ -27,6 +27,25 @@ interface Address {
   isDefault: boolean;
 }
 
+// Map backend format to frontend format
+const mapBackendToFrontend = (backendAddress: any): Address => {
+  // Backend trả về: mobile, street, locality
+  // Frontend cần: phone, address, ward, district, city
+  const localityParts = backendAddress.locality
+    ? backendAddress.locality.split(',').map((s: string) => s.trim())
+    : [];
+  return {
+    id: backendAddress.id,
+    name: backendAddress.name || '',
+    phone: backendAddress.mobile || backendAddress.phone || '',
+    address: backendAddress.street || backendAddress.address || '',
+    ward: localityParts[0] || '',
+    district: localityParts[1] || '',
+    city: localityParts[2] || localityParts.slice(2).join(', ') || '',
+    isDefault: backendAddress.isDefault || false,
+  };
+};
+
 const OrderScreen = () => {
   const navigation = useNavigation();
   const {cartItems, totalPrice, updateItem, removeItem} = useCart();
@@ -42,12 +61,14 @@ const OrderScreen = () => {
         const addressesList = Array.isArray(response.data)
           ? response.data
           : response.data.addresses || response.data.data || [];
-        setAddresses(addressesList);
-        const defaultAddress = addressesList.find((addr: Address) => addr.isDefault);
+        // Map từ backend format sang frontend format
+        const mappedAddresses = addressesList.map(mapBackendToFrontend);
+        setAddresses(mappedAddresses);
+        const defaultAddress = mappedAddresses.find((addr: Address) => addr.isDefault);
         if (defaultAddress) {
           setSelectedAddressId(defaultAddress.id);
-        } else if (addressesList.length > 0) {
-          setSelectedAddressId(addressesList[0].id);
+        } else if (mappedAddresses.length > 0) {
+          setSelectedAddressId(mappedAddresses[0].id);
         }
       }
     } catch (error) {
@@ -155,7 +176,7 @@ const OrderScreen = () => {
           style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Orders</Text>
+        <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
         <TouchableOpacity style={styles.searchButton} activeOpacity={0.7}>
           <Ionicons name="search" size={24} color="#000" />
         </TouchableOpacity>
@@ -239,26 +260,41 @@ const OrderScreen = () => {
           <View style={styles.addressSection}>
             <Text style={styles.addressTitle}>Địa chỉ giao hàng</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {addresses.map((address) => (
-                <TouchableOpacity
-                  key={address.id}
-                  onPress={() => setSelectedAddressId(address.id)}
-                  style={[
-                    styles.addressCard,
-                    selectedAddressId === address.id && styles.addressCardSelected,
-                  ]}>
-                  <Text style={styles.addressName}>{address.name}</Text>
-                  <Text style={styles.addressText}>{address.phone}</Text>
-                  <Text style={styles.addressText} numberOfLines={2}>
-                    {address.address}, {address.ward}, {address.district}, {address.city}
-                  </Text>
-                  {address.isDefault && (
-                    <View style={styles.defaultBadge}>
-                      <Text style={styles.defaultBadgeText}>Mặc định</Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))}
+              {addresses.map((address) => {
+                // Tạo địa chỉ đầy đủ từ các phần
+                const fullAddressParts = [
+                  address.address,
+                  address.ward,
+                  address.district,
+                  address.city,
+                ].filter(Boolean); // Loại bỏ các phần rỗng
+                const fullAddress = fullAddressParts.length > 0
+                  ? fullAddressParts.join(', ')
+                  : address.address || 'Chưa có địa chỉ';
+                
+                return (
+                  <TouchableOpacity
+                    key={address.id}
+                    onPress={() => setSelectedAddressId(address.id)}
+                    style={[
+                      styles.addressCard,
+                      selectedAddressId === address.id && styles.addressCardSelected,
+                    ]}>
+                    <Text style={styles.addressName}>{address.name || 'Chưa có tên'}</Text>
+                    {address.phone && (
+                      <Text style={styles.addressText}>{address.phone}</Text>
+                    )}
+                    <Text style={styles.addressText} numberOfLines={3}>
+                      {fullAddress}
+                    </Text>
+                    {address.isDefault && (
+                      <View style={styles.defaultBadge}>
+                        <Text style={styles.defaultBadgeText}>Mặc định</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </ScrollView>
             <TouchableOpacity
               style={styles.changeAddressButton}
