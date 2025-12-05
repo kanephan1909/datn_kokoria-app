@@ -541,13 +541,22 @@ async function createVNPayPayment(req, res) {
       ipAddr = vnpayConfig.getIpAddr();
     }
 
+    // VNPay không chấp nhận custom URL scheme (kokoriaapp://)
+    // Phải dùng HTTP/HTTPS URL, sau đó redirect về app
+    // Lưu appReturnUrl để dùng sau khi redirect
+    const appReturnUrl = returnUrl && returnUrl.startsWith('kokoriaapp://') 
+      ? returnUrl 
+      : `kokoriaapp://payment/return?orderId=${orderId}`;
+
     // Tạo payment object để truyền vào service
+    // Dùng backend HTTP URL cho VNPay (không dùng custom scheme)
     const payment = {
       orderId: order.id,
       amount: parseFloat(amount),
       metadata: {
         orderInfo: orderInfo || `Payment for order ${orderId}`,
-        returnUrl: returnUrl || vnpayConfig.getReturnUrl(),
+        returnUrl: vnpayConfig.getReturnUrl(), // Dùng backend HTTP URL
+        appReturnUrl: appReturnUrl, // Lưu appReturnUrl để dùng sau
         ipAddress: ipAddr,
         request: req,
       },
@@ -583,19 +592,53 @@ async function createVNPayPayment(req, res) {
       },
     });
 
-    // Tạo Payment record với provider = VNPAY
-    await prisma.payment.create({
-      data: {
+    // Kiểm tra xem đã có payment record chưa (retry case)
+    const existingPayment = await prisma.payment.findFirst({
+      where: {
         orderId: orderId,
         provider: "VNPAY",
-        method: "ONLINE",
-        status: "PAYMENT_PENDING",
-        amount: parseFloat(amount),
-        currency: "VND",
-        gatewayOrderId: vnpTxnRef,
-        gatewayResponse: { paymentUrl: paymentUrl },
+        status: {
+          in: ["PAYMENT_PENDING", "PAYMENT_FAILED"],
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
+
+    if (existingPayment) {
+      // Update payment record với payment URL mới (retry)
+      await prisma.payment.update({
+        where: { id: existingPayment.id },
+        data: {
+          status: "PAYMENT_PENDING",
+          gatewayOrderId: vnpTxnRef,
+          gatewayResponse: { 
+            paymentUrl: paymentUrl,
+            appReturnUrl: appReturnUrl, // Lưu appReturnUrl vào gatewayResponse
+          },
+          // Prisma tự động cập nhật updatedAt nếu có @updatedAt trong schema
+        },
+      });
+      logger.info(`Updated existing payment record for order ${orderId} (retry)`);
+    } else {
+      // Tạo Payment record mới với provider = VNPAY
+      await prisma.payment.create({
+        data: {
+          orderId: orderId,
+          provider: "VNPAY",
+          method: "ONLINE",
+          status: "PAYMENT_PENDING",
+          amount: parseFloat(amount),
+          currency: "VND",
+          gatewayOrderId: vnpTxnRef,
+          gatewayResponse: { 
+            paymentUrl: paymentUrl,
+            appReturnUrl: appReturnUrl, // Lưu appReturnUrl vào gatewayResponse
+          },
+        },
+      });
+    }
 
     return res.json({
       success: true,
@@ -704,8 +747,9 @@ async function vnPayReturn(req, res) {
 
     // Tìm order qua Payment table theo gatewayOrderId (vnp_TxnRef)
     let order = null;
+    let payment = null;
     if (orderId) {
-      const payment = await prisma.payment.findFirst({
+      payment = await prisma.payment.findFirst({
         where: {
           gatewayOrderId: orderId,
           provider: 'VNPAY',
@@ -715,31 +759,74 @@ async function vnPayReturn(req, res) {
       order = payment?.order || null;
     }
 
-    // Redirect dựa trên response code
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-
+    // Lấy appReturnUrl từ payment gatewayResponse
+    const gatewayResponse = payment?.gatewayResponse || {};
+    const appReturnUrl = gatewayResponse.appReturnUrl;
+    
     if (vnp_ResponseCode === "00") {
       // Thanh toán thành công
-      const successUrl = order?.metadata?.returnUrl
-        ? `${order.metadata.returnUrl}?orderId=${
-            order.id
-          }&status=success&transId=${transactionNo || ""}`
-        : `${frontendUrl}/payment/success?orderId=${
-            order?.id || orderId
-          }&status=success&transId=${transactionNo || ""}`;
-
-      return res.redirect(successUrl);
+      if (appReturnUrl && appReturnUrl.startsWith('kokoriaapp://')) {
+        // Redirect về app qua deep link
+        const deepLink = `${appReturnUrl}&status=success&transId=${transactionNo || ""}`;
+        return res.send(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Đang chuyển hướng...</title>
+          </head>
+          <body>
+            <script>
+              window.location.href = "${deepLink}";
+              setTimeout(function() {
+                window.close();
+              }, 1000);
+            </script>
+            <p>Đang chuyển hướng về ứng dụng...</p>
+          </body>
+          </html>
+        `);
+      } else {
+        // Fallback về frontend URL
+        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+        const successUrl = `${frontendUrl}/payment/success?orderId=${
+          order?.id || orderId
+        }&status=success&transId=${transactionNo || ""}`;
+        return res.redirect(successUrl);
+      }
     } else {
       // Thanh toán thất bại
-      const cancelUrl = order?.metadata?.cancelUrl
-        ? `${order.metadata.cancelUrl}?orderId=${order.id}&status=failed&code=${
-            vnp_ResponseCode || ""
-          }`
-        : `${frontendUrl}/payment/failed?orderId=${
-            order?.id || orderId
-          }&status=failed&code=${vnp_ResponseCode || ""}`;
-
-      return res.redirect(cancelUrl);
+      if (appReturnUrl && appReturnUrl.startsWith('kokoriaapp://')) {
+        // Redirect về app qua deep link
+        const deepLink = `${appReturnUrl}&status=failed&code=${vnp_ResponseCode || ""}`;
+        return res.send(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Đang chuyển hướng...</title>
+          </head>
+          <body>
+            <script>
+              window.location.href = "${deepLink}";
+              setTimeout(function() {
+                window.close();
+              }, 1000);
+            </script>
+            <p>Đang chuyển hướng về ứng dụng...</p>
+          </body>
+          </html>
+        `);
+      } else {
+        // Fallback về frontend URL
+        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+        const cancelUrl = `${frontendUrl}/payment/failed?orderId=${
+          order?.id || orderId
+        }&status=failed&code=${vnp_ResponseCode || ""}`;
+        return res.redirect(cancelUrl);
+      }
     }
   } catch (error) {
     logger.error(`VNPay return error: ${error.message || error}`);
