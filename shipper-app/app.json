@@ -4,30 +4,31 @@
     "slug": "shipper-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
     "splash": {
-      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#3B82F6"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#3B82F6"
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_BACKGROUND_LOCATION"
       ],
       "config": {
         "googleMaps": {
-          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+          "apiKey": "AIzaSyA-SkUtfGlqdwhs1qeRPjQuXkn3KrlbdHo"
         }
-      }
+      },
+      "package": "com.anonymous.shipperapp"
     },
     "ios": {
       "supportsTablet": true,
@@ -36,11 +37,9 @@
         "NSLocationAlwaysUsageDescription": "Ứng dụng cần quyền truy cập vị trí để theo dõi vị trí khi giao hàng."
       },
       "config": {
-        "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+        "googleMapsApiKey": "AIzaSyA-SkUtfGlqdwhs1qeRPjQuXkn3KrlbdHo"
       }
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "web": {}
   }
 }

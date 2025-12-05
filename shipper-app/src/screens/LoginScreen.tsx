@@ -79,7 +79,8 @@ const LoginScreen = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-white"
+      className="flex-1"
+      style={{ backgroundColor: '#F0F9FF' }}
     >
       <ScrollView
         contentContainerClassName="flex-grow justify-center px-6 py-8"
@@ -87,35 +88,38 @@ const LoginScreen = () => {
       >
         <View className="items-center mb-10">
           <View 
-            className="bg-blue-500 rounded-full p-6 mb-6"
+            className="rounded-full p-8 mb-6"
             style={{
+              backgroundColor: '#3B82F6',
               shadowColor: '#3B82F6',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 8,
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.4,
+              shadowRadius: 16,
+              elevation: 12,
             }}
           >
-            <Ionicons name="bicycle" size={56} color="white" />
+            <Ionicons name="bicycle" size={64} color="white" />
           </View>
-          <Text className="text-3xl font-bold text-gray-900 mb-2">Shipper App</Text>
-          <Text className="text-gray-600 text-center text-base">Đăng nhập để nhận và giao đơn hàng</Text>
+          <Text className="text-4xl font-bold text-gray-900 mb-3">Shipper App</Text>
+          <Text className="text-gray-600 text-center text-base leading-6">
+            Đăng nhập để nhận và giao đơn hàng
+          </Text>
         </View>
 
-        <View className="space-y-4">
+        <View>
           {/* Email Input */}
           <View className="mb-4">
             <Text className="text-gray-700 font-semibold mb-2.5 text-base">Email</Text>
             <View
-              className={`flex-row items-center bg-white rounded-xl px-4 py-2.5 border ${
+              className={`flex-row items-center bg-white rounded-2xl px-5 py-4 border-2 ${
                 errors.email ? 'border-red-500' : 'border-gray-200'
               }`}
               style={{
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 2,
-                elevation: 2,
+                shadowColor: errors.email ? '#EF4444' : '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: errors.email ? 0.2 : 0.05,
+                shadowRadius: 4,
+                elevation: 3,
               }}
             >
               <Ionicons name="mail-outline" size={20} color="#6B7280" />
@@ -142,15 +146,15 @@ const LoginScreen = () => {
           <View className="mb-4">
             <Text className="text-gray-700 font-semibold mb-2.5 text-base">Mật khẩu</Text>
             <View
-              className={`flex-row items-center bg-white rounded-xl px-4 py-2.5 border ${
+              className={`flex-row items-center bg-white rounded-2xl px-5 py-4 border-2 ${
                 errors.password ? 'border-red-500' : 'border-gray-200'
               }`}
               style={{
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 2,
-                elevation: 2,
+                shadowColor: errors.password ? '#EF4444' : '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: errors.password ? 0.2 : 0.05,
+                shadowRadius: 4,
+                elevation: 3,
               }}
             >
               <Ionicons name="lock-closed-outline" size={20} color="#6B7280" />
@@ -182,21 +186,24 @@ const LoginScreen = () => {
 
           {/* Login Button */}
           <TouchableOpacity
-            className="bg-blue-500 rounded-xl py-4 items-center justify-center mt-2"
+            className="bg-blue-500 rounded-2xl py-5 items-center justify-center mt-4"
             onPress={handleLogin}
             disabled={loginMutation.isPending}
             style={{
               shadowColor: '#3B82F6',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 6,
-              elevation: 6,
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.4,
+              shadowRadius: 12,
+              elevation: 8,
             }}
           >
             {loginMutation.isPending ? (
-              <ActivityIndicator color="white" />
+              <ActivityIndicator color="white" size="large" />
             ) : (
-              <Text className="text-white font-bold text-lg">Đăng nhập</Text>
+              <View className="flex-row items-center">
+                <Text className="text-white font-bold text-lg mr-2">Đăng nhập</Text>
+                <Ionicons name="arrow-forward" size={22} color="white" />
+              </View>
             )}
           </TouchableOpacity>
 

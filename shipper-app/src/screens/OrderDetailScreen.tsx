@@ -74,18 +74,40 @@ const OrderDetailScreen = () => {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-gray-50">
-        <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="text-gray-600 mt-4">Đang tải...</Text>
+      <View className="flex-1 items-center justify-center" style={{ backgroundColor: '#F0F9FF' }}>
+        <View 
+          className="bg-white rounded-full p-6 mb-4"
+          style={{
+            shadowColor: '#3B82F6',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 12,
+            elevation: 8,
+          }}
+        >
+          <ActivityIndicator size="large" color="#3B82F6" />
+        </View>
+        <Text className="text-gray-700 mt-4 font-semibold text-base">Đang tải...</Text>
       </View>
     );
   }
 
   if (error || !order) {
     return (
-      <View className="flex-1 items-center justify-center bg-gray-50 px-6">
-        <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
-        <Text className="text-red-500 text-center mt-4 text-lg font-semibold">
+      <View className="flex-1 items-center justify-center px-6" style={{ backgroundColor: '#F0F9FF' }}>
+        <View 
+          className="bg-white rounded-full p-6 mb-4"
+          style={{
+            shadowColor: '#EF4444',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 12,
+            elevation: 8,
+          }}
+        >
+          <Ionicons name="alert-circle" size={64} color="#EF4444" />
+        </View>
+        <Text className="text-gray-900 text-center mt-4 text-xl font-bold">
           Không thể tải đơn hàng
         </Text>
       </View>
@@ -95,48 +117,103 @@ const OrderDetailScreen = () => {
   const isAvailable = order.status === 'READY_FOR_PICKUP' && !order.driverId;
   const isMyOrder = order.driverId && ['PICKED_UP', 'DELIVERING'].includes(order.status);
 
+  const getStatusInfo = (status: string) => {
+    const statusMap: { [key: string]: { text: string; color: string; bgColor: string } } = {
+      READY_FOR_PICKUP: { text: 'Sẵn sàng', color: '#10B981', bgColor: '#D1FAE5' },
+      PICKED_UP: { text: 'Đã lấy hàng', color: '#F59E0B', bgColor: '#FEF3C7' },
+      DELIVERING: { text: 'Đang giao', color: '#3B82F6', bgColor: '#DBEAFE' },
+      COMPLETED: { text: 'Đã giao', color: '#10B981', bgColor: '#D1FAE5' },
+    };
+    return statusMap[status] || { text: status, color: '#6B7280', bgColor: '#F3F4F6' };
+  };
+
+  const statusInfo = getStatusInfo(order.status);
+
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView className="flex-1" style={{ backgroundColor: '#F0F9FF' }}>
       {/* Order Info */}
-      <View className="bg-white mx-4 my-4 rounded-xl p-4">
-        <View className="flex-row justify-between items-start mb-4">
-          <View>
-            <Text className="text-lg font-bold text-gray-900">Đơn #{order.id.slice(-6)}</Text>
-            <Text className="text-gray-600 text-sm mt-1">
+      <View className="bg-white mx-4 my-4 rounded-2xl p-5" style={{
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 6,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+      }}>
+        <View className="flex-row justify-between items-start mb-5">
+          <View className="flex-1">
+            <View className="flex-row items-center mb-2">
+              <View className="bg-gray-100 rounded-lg px-3 py-1 mr-2">
+                <Text className="text-gray-700 font-bold text-xs">#{order.id.slice(-6)}</Text>
+              </View>
+              <View 
+                className="rounded-full px-3 py-1"
+                style={{ backgroundColor: statusInfo.bgColor }}
+              >
+                <Text 
+                  className="font-bold text-xs"
+                  style={{ color: statusInfo.color }}
+                >
+                  {statusInfo.text}
+                </Text>
+              </View>
+            </View>
+            <Text className="text-3xl font-bold text-gray-900 mt-2">
               {formatCurrency(order.totalAmount)}
             </Text>
-          </View>
-          <View className="bg-blue-100 px-3 py-1 rounded-full">
-            <Text className="text-blue-600 font-semibold text-xs">{order.status}</Text>
           </View>
         </View>
 
         {/* Address */}
-        <View className="border-t border-gray-100 pt-4 mt-4">
-          <Text className="text-gray-700 font-semibold mb-2">Địa chỉ giao hàng</Text>
-          <Text className="text-gray-900">{getAddressString(order.address)}</Text>
+        <View className="border-t border-gray-100 pt-5 mt-5">
+          <Text className="text-gray-500 text-xs font-semibold mb-3 uppercase tracking-wide">
+            Địa chỉ giao hàng
+          </Text>
+          <View className="bg-gray-50 rounded-xl p-4 mb-4">
+            <Text className="text-gray-900 text-base leading-6">
+              {getAddressString(order.address)}
+            </Text>
+          </View>
           
           {order.address?.latitude && order.address?.longitude && (
             <TouchableOpacity
-              className="flex-row items-center mt-3 bg-blue-50 px-4 py-2 rounded-lg"
+              className="flex-row items-center justify-center bg-blue-500 px-6 py-4 rounded-xl"
+              style={{
+                shadowColor: '#3B82F6',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 6,
+              }}
               onPress={() => openGoogleMaps(order.address.latitude, order.address.longitude)}
             >
-              <Ionicons name="navigate" size={20} color="#3B82F6" />
-              <Text className="text-blue-600 font-semibold ml-2">Mở Google Maps</Text>
+              <Ionicons name="navigate" size={22} color="white" />
+              <Text className="text-white font-bold ml-2 text-base">Mở Google Maps</Text>
             </TouchableOpacity>
           )}
         </View>
 
         {/* Items */}
         {order.items && Array.isArray(order.items) && order.items.length > 0 && (
-          <View className="border-t border-gray-100 pt-4 mt-4">
-            <Text className="text-gray-700 font-semibold mb-2">Sản phẩm</Text>
+          <View className="border-t border-gray-100 pt-5 mt-5">
+            <Text className="text-gray-500 text-xs font-semibold mb-3 uppercase tracking-wide">
+              Sản phẩm
+            </Text>
             {order.items.map((item: any, index: number) => (
-              <View key={index} className="flex-row justify-between py-2">
-                <Text className="text-gray-900 flex-1">
-                  {item.name || item.productName} x{item.quantity || 1}
-                </Text>
-                <Text className="text-gray-600">
+              <View 
+                key={index} 
+                className="flex-row justify-between items-center py-3 px-4 bg-gray-50 rounded-xl mb-2"
+              >
+                <View className="flex-1 mr-3">
+                  <Text className="text-gray-900 font-semibold text-base">
+                    {item.name || item.productName}
+                  </Text>
+                  <Text className="text-gray-500 text-sm mt-1">
+                    Số lượng: {item.quantity || 1}
+                  </Text>
+                </View>
+                <Text className="text-gray-900 font-bold text-base">
                   {formatCurrency((item.price || 0) * (item.quantity || 1))}
                 </Text>
               </View>
@@ -146,56 +223,96 @@ const OrderDetailScreen = () => {
 
         {/* Note */}
         {order.note && (
-          <View className="border-t border-gray-100 pt-4 mt-4">
-            <Text className="text-gray-700 font-semibold mb-2">Ghi chú</Text>
-            <Text className="text-gray-900">{order.note}</Text>
+          <View className="border-t border-gray-100 pt-5 mt-5">
+            <Text className="text-gray-500 text-xs font-semibold mb-3 uppercase tracking-wide">
+              Ghi chú
+            </Text>
+            <View className="bg-yellow-50 rounded-xl p-4 border-l-4" style={{ borderLeftColor: '#F59E0B' }}>
+              <Text className="text-gray-900 text-base leading-6">{order.note}</Text>
+            </View>
           </View>
         )}
       </View>
 
       {/* Actions */}
       {isAvailable && (
-        <View className="px-4 pb-4">
+        <View className="px-4 pb-6">
           <TouchableOpacity
-            className="bg-green-500 rounded-xl py-4"
+            className="bg-green-500 rounded-2xl py-5"
+            style={{
+              shadowColor: '#10B981',
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.4,
+              shadowRadius: 12,
+              elevation: 8,
+            }}
             onPress={() => acceptMutation.mutate()}
             disabled={acceptMutation.isPending}
           >
             {acceptMutation.isPending ? (
-              <ActivityIndicator color="white" />
+              <ActivityIndicator color="white" size="large" />
             ) : (
-              <Text className="text-white font-bold text-center text-lg">Nhận đơn</Text>
+              <View className="flex-row items-center justify-center">
+                <Ionicons name="checkmark-circle" size={24} color="white" />
+                <Text className="text-white font-bold text-center text-lg ml-2">
+                  Nhận đơn hàng
+                </Text>
+              </View>
             )}
           </TouchableOpacity>
         </View>
       )}
 
       {isMyOrder && (
-        <View className="px-4 pb-4 space-y-3">
+        <View className="px-4 pb-6">
           {order.status === 'PICKED_UP' && (
             <TouchableOpacity
-              className="bg-blue-500 rounded-xl py-4"
+              className="bg-blue-500 rounded-2xl py-5 mb-3"
+              style={{
+                shadowColor: '#3B82F6',
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.4,
+                shadowRadius: 12,
+                elevation: 8,
+              }}
               onPress={() => updateStatusMutation.mutate({ status: 'DELIVERING' })}
               disabled={updateStatusMutation.isPending}
             >
               {updateStatusMutation.isPending ? (
-                <ActivityIndicator color="white" />
+                <ActivityIndicator color="white" size="large" />
               ) : (
-                <Text className="text-white font-bold text-center text-lg">Bắt đầu giao hàng</Text>
+                <View className="flex-row items-center justify-center">
+                  <Ionicons name="bicycle" size={24} color="white" />
+                  <Text className="text-white font-bold text-center text-lg ml-2">
+                    Bắt đầu giao hàng
+                  </Text>
+                </View>
               )}
             </TouchableOpacity>
           )}
 
           {order.status === 'DELIVERING' && (
             <TouchableOpacity
-              className="bg-green-500 rounded-xl py-4"
+              className="bg-green-500 rounded-2xl py-5"
+              style={{
+                shadowColor: '#10B981',
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.4,
+                shadowRadius: 12,
+                elevation: 8,
+              }}
               onPress={() => updateStatusMutation.mutate({ status: 'COMPLETED' })}
               disabled={updateStatusMutation.isPending}
             >
               {updateStatusMutation.isPending ? (
-                <ActivityIndicator color="white" />
+                <ActivityIndicator color="white" size="large" />
               ) : (
-                <Text className="text-white font-bold text-center text-lg">Hoàn thành giao hàng</Text>
+                <View className="flex-row items-center justify-center">
+                  <Ionicons name="checkmark-circle" size={24} color="white" />
+                  <Text className="text-white font-bold text-center text-lg ml-2">
+                    Hoàn thành giao hàng
+                  </Text>
+                </View>
               )}
             </TouchableOpacity>
           )}
