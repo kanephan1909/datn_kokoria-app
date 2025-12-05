@@ -217,3 +217,5 @@ export const useSocket = (options: UseSocketOptions = {}) => {
   };
 };
 
+export type {UseSocketOptions};
+

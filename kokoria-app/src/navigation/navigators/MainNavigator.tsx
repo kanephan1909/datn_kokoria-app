@@ -20,6 +20,8 @@ import ChatbotScreen from '../../screens/ChatbotScreen';
 import SettingsScreen from '../../screens/SettingsScreen';
 import EditLocationScreen from '../../screens/EditLocationScreen';
 import NotificationsScreen from '../../screens/NotificationsScreen';
+import ChatScreen from '../../screens/ChatScreen';
+import OrderDeliveredScreen from '../../screens/OrderDeliveredScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -64,6 +66,14 @@ const MainNavigator = () => {
       <Stack.Screen
         name={MainRoutes.Notifications}
         component={NotificationsScreen}
+      />
+      <Stack.Screen
+        name={MainRoutes.Chat}
+        component={ChatScreen}
+      />
+      <Stack.Screen
+        name={MainRoutes.OrderDelivered}
+        component={OrderDeliveredScreen}
       />
     </Stack.Navigator>
   );

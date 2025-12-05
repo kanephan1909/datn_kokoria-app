@@ -38,7 +38,9 @@ export enum MainRoutes {
     OrderConfirmation = 'Xác nhận đơn hàng',
     LiveTrackingMap = 'Theo dõi đơn hàng',
     Chatbot = 'Chatbot',
-    EditLocation = 'Chỉnh sửa vị trí'
+    EditLocation = 'Chỉnh sửa vị trí',
+    Chat = 'Chat',
+    OrderDelivered = 'Đơn hàng đã giao'
 }
 
 // Type for the root stack param list
@@ -99,5 +101,13 @@ export type MainStackParamList = {
     [MainRoutes.EditLocation]:{
       initialLocation?: {latitude: number; longitude: number};
       address?: string;
+    };
+    [MainRoutes.Chat]:{
+      orderId: string;
+      recipientName?: string;
+      recipientId?: string;
+    };
+    [MainRoutes.OrderDelivered]:{
+      orderId: string;
     };
 }

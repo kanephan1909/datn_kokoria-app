@@ -682,6 +682,21 @@ export const fetchRestaurants = async (params?: {
 export const fetchRestaurantById = async (id: string) =>
   (await api.get(`/restaurants/${id}`)).data;
 
+// ==================== RATINGS/REVIEWS API ====================
+// TODO: Implement rating/review API endpoint in backend
+export const submitOrderRating = async (orderId: string, data: {
+  rating: number;
+  feedback?: string;
+}) => {
+  // Placeholder - cần implement endpoint trong backend
+  // return (await api.post(`/orders/${orderId}/rating`, data)).data;
+  return Promise.resolve({
+    success: true,
+    message: 'Đánh giá đã được ghi nhận',
+    data: { orderId, ...data },
+  });
+};
+
 // ==================== UPLOAD API ====================
 export const uploadImage = async (imageUri: string) => {
   const formData = new FormData();
@@ -736,6 +751,30 @@ export interface Product {
   rating?: number;
   reviews?: number;
 }
+
+// ==================== MESSAGES API ====================
+export interface Message {
+  id: string;
+  orderId: string;
+  senderId: string;
+  text: string;
+  createdAt: string;
+}
+
+export const fetchOrderMessages = async (orderId: string, params?: {page?: number; limit?: number}) => {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append('page', params.page.toString());
+  if (params?.limit) queryParams.append('limit', params.limit.toString());
+  return (await api.get(`/messages/order/${orderId}?${queryParams.toString()}`)).data;
+};
+
+export const sendMessage = async (orderId: string, text: string) => {
+  return (await api.post('/messages', {orderId, text})).data;
+};
+
+export const deleteMessage = async (messageId: string) => {
+  return (await api.delete(`/messages/${messageId}`)).data;
+};
 
 // ==================== CHATBOT API ====================
 export interface ChatMessage {

@@ -22,17 +22,7 @@ import {
 } from '../../api/apiClient';
 import {MainRoutes} from '../navigation/Routes';
 import {GOOGLE_MAPS_API_KEY} from '../config/env';
-
-// Import MapView nếu có
-let MapView: any = null;
-let Marker: any = null;
-try {
-  const reactNativeMaps = require('react-native-maps');
-  MapView = reactNativeMaps.default || reactNativeMaps;
-  Marker = reactNativeMaps.Marker;
-} catch (error) {
-  console.log('react-native-maps not installed, using placeholder');
-}
+import MapView, {Marker} from 'react-native-maps';
 
 interface Address {
   id: string;
@@ -112,7 +102,6 @@ const CheckoutScreen2 = () => {
     latitude: number;
     longitude: number;
   }>(defaultLocation);
-  const [isGeocoding, setIsGeocoding] = useState(false);
   const mapViewRef = useRef<any>(null);
 
   const isProcessingRef = useRef(false);
@@ -139,7 +128,6 @@ const CheckoutScreen2 = () => {
     }
 
     try {
-      setIsGeocoding(true);
       const addressString = [
         address.address,
         address.ward,
@@ -176,8 +164,6 @@ const CheckoutScreen2 = () => {
     } catch (error) {
       console.error('Geocoding error:', error);
       setMapLocation(defaultLocation);
-    } finally {
-      setIsGeocoding(false);
     }
   }, []);
 
@@ -560,65 +546,41 @@ const CheckoutScreen2 = () => {
         contentContainerStyle={styles.scrollContent}>
         {/* Map */}
         <View style={styles.mapContainer}>
-          {MapView ? (
-            <MapView
-              ref={mapViewRef}
-              style={styles.map}
-              initialRegion={{
-                latitude: mapLocation.latitude,
-                longitude: mapLocation.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }}
-              region={{
-                latitude: mapLocation.latitude,
-                longitude: mapLocation.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }}
-              onPress={(event: any) => {
+          <MapView
+            ref={mapViewRef}
+            style={styles.map}
+            initialRegion={{
+              latitude: mapLocation.latitude,
+              longitude: mapLocation.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }}
+            region={{
+              latitude: mapLocation.latitude,
+              longitude: mapLocation.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }}
+            onPress={(event: any) => {
+              const {latitude, longitude} = event.nativeEvent.coordinate;
+              setMapLocation({latitude, longitude});
+              // Reverse geocode để lấy địa chỉ mới
+              reverseGeocode(latitude, longitude);
+            }}>
+            <Marker
+              coordinate={mapLocation}
+              draggable
+              onDragEnd={(event: any) => {
                 const {latitude, longitude} = event.nativeEvent.coordinate;
                 setMapLocation({latitude, longitude});
-                // Reverse geocode để lấy địa chỉ mới
+                // Reverse geocode để lấy địa chỉ mới khi kéo marker
                 reverseGeocode(latitude, longitude);
               }}>
-              <Marker
-                coordinate={mapLocation}
-                draggable
-                onDragEnd={(event: any) => {
-                  const {latitude, longitude} = event.nativeEvent.coordinate;
-                  setMapLocation({latitude, longitude});
-                  // Reverse geocode để lấy địa chỉ mới khi kéo marker
-                  reverseGeocode(latitude, longitude);
-                }}>
-                <View style={styles.markerContainer}>
-                  <Ionicons name="location" size={32} color="#EF4444" />
-                </View>
-              </Marker>
-            </MapView>
-          ) : (
-            <View style={styles.mapPlaceholder}>
-              {isGeocoding ? (
-                <View style={styles.mapLoadingContainer}>
-                  <ActivityIndicator size="large" color="#EA580C" />
-                  <Text style={styles.mapLoadingText}>
-                    Đang tải bản đồ...
-                  </Text>
-                </View>
-              ) : (
-                <>
-                  <View style={styles.mapBackground}>
-                    <View style={styles.mapBuilding} />
-                    <View style={[styles.mapBuilding, styles.mapBuildingRight]} />
-                    <View style={[styles.mapBuilding, styles.mapBuildingLeft]} />
-                  </View>
-                  <View style={styles.redPinWrapper}>
-                    <Ionicons name="location" size={32} color="#EF4444" />
-                  </View>
-                </>
-              )}
-            </View>
-          )}
+              <View style={styles.markerContainer}>
+                <Ionicons name="location" size={32} color="#EF4444" />
+              </View>
+            </Marker>
+          </MapView>
           <TouchableOpacity
             style={styles.editPinButton}
             onPress={() => {

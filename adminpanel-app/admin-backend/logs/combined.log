@@ -1021,3 +1021,13 @@
 {"level":"info","message":"Socket connected: x8XxNvR31WAGEZR0AAAZ (User: admin@gmail.com)","timestamp":"2025-12-05T23:21:10.495Z"}
 {"level":"info","message":"Socket disconnected: x8XxNvR31WAGEZR0AAAZ - Reason: transport close","timestamp":"2025-12-05T23:21:34.912Z"}
 {"level":"info","message":"Socket disconnected: aeg419MXnoSD64tSAAAX - Reason: transport close","timestamp":"2025-12-05T23:21:34.912Z"}
+{"level":"info","message":"Socket connected: pb9g2ysimgGpHOw0AAAb (User: admin@gmail.com)","timestamp":"2025-12-05T23:23:43.296Z"}
+{"level":"info","message":"Socket connected: 6wijq5EafGUCJ2NbAAAd (User: admin@gmail.com)","timestamp":"2025-12-05T23:23:49.405Z"}
+{"level":"info","message":"Socket disconnected: 6wijq5EafGUCJ2NbAAAd - Reason: client namespace disconnect","timestamp":"2025-12-05T23:27:08.276Z"}
+{"level":"info","message":"Socket connected: CpRwB5llPHMkUe30AAAf (User: admin@gmail.com)","timestamp":"2025-12-05T23:27:08.338Z"}
+{"level":"info","message":"Socket disconnected: CpRwB5llPHMkUe30AAAf - Reason: client namespace disconnect","timestamp":"2025-12-05T23:27:08.700Z"}
+{"level":"info","message":"Socket connected: ftO2UwGt5x8wtXRhAAAh (User: admin@gmail.com)","timestamp":"2025-12-05T23:27:08.753Z"}
+{"level":"info","message":"Socket disconnected: ftO2UwGt5x8wtXRhAAAh - Reason: client namespace disconnect","timestamp":"2025-12-05T23:27:09.532Z"}
+{"level":"info","message":"Socket connected: ZhAovtvcnH8ZzGOdAAAj (User: admin@gmail.com)","timestamp":"2025-12-05T23:27:09.601Z"}
+{"level":"info","message":"Socket disconnected: ZhAovtvcnH8ZzGOdAAAj - Reason: client namespace disconnect","timestamp":"2025-12-05T23:27:09.976Z"}
+{"level":"info","message":"Socket connected: st9wA2JKSljtwmsNAAAl (User: admin@gmail.com)","timestamp":"2025-12-05T23:27:10.044Z"}

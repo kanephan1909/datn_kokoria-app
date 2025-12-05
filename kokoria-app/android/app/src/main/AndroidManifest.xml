@@ -21,7 +21,7 @@
       tools:replace="android:appComponentFactory">
       <meta-data
           android:name="com.google.android.geo.API_KEY"
-          android:value="AIzaSyA-SkUtfGlqdwhs1qeRPjQuXkn3KrlbdHo" />
+          android:value="AIzaSyCXzcgigGuTcQ0H3meiX11tF7g1yiF47Ss" />
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"

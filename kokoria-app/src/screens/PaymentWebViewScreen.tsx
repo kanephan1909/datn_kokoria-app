@@ -48,7 +48,6 @@ const PaymentWebViewScreen = () => {
     handleMessage,
     handleGoBack,
     getPaymentMethodName,
-    retryPayment,
   } = usePaymentWebView({orderId, paymentMethod, paymentUrl, orderAmount});
 
   // Validate params

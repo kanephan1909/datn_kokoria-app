@@ -25,7 +25,7 @@
       ],
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyA-SkUtfGlqdwhs1qeRPjQuXkn3KrlbdHo"
+          "apiKey": "AIzaSyCXzcgigGuTcQ0H3meiX11tF7g1yiF47Ss"
         }
       },
       "package": "com.anonymous.shipperapp"
@@ -37,7 +37,7 @@
         "NSLocationAlwaysUsageDescription": "Ứng dụng cần quyền truy cập vị trí để theo dõi vị trí khi giao hàng."
       },
       "config": {
-        "googleMapsApiKey": "AIzaSyA-SkUtfGlqdwhs1qeRPjQuXkn3KrlbdHo"
+        "googleMapsApiKey": "AIzaSyCXzcgigGuTcQ0H3meiX11tF7g1yiF47Ss"
       }
     },
     "web": {}
