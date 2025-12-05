@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
 import {
   View,
   ScrollView,
@@ -14,6 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {fetchOrderById} from '../../api/apiClient';
 import {MainRoutes} from '../navigation/Routes';
 import {formatPrice, formatDate} from '../utils/formatters';
+import {useCart} from '../store/useCartStore';
 
 interface OrderItem {
   id?: string;
@@ -51,6 +52,8 @@ const OrderConfirmationScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const {orderId} = route.params as {orderId: string};
+  const {clear: clearCart} = useCart();
+  const cartClearedRef = useRef(false);
 
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,6 +64,18 @@ const OrderConfirmationScreen = () => {
       const response = await fetchOrderById(orderId);
       if (response.success && response.data) {
         setOrder(response.data);
+
+        // Xóa giỏ hàng sau khi load order thành công (chỉ xóa một lần)
+        if (!cartClearedRef.current) {
+          try {
+            await clearCart();
+            cartClearedRef.current = true;
+            console.log('✅ Cart cleared after successful order');
+          } catch (error) {
+            console.error('Error clearing cart:', error);
+            // Không block UI nếu xóa giỏ hàng lỗi
+          }
+        }
       } else {
         (navigation as any).goBack();
       }
@@ -70,7 +85,7 @@ const OrderConfirmationScreen = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [orderId, navigation]);
+  }, [orderId, navigation, clearCart]);
 
   useEffect(() => {
     loadOrder();

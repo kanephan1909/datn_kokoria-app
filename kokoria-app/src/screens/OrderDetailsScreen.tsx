@@ -52,12 +52,92 @@ const OrderDetailsScreen = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const parseAddress = (addressData: any) => {
+    if (!addressData) {
+      return null;
+    }
+
+    // Nếu address là string JSON, parse nó
+    if (typeof addressData === 'string') {
+      try {
+        addressData = JSON.parse(addressData);
+      } catch (e) {
+        console.log('Failed to parse address string:', e);
+        return null;
+      }
+    }
+
+    // Nếu address là object, xử lý các trường hợp
+    if (typeof addressData === 'object') {
+      // Kiểm tra tất cả các field có thể có
+      const result: any = {
+        name: addressData.name || '',
+        phone: addressData.phone || addressData.mobile || '',
+        address: addressData.address || addressData.street || '',
+        ward: addressData.ward || '',
+        district: addressData.district || '',
+        city: addressData.city || '',
+      };
+
+      // Nếu có locality, tách nó ra
+      if (addressData.locality && !result.ward && !result.district && !result.city) {
+        const localityParts = addressData.locality
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter(Boolean);
+        if (localityParts.length > 0) {
+          result.ward = localityParts[0] || '';
+        }
+        if (localityParts.length > 1) {
+          result.district = localityParts[1] || '';
+        }
+        if (localityParts.length > 2) {
+          result.city = localityParts.slice(2).join(', ') || '';
+        }
+      }
+
+      // Chỉ trả về nếu có ít nhất name
+      if (result.name) {
+        return result;
+      }
+    }
+
+    return null;
+  };
+
   const loadOrder = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetchOrderById(orderId);
       if (response.success && response.data) {
-        setOrder(response.data);
+        const orderData = response.data;
+
+        // Debug: Log toàn bộ order data để tìm address
+        console.log('Full order data from API:', JSON.stringify(orderData, null, 2));
+        console.log('Raw address from API:', JSON.stringify(orderData.address, null, 2));
+
+        // Parse address nếu có
+        if (orderData.address) {
+          // Kiểm tra xem address có phải là object với các field khác không
+          const addressObj = typeof orderData.address === 'string'
+            ? JSON.parse(orderData.address)
+            : orderData.address;
+
+          console.log('Address object:', JSON.stringify(addressObj, null, 2));
+
+          const parsedAddress = parseAddress(addressObj);
+          console.log('Parsed address:', JSON.stringify(parsedAddress, null, 2));
+
+          // Nếu parsed address chỉ có name, thử tìm trong toàn bộ orderData
+          if (parsedAddress && parsedAddress.name && !parsedAddress.address && !parsedAddress.ward) {
+            console.log('Address incomplete, checking other fields in orderData...');
+            // Có thể address data nằm ở đâu đó khác
+          }
+
+          orderData.address = parsedAddress;
+        }
+
+        setOrder(orderData);
       } else {
         Alert.alert('Lỗi', 'Không tìm thấy đơn hàng');
         navigation.goBack();
@@ -214,18 +294,29 @@ const OrderDetailsScreen = () => {
           </View>
 
           {/* Delivery Address */}
-          {order.address && (
+          {order.address && order.address.name && (
             <View className="bg-white rounded-xl p-4 mb-3 shadow-sm">
               <View className="flex-row items-center mb-3">
                 <Ionicons name="location" size={20} color="#F97316" />
                 <Text className="text-gray-800 font-semibold ml-2">Địa chỉ giao hàng</Text>
               </View>
               <Text className="text-gray-800 font-semibold">{order.address.name}</Text>
-              <Text className="text-gray-600 text-sm mt-1">{order.address.phone}</Text>
-              <Text className="text-gray-600 text-sm">
-                {order.address.address}, {order.address.ward}, {order.address.district},{' '}
-                {order.address.city}
-              </Text>
+              {order.address.phone && (
+                <Text className="text-gray-600 text-sm mt-1">{order.address.phone}</Text>
+              )}
+              {(() => {
+                const addressParts = [
+                  order.address?.address,
+                  order.address?.ward,
+                  order.address?.district,
+                  order.address?.city,
+                ].filter(Boolean);
+                return addressParts.length > 0 ? (
+                  <Text className="text-gray-600 text-sm mt-1">
+                    {addressParts.join(', ')}
+                  </Text>
+                ) : null;
+              })()}
             </View>
           )}
 

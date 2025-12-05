@@ -21,6 +21,18 @@ import {
   createVNPayPayment,
 } from '../../api/apiClient';
 import {MainRoutes} from '../navigation/Routes';
+import {GOOGLE_MAPS_API_KEY} from '../config/env';
+
+// Import MapView nếu có
+let MapView: any = null;
+let Marker: any = null;
+try {
+  const reactNativeMaps = require('react-native-maps');
+  MapView = reactNativeMaps.default || reactNativeMaps;
+  Marker = reactNativeMaps.Marker;
+} catch (error) {
+  console.log('react-native-maps not installed, using placeholder');
+}
 
 interface Address {
   id: string;
@@ -31,7 +43,15 @@ interface Address {
   district: string;
   city: string;
   isDefault: boolean;
+  latitude?: number;
+  longitude?: number;
 }
+
+// Default location (Ho Chi Minh City)
+const defaultLocation = {
+  latitude: 10.762622,
+  longitude: 106.660172,
+};
 
 // Map backend format to frontend format
 const mapBackendToFrontend = (backendAddress: any): Address => {
@@ -45,9 +65,15 @@ const mapBackendToFrontend = (backendAddress: any): Address => {
   }
 
   if (localityParts.length === 0) {
-    if (backendAddress.ward) localityParts.push(backendAddress.ward);
-    if (backendAddress.district) localityParts.push(backendAddress.district);
-    if (backendAddress.city) localityParts.push(backendAddress.city);
+    if (backendAddress.ward) {
+      localityParts.push(backendAddress.ward);
+    }
+    if (backendAddress.district) {
+      localityParts.push(backendAddress.district);
+    }
+    if (backendAddress.city) {
+      localityParts.push(backendAddress.city);
+    }
   }
 
   return {
@@ -63,6 +89,8 @@ const mapBackendToFrontend = (backendAddress: any): Address => {
       backendAddress.city ||
       '',
     isDefault: backendAddress.isDefault || false,
+    latitude: backendAddress.latitude,
+    longitude: backendAddress.longitude,
   };
 };
 
@@ -71,7 +99,7 @@ type PaymentMethod = 'CASH' | 'MOMO' | 'VNPAY';
 const CheckoutScreen2 = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const {addressId} = (route.params as any) || {};
+  const {addressId, selectedLocation} = (route.params as any) || {};
   const {cartItems, totalPrice, clear, loadCart} = useCart();
   const {user} = useAuth();
 
@@ -80,6 +108,12 @@ const CheckoutScreen2 = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mapLocation, setMapLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  }>(defaultLocation);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const mapViewRef = useRef<any>(null);
 
   const isProcessingRef = useRef(false);
   const orderRequestIdRef = useRef<string | null>(null);
@@ -93,6 +127,83 @@ const CheckoutScreen2 = () => {
       orderRequestIdRef.current = null;
     };
   }, []);
+
+  // Geocode địa chỉ thành tọa độ
+  const geocodeAddress = useCallback(async (address: Address) => {
+    if (address.latitude && address.longitude) {
+      setMapLocation({
+        latitude: address.latitude,
+        longitude: address.longitude,
+      });
+      return;
+    }
+
+    try {
+      setIsGeocoding(true);
+      const addressString = [
+        address.address,
+        address.ward,
+        address.district,
+        address.city,
+      ]
+        .filter(Boolean)
+        .join(', ');
+
+      if (!addressString) {
+        setMapLocation(defaultLocation);
+        return;
+      }
+
+      // Sử dụng Google Geocoding API
+      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+        addressString + ', Vietnam',
+      )}&key=${GOOGLE_MAPS_API_KEY}&language=vi`;
+
+      const response = await fetch(geocodeUrl);
+      const data = await response.json();
+
+      if (data.status === 'OK' && data.results && data.results.length > 0) {
+        const location = data.results[0].geometry.location;
+        setMapLocation({
+          latitude: location.lat,
+          longitude: location.lng,
+        });
+      } else {
+        // Fallback về default location nếu geocode thất bại
+        console.warn('Geocoding failed, using default location');
+        setMapLocation(defaultLocation);
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      setMapLocation(defaultLocation);
+    } finally {
+      setIsGeocoding(false);
+    }
+  }, []);
+
+  // Reverse geocode: chuyển tọa độ thành địa chỉ
+  const reverseGeocode = useCallback(
+    async (latitude: number, longitude: number) => {
+      try {
+        const reverseGeocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}&language=vi`;
+
+        const response = await fetch(reverseGeocodeUrl);
+        const data = await response.json();
+
+        if (data.status === 'OK' && data.results && data.results.length > 0) {
+          const result = data.results[0];
+          // Parse địa chỉ từ Google Maps response
+          // Có thể cập nhật selectedAddress nếu cần
+          console.log('Reverse geocoded address:', result.formatted_address);
+          return result.formatted_address;
+        }
+      } catch (error) {
+        console.error('Reverse geocoding error:', error);
+      }
+      return null;
+    },
+    [],
+  );
 
   const loadAddresses = useCallback(async () => {
     try {
@@ -109,30 +220,33 @@ const CheckoutScreen2 = () => {
           mapBackendToFrontend,
         );
 
+        let selectedAddr: Address | null = null;
         if (addressId) {
-          const addr = mappedAddresses.find(a => a.id === addressId);
-          if (addr) {
-            setSelectedAddress(addr);
-          }
+          selectedAddr = mappedAddresses.find(a => a.id === addressId) || null;
         } else {
-          const defaultAddress = mappedAddresses.find(a => a.isDefault);
-          if (defaultAddress) {
-            setSelectedAddress(defaultAddress);
-          } else if (mappedAddresses.length > 0) {
-            setSelectedAddress(mappedAddresses[0]);
-          } else {
-            setSelectedAddress(null);
-          }
+          selectedAddr =
+            mappedAddresses.find(a => a.isDefault) ||
+            mappedAddresses[0] ||
+            null;
+        }
+
+        setSelectedAddress(selectedAddr);
+        if (selectedAddr) {
+          await geocodeAddress(selectedAddr);
+        } else {
+          setMapLocation(defaultLocation);
         }
       } else {
         setSelectedAddress(null);
+        setMapLocation(defaultLocation);
       }
     } catch {
       setSelectedAddress(null);
+      setMapLocation(defaultLocation);
     } finally {
       setIsLoadingAddresses(false);
     }
-  }, [addressId]);
+  }, [addressId, geocodeAddress]);
 
   // Load addresses khi vào màn hình + reset nếu bị stuck
   useFocusEffect(
@@ -158,6 +272,18 @@ const CheckoutScreen2 = () => {
       loadAddresses();
     }
   }, [addressId, loadAddresses]);
+
+  // Xử lý khi quay lại từ EditLocationScreen với selectedLocation
+  useEffect(() => {
+    if (selectedLocation) {
+      setMapLocation({
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude,
+      });
+      // Có thể cập nhật địa chỉ nếu cần
+      console.log('Location updated from EditLocationScreen:', selectedLocation);
+    }
+  }, [selectedLocation]);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('vi-VN', {
@@ -253,6 +379,9 @@ const CheckoutScreen2 = () => {
                 if (paymentMethod !== 'CASH' && backendPaymentMethod === 'ONLINE') {
                   try {
                     let paymentResponse;
+                    // VNPay không chấp nhận custom URL scheme, cần dùng HTTP/HTTPS URL
+                    // Backend sẽ xử lý và redirect về app
+                    // Không truyền returnUrl cho VNPay, để backend dùng default
                     const returnUrl = `kokoriaapp://payment/return?orderId=${orderId}`;
 
                     switch (paymentMethod) {
@@ -265,11 +394,13 @@ const CheckoutScreen2 = () => {
                         });
                         break;
                       case 'VNPAY':
+                        // Không truyền returnUrl cho VNPay - backend sẽ dùng HTTP URL
+                        // và lưu orderId vào metadata để redirect về app sau
                         paymentResponse = await createVNPayPayment({
                           orderId,
                           amount: finalTotal,
                           orderInfo: `Thanh toan don hang ${orderId}`,
-                          returnUrl,
+                          // Không truyền returnUrl - để backend dùng default HTTP URL
                         });
                         break;
                       default:
@@ -296,6 +427,7 @@ const CheckoutScreen2 = () => {
                             paymentUrl,
                             orderId,
                             paymentMethod,
+                            orderAmount: finalTotal, // Truyền order amount để có thể retry
                           },
                         );
                       }, 100);
@@ -426,21 +558,86 @@ const CheckoutScreen2 = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}>
-        {/* Map placeholder */}
+        {/* Map */}
         <View style={styles.mapContainer}>
-          <View style={styles.mapPlaceholder}>
-            <View style={styles.mapBackground}>
-              <View style={styles.mapBuilding} />
-              <View style={[styles.mapBuilding, styles.mapBuildingRight]} />
-              <View style={[styles.mapBuilding, styles.mapBuildingLeft]} />
+          {MapView ? (
+            <MapView
+              ref={mapViewRef}
+              style={styles.map}
+              initialRegion={{
+                latitude: mapLocation.latitude,
+                longitude: mapLocation.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+              region={{
+                latitude: mapLocation.latitude,
+                longitude: mapLocation.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+              onPress={(event: any) => {
+                const {latitude, longitude} = event.nativeEvent.coordinate;
+                setMapLocation({latitude, longitude});
+                // Reverse geocode để lấy địa chỉ mới
+                reverseGeocode(latitude, longitude);
+              }}>
+              <Marker
+                coordinate={mapLocation}
+                draggable
+                onDragEnd={(event: any) => {
+                  const {latitude, longitude} = event.nativeEvent.coordinate;
+                  setMapLocation({latitude, longitude});
+                  // Reverse geocode để lấy địa chỉ mới khi kéo marker
+                  reverseGeocode(latitude, longitude);
+                }}>
+                <View style={styles.markerContainer}>
+                  <Ionicons name="location" size={32} color="#EF4444" />
+                </View>
+              </Marker>
+            </MapView>
+          ) : (
+            <View style={styles.mapPlaceholder}>
+              {isGeocoding ? (
+                <View style={styles.mapLoadingContainer}>
+                  <ActivityIndicator size="large" color="#EA580C" />
+                  <Text style={styles.mapLoadingText}>
+                    Đang tải bản đồ...
+                  </Text>
+                </View>
+              ) : (
+                <>
+                  <View style={styles.mapBackground}>
+                    <View style={styles.mapBuilding} />
+                    <View style={[styles.mapBuilding, styles.mapBuildingRight]} />
+                    <View style={[styles.mapBuilding, styles.mapBuildingLeft]} />
+                  </View>
+                  <View style={styles.redPinWrapper}>
+                    <Ionicons name="location" size={32} color="#EF4444" />
+                  </View>
+                </>
+              )}
             </View>
-            <View style={styles.redPinWrapper}>
-              <Ionicons name="location" size={32} color="#EF4444" />
-            </View>
-            <TouchableOpacity style={styles.editPinButton}>
-              <Text style={styles.editPinText}>Chỉnh sửa vị trí</Text>
-            </TouchableOpacity>
-          </View>
+          )}
+          <TouchableOpacity
+            style={styles.editPinButton}
+            onPress={() => {
+              (navigation as any).navigate(MainRoutes.EditLocation, {
+                initialLocation: mapLocation,
+                address: selectedAddress
+                  ? [
+                      selectedAddress.address,
+                      selectedAddress.ward,
+                      selectedAddress.district,
+                      selectedAddress.city,
+                    ]
+                      .filter(Boolean)
+                      .join(', ')
+                  : '',
+              });
+            }}>
+            <Text style={styles.editPinText}>Chỉnh sửa vị trí</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Delivery info */}
@@ -577,7 +774,7 @@ const CheckoutScreen2 = () => {
                 </View>
               </View>
               <View style={styles.paymentContent}>
-                <Text style={styles.paymentLabel}>VNPay</Text>
+                <Text style={styles.paymentLabel}>VNPay (Bảo trì)</Text>
               </View>
               <View
                 style={[
@@ -668,11 +865,30 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#FFFFFF',
   },
+  map: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   mapPlaceholder: {
     flex: 1,
     backgroundColor: '#F3F4F6',
     position: 'relative',
     overflow: 'hidden',
+  },
+  mapLoadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapLoadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  markerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   mapBackground: {
     position: 'absolute',

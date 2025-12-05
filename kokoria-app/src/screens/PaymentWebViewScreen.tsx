@@ -34,9 +34,10 @@ const PaymentWebViewScreen = () => {
     paymentUrl: string;
     orderId: string;
     paymentMethod: string;
+    orderAmount?: number;
   };
 
-  const {paymentUrl, orderId, paymentMethod} = routeParams;
+  const {paymentUrl, orderId, paymentMethod, orderAmount} = routeParams;
 
   // Sử dụng custom hook để xử lý payment logic
   const {
@@ -47,7 +48,8 @@ const PaymentWebViewScreen = () => {
     handleMessage,
     handleGoBack,
     getPaymentMethodName,
-  } = usePaymentWebView({orderId, paymentMethod});
+    retryPayment,
+  } = usePaymentWebView({orderId, paymentMethod, paymentUrl, orderAmount});
 
   // Validate params
   useEffect(() => {

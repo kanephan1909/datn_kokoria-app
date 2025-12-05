@@ -183,12 +183,22 @@ const HomeScreen = () => {
         translucent={false}
       />
 
-      {/* Socket Connection Status (Debug) - Chỉ hiển thị khi có lỗi */}
-      {__DEV__ && socketError && (
-        <View className="px-2 py-1 bg-red-500">
-          <Text className="text-white text-xs text-center">
-            Socket Error: {socketError}
-          </Text>
+      {/* Socket Connection Status - Chỉ hiển thị khi có lỗi quan trọng */}
+      {socketError && socketError.includes('chưa được cài đặt') && (
+        <View style={styles.errorBanner}>
+          <View style={styles.errorContent}>
+            <Ionicons name="warning" size={16} color="#FFFFFF" />
+            <Text style={styles.errorText}>
+              {socketError}
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => {
+              // Có thể thêm logic để dismiss error
+            }}
+            style={styles.errorCloseButton}>
+            <Ionicons name="close" size={16} color="#FFFFFF" />
+          </TouchableOpacity>
         </View>
       )}
 
@@ -367,6 +377,30 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1000,
+  },
+  errorBanner: {
+    backgroundColor: '#EF4444',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  errorContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
+  },
+  errorText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '500',
+    marginLeft: 8,
+    flex: 1,
+  },
+  errorCloseButton: {
+    padding: 4,
   },
 });
 
