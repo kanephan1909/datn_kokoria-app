@@ -10,6 +10,7 @@ import MyOrdersScreen from "../screens/MyOrdersScreen";
 import EarningsScreen from "../screens/EarningsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import OrderDetailScreen from "../screens/OrderDetailScreen";
+import ChatScreen from "../screens/ChatScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -83,6 +84,13 @@ const RootNavigator = () => {
               headerShown: true,
               title: "Chi tiết đơn hàng",
               headerBackTitle: "Quay lại"
+            }}
+          />
+          <Stack.Screen 
+            name="Chat" 
+            component={ChatScreen}
+            options={{ 
+              headerShown: false
             }}
           />
         </>

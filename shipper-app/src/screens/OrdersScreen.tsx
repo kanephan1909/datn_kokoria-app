@@ -1,17 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { fetchAvailableOrders } from '../api/apiClient';
+import { useSocketContext } from '../context/SocketContext';
 
 const OrdersScreen = () => {
   const navigation = useNavigation();
+  const { isConnected } = useSocketContext();
   const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ['availableOrders'],
     queryFn: () => fetchAvailableOrders({ page: 1, limit: 20 }),
-    refetchInterval: 10000, // Refresh mỗi 10 giây
+    refetchInterval: isConnected ? false : 10000, // Nếu có socket thì không cần polling
+    onError: (err: any) => {
+      console.error('❌ Error fetching orders:', err);
+      console.error('Error details:', err?.response?.data || err?.message);
+    },
+    onSuccess: (response) => {
+      console.log('✅ Orders fetched:', response);
+      console.log('Orders count:', response?.data?.length || 0);
+    },
   });
+
+  // Khi socket nhận đơn hàng mới, tự động refetch
+  useEffect(() => {
+    if (isConnected) {
+      // Socket sẽ tự động invalidate queries thông qua SocketContext
+      // Chỉ cần refetch khi cần
+    }
+  }, [isConnected]);
 
   const orders = data?.data || [];
 
@@ -111,9 +129,17 @@ const OrdersScreen = () => {
         <View className="flex-row items-center justify-between mb-2">
           <View>
             <Text className="text-2xl font-bold text-white">Đơn hàng sẵn sàng</Text>
-            <Text className="text-blue-100 text-sm mt-1">
-              {orders.length} đơn hàng đang chờ
-            </Text>
+            <View className="flex-row items-center mt-1">
+              <Text className="text-blue-100 text-sm">
+                {orders.length} đơn hàng đang chờ
+              </Text>
+              {isConnected && (
+                <View className="ml-2 flex-row items-center">
+                  <View className="w-2 h-2 bg-green-400 rounded-full mr-1" />
+                  <Text className="text-green-200 text-xs">Real-time</Text>
+                </View>
+              )}
+            </View>
           </View>
           <View 
             className="rounded-full p-3"

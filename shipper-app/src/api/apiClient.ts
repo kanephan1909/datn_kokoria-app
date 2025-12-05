@@ -82,13 +82,13 @@ export const logout = async () => {
 export const getMe = async () => (await api.get('/auth/me')).data;
 
 // ==================== ORDERS API ====================
-// Lấy danh sách đơn sẵn sàng (READY_FOR_PICKUP) - cho shipper nhận đơn
+// Lấy danh sách đơn sẵn sàng (chưa có driver) - cho shipper nhận đơn
 export const fetchAvailableOrders = async (params?: { page?: number; limit?: number }) => {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
-    queryParams.append('status', 'READY_FOR_PICKUP');
-    return (await api.get(`/orders?${queryParams.toString()}`)).data;
+    // Sử dụng endpoint /orders/available để lấy đơn hàng chưa có driver
+    return (await api.get(`/orders/available?${queryParams.toString()}`)).data;
 };
 
 // Lấy đơn đã nhận của shipper (PICKED_UP, DELIVERING)
@@ -137,4 +137,28 @@ export const updateDriverStatus = async (isOnline: boolean) => {
     }
     const driverId = response.data.id;
     return (await api.put(`/drivers/${driverId}`, { isOnline })).data;
+};
+
+// ==================== MESSAGES API ====================
+export interface Message {
+    id: string;
+    orderId: string;
+    senderId: string;
+    text: string;
+    createdAt: string;
+}
+
+export const fetchOrderMessages = async (orderId: string, params?: { page?: number; limit?: number }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    return (await api.get(`/messages/order/${orderId}?${queryParams.toString()}`)).data;
+};
+
+export const sendMessage = async (orderId: string, text: string) => {
+    return (await api.post('/messages', { orderId, text })).data;
+};
+
+export const deleteMessage = async (messageId: string) => {
+    return (await api.delete(`/messages/${messageId}`)).data;
 };

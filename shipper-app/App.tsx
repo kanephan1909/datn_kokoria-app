@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import RootNavigator from "./src/navigation/RootNavigator";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./src/context/AuthContext";
+import { SocketProvider } from "./src/context/SocketContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,9 +19,11 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <NavigationContainer>
-          <RootNavigator />
-        </NavigationContainer>
+        <SocketProvider>
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+        </SocketProvider>
       </AuthProvider>
       <StatusBar style="auto" />
     </QueryClientProvider>
