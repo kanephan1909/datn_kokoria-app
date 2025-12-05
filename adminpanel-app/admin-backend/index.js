@@ -1,10 +1,13 @@
 require('dotenv').config(); 
 const express = require('express');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const logger = require('./utils/logger');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const errorHandler = require('./middlesware/errorHandler.js');
+const jwt = require('jsonwebtoken');
 
 const authRoutes = require('./routes/auth');
 const categoriesRoutes = require('./routes/categories');
@@ -20,14 +23,88 @@ const messagesRoutes = require('./routes/messages');
 const dashboardRoutes = require('./routes/dashboard');
 const uploadRoutes = require('./routes/upload');
 const paymentsRoutes = require('./routes/payments');
+const chatbotRoutes = require('./routes/chatbot');
+const socketService = require('./services/socketService');
 
 const app = express();
+const httpServer = createServer(app);
 
 /**
  * CORS - Chỉ cho phép frontend truy cập API
  * FRONTEND_URL được khai báo trong .env (VD: http://localhost:5173)
  */
-app.use(cors({ origin: process.env.FRONTEND_URL }));
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
+/**
+ * Socket.IO Server Setup
+ */
+const io = new Server(httpServer, {
+  cors: corsOptions,
+  transports: ['websocket', 'polling'],
+});
+
+// Socket.IO Authentication Middleware
+io.use((socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token;
+    
+    if (!token) {
+      // Cho phép kết nối không có token (cho các tính năng công khai)
+      socket.user = null;
+      return next();
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    socket.user = {
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
+    };
+    next();
+  } catch (error) {
+    // Nếu token không hợp lệ, vẫn cho phép kết nối nhưng không có user info
+    socket.user = null;
+    next();
+  }
+});
+
+// Socket.IO Connection Handler
+io.on('connection', (socket) => {
+  logger.info(`Socket connected: ${socket.id}${socket.user ? ` (User: ${socket.user.email})` : ' (Anonymous)'}`);
+
+  // Join user to their personal room if authenticated
+  if (socket.user) {
+    socket.join(`user:${socket.user.id}`);
+  }
+
+  // Handle flash sale countdown request
+  socket.on('flashSale:getCountdown', () => {
+    // TODO: Implement flash sale countdown logic
+    // For now, send a mock response
+    socket.emit('flashSale:countdown', { timeLeft: 3600 });
+  });
+
+  // Handle disconnect
+  socket.on('disconnect', (reason) => {
+    logger.info(`Socket disconnected: ${socket.id} - Reason: ${reason}`);
+  });
+
+  // Handle errors
+  socket.on('error', (error) => {
+    logger.error(`Socket error: ${socket.id} - ${error.message}`);
+  });
+});
+
+// Export io for use in other modules
+app.set('io', io);
+
+// Initialize socket service
+socketService.initialize(io);
 
 /**
  * Helmet - bảo vệ API trước các vấn đề bảo mật phổ biến
@@ -98,13 +175,15 @@ app.use('/api/v1/messages', messagesRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/payments', paymentsRoutes);
+app.use('/api/v1/chatbot', chatbotRoutes);
 
 // Error handler phải đặt sau tất cả routes
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`);
+  logger.info(`Socket.IO server is ready for connections`);
 });
 
-module.exports = app;
+module.exports = { app, io };
