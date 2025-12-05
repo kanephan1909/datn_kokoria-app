@@ -1,5 +1,6 @@
 const logger = require('../utils/logger');
 const { PrismaClient } = require('@prisma/client');
+const socketService = require('../services/socketService');
 
 const prisma = new PrismaClient();
 
@@ -458,6 +459,16 @@ async function updateOrderStatus(req, res) {
             },
         });
 
+        // Emit socket event để thông báo cho customer và driver
+        if (order.userId) {
+            socketService.emitOrderStatusUpdate(order.userId, id, status, message);
+        }
+
+        // Nếu order chuyển sang READY_FOR_PICKUP, emit cho tất cả drivers
+        if (status === 'READY_FOR_PICKUP' && !order.driverId) {
+            socketService.emitToAll('order:new', { order });
+        }
+
         res.json({
             success: true,
             data: order,
@@ -735,6 +746,19 @@ async function acceptOrder(req, res) {
                 message: `Order accepted by driver: ${driver.name}`,
             },
         });
+
+        // Emit socket event để thông báo cho customer
+        if (order.userId) {
+            socketService.emitOrderStatusUpdate(
+                order.userId,
+                id,
+                currentOrder.status,
+                `Đơn hàng đã được shipper ${driver.name} nhận`
+            );
+        }
+
+        // Emit cho tất cả drivers để remove order khỏi danh sách available
+        socketService.emitToAll('order:accepted', { orderId: id, driverId });
 
         res.json({
             success: true,

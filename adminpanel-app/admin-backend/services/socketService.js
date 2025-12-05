@@ -99,6 +99,19 @@ class SocketService {
       this.emitToAll('notification', data);
     }
   }
+
+  /**
+   * Emit new message to order participants
+   */
+  emitNewMessage(orderId, message, recipientId) {
+    const data = { message };
+    if (recipientId) {
+      this.emitToUser(recipientId, 'message:new', data);
+    }
+    // Also emit to order room for real-time updates
+    this.io.to(`order:${orderId}`).emit('message:new', data);
+    logger.info(`SocketService: Emitted message:new for order ${orderId} to user ${recipientId}`);
+  }
 }
 
 // Export singleton instance

@@ -82,6 +82,17 @@ io.on('connection', (socket) => {
     socket.join(`user:${socket.user.id}`);
   }
 
+  // Handle joining order room for real-time messaging
+  socket.on('order:join', (orderId) => {
+    socket.join(`order:${orderId}`);
+    logger.info(`Socket ${socket.id} joined order room: order:${orderId}`);
+  });
+
+  socket.on('order:leave', (orderId) => {
+    socket.leave(`order:${orderId}`);
+    logger.info(`Socket ${socket.id} left order room: order:${orderId}`);
+  });
+
   // Handle flash sale countdown request
   socket.on('flashSale:getCountdown', () => {
     // TODO: Implement flash sale countdown logic

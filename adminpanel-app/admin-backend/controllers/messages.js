@@ -1,5 +1,6 @@
 const logger = require('../utils/logger');
 const { PrismaClient } = require('@prisma/client');
+const socketService = require('../services/socketService');
 
 const prisma = new PrismaClient();
 
@@ -182,6 +183,12 @@ async function createMessage(req, res) {
                 },
             },
         });
+
+        // Emit socket event để notify recipient
+        const recipientId = req.user.id === order.userId ? order.driverId : order.userId;
+        if (recipientId) {
+            socketService.emitNewMessage(orderId, message, recipientId);
+        }
 
         res.status(201).json({
             success: true,
