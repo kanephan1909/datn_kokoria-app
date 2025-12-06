@@ -30,7 +30,7 @@ export const useDistanceMatrix = (options: UseDistanceMatrixOptions) => {
     origin,
     destination,
     enabled = true,
-    updateInterval = 10000, // Mặc định 10 giây
+    updateInterval = 30000, // Mặc định 30 giây (tối ưu để giảm API calls)
   } = options;
 
   const [result, setResult] = useState<DistanceMatrixResult | null>(null);

@@ -80,14 +80,23 @@ const ChatbotButton: React.FC<ChatbotButtonProps> = ({
         const minX = 20;
         const minY = Platform.OS === 'ios' ? 50 : 20;
 
-        let finalX = Math.max(minX, Math.min(maxX, newX));
         let finalY = Math.max(minY, Math.min(maxY, newY));
 
-        // Snap to edges (tùy chọn - có thể bỏ nếu muốn tự do hơn)
-        const snapThreshold = 50;
-        if (finalX < snapThreshold) {
+        // Snap to edges - LUÔN snap về một bên, không bao giờ ở giữa
+        // Tính toán dựa trên vị trí X hiện tại
+        const screenCenter = SCREEN_WIDTH / 2;
+
+        // Quyết định snap về bên nào dựa trên vị trí X của nút
+        // Nếu vị trí X + nửa kích thước nút < trung tâm màn hình -> bên trái
+        // Ngược lại -> bên phải
+        let finalX: number;
+        const buttonCenterX = newX + BUTTON_SIZE / 2;
+
+        if (buttonCenterX <= screenCenter) {
+          // Snap về bên trái
           finalX = minX;
-        } else if (finalX > SCREEN_WIDTH - BUTTON_SIZE - snapThreshold) {
+        } else {
+          // Snap về bên phải
           finalX = maxX;
         }
 
@@ -127,8 +136,18 @@ const ChatbotButton: React.FC<ChatbotButtonProps> = ({
           const minX = 20;
           const minY = Platform.OS === 'ios' ? 50 : 20;
 
-          initialX = Math.max(minX, Math.min(maxX, x));
+          let validatedX = Math.max(minX, Math.min(maxX, x));
           initialY = Math.max(minY, Math.min(maxY, y));
+
+          // Đảm bảo nút luôn ở một bên, không ở giữa
+          const screenCenter = SCREEN_WIDTH / 2;
+          const buttonCenterX = validatedX + BUTTON_SIZE / 2;
+
+          if (buttonCenterX < screenCenter) {
+            initialX = minX; // Snap về bên trái
+          } else {
+            initialX = maxX; // Snap về bên phải
+          }
         } else {
           // Default position (bottom right)
           initialX = SCREEN_WIDTH - BUTTON_SIZE - 20;

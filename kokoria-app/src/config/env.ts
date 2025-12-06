@@ -26,7 +26,7 @@ interface EnvConfig {
 // Thay YOUR_GOOGLE_MAPS_API_KEY bằng API key thật của bạn
 // Lấy API key từ: https://console.cloud.google.com/google/maps-apis
 // Bật các API: Maps SDK for Android, Maps SDK for iOS, Geocoding API, Directions API
-const HARDCODED_GOOGLE_MAPS_API_KEY = 'AIzaSyCXzcgigGuTcQ0H3meiX11tF7g1yiF47Ss';
+const HARDCODED_GOOGLE_MAPS_API_KEY = 'AIzaSyAFUoOl-7vgP8n2q_K5D5V6UiYW8GeaIXg';
 
 // ============================================
 
@@ -34,7 +34,7 @@ const getEnvConfig = (): EnvConfig => {
   // Ưu tiên 1: Sử dụng react-native-config nếu có
   try {
     const Config = require('react-native-config').default;
-    if (Config.GOOGLE_MAPS_API_KEY && Config.GOOGLE_MAPS_API_KEY !== 'AIzaSyCXzcgigGuTcQ0H3meiX11tF7g1yiF47Ss') {
+    if (Config.GOOGLE_MAPS_API_KEY && Config.GOOGLE_MAPS_API_KEY !== 'AIzaSyAFUoOl-7vgP8n2q_K5D5V6UiYW8GeaIXg') {
       return {
         GOOGLE_MAPS_API_KEY: Config.GOOGLE_MAPS_API_KEY,
         API_BASE_URL: Config.API_BASE_URL,
@@ -46,7 +46,7 @@ const getEnvConfig = (): EnvConfig => {
   }
 
   // Ưu tiên 2: Sử dụng hardcoded value
-  if (HARDCODED_GOOGLE_MAPS_API_KEY && HARDCODED_GOOGLE_MAPS_API_KEY !== 'AIzaSyCXzcgigGuTcQ0H3meiX11tF7g1yiF47Ss') {
+  if (HARDCODED_GOOGLE_MAPS_API_KEY && HARDCODED_GOOGLE_MAPS_API_KEY !== 'AIzaSyAFUoOl-7vgP8n2q_K5D5V6UiYW8GeaIXg') {
     return {
       GOOGLE_MAPS_API_KEY: HARDCODED_GOOGLE_MAPS_API_KEY,
       API_BASE_URL: undefined,
@@ -56,7 +56,7 @@ const getEnvConfig = (): EnvConfig => {
 
   // Fallback: giá trị mặc định (sẽ không hoạt động)
   return {
-    GOOGLE_MAPS_API_KEY: 'AIzaSyCXzcgigGuTcQ0H3meiX11tF7g1yiF47Ss',
+    GOOGLE_MAPS_API_KEY: 'AIzaSyAFUoOl-7vgP8n2q_K5D5V6UiYW8GeaIXg',
     API_BASE_URL: undefined,
     SOCKET_URL: undefined,
   };

@@ -70,7 +70,7 @@ const OrderDetailScreen = () => {
     origin,
     destination,
     enabled: shouldCalculateDistance,
-    updateInterval: isDelivering ? 10000 : 0, // Chỉ tự động update khi đang giao hàng
+    updateInterval: isDelivering ? 30000 : 0, // Chỉ tự động update khi đang giao hàng (30s để giảm API calls)
   });
 
   const acceptMutation = useMutation({

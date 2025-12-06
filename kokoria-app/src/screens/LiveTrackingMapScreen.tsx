@@ -6,7 +6,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import React, {useEffect, useState, useCallback, useMemo} from 'react';
+import React, {useEffect, useState, useCallback, useMemo, useRef} from 'react';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {fetchOrderById, fetchRestaurants} from '../../api/apiClient';
@@ -71,6 +71,9 @@ const LiveTrackingMapScreen = () => {
   // Hooks
   const {calculateRoute, route: calculatedRoute, isCalculating} = useDirections();
   const {geocodeAddress} = useGeocoding();
+
+  // Cache để tránh gọi API quá nhiều
+  const lastCalculatedLocationRef = useRef<{latitude: number; longitude: number} | null>(null);
 
   // Socket để nhận vị trí shipper real-time và cập nhật trạng thái đơn hàng
   useSocket({
@@ -265,12 +268,46 @@ const LiveTrackingMapScreen = () => {
     }
   }, [restaurantLocation, destinationLocation, driverLocation, calculateRoute]);
 
+  // Hàm tính khoảng cách giữa 2 điểm (Haversine formula - đơn giản)
+  const calculateDistanceInMeters = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371e3; // Bán kính Trái Đất (mét)
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Khoảng cách tính bằng mét
+  }, []);
+
   // Tính toán route từ driver đến destination khi có driver location
+  // Tối ưu: Chỉ tính toán lại khi location thay đổi đáng kể (>50m) hoặc lần đầu
   useEffect(() => {
     if (driverLocation && destinationLocation) {
-      calculateRoute(driverLocation, destinationLocation);
+      const lastLocation = lastCalculatedLocationRef.current;
+
+      // Kiểm tra xem location có thay đổi đáng kể không (tránh gọi API quá nhiều)
+      const shouldRecalculate = !lastLocation ||
+        calculateDistanceInMeters(
+          driverLocation.latitude,
+          driverLocation.longitude,
+          lastLocation.latitude,
+          lastLocation.longitude,
+        ) > 50; // Chỉ tính lại khi di chuyển > 50m
+
+      if (shouldRecalculate) {
+        lastCalculatedLocationRef.current = {
+          latitude: driverLocation.latitude,
+          longitude: driverLocation.longitude,
+        };
+        calculateRoute(driverLocation, destinationLocation);
+      }
     }
-  }, [driverLocation, destinationLocation, calculateRoute]);
+  }, [driverLocation, destinationLocation, calculateRoute, calculateDistanceInMeters]);
 
   // Sử dụng dữ liệu từ Directions API thay vì Distance Matrix API
   // Directions API đã trả về distance và duration, không cần gọi Distance Matrix API riêng

@@ -133,8 +133,8 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    top: 6,
-    right: 6,
+    top: 2,
+    right: 1,
     backgroundColor: '#EF4444',
     borderRadius: 10,
     minWidth: 20,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 5,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#FFFFFF',
   },
   badgeText: {

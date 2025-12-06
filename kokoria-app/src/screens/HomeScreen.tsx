@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Animated,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import React, {useState, useEffect, useRef} from 'react';
 import Header from '../components/dashboard/Header';
@@ -55,10 +56,7 @@ const HomeScreen = () => {
       // New products
       'product:new': (data: {product: any}) => {
         setNewProductsCount(prev => prev + 1);
-        showNotification(
-          `🆕 Sản phẩm mới: ${data.product.name}`,
-          'newProduct',
-        );
+        showNotification(`🆕 Sản phẩm mới: ${data.product.name}`, 'newProduct');
       },
 
       // Order updates
@@ -87,7 +85,7 @@ const HomeScreen = () => {
       },
 
       // General notifications
-      'notification': (data: {message: string; type?: string}) => {
+      notification: (data: {message: string; type?: string}) => {
         showNotification(data.message, data.type || 'info');
       },
     },
@@ -146,9 +144,7 @@ const HomeScreen = () => {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        setNotifications(prev =>
-          prev.filter(n => n.id !== notification.id),
-        );
+        setNotifications(prev => prev.filter(n => n.id !== notification.id));
         notificationOpacity.setValue(0);
         slideAnim.setValue(-100);
       });
@@ -159,8 +155,8 @@ const HomeScreen = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
-      setNotifications(prev =>
-        prev.filter(n => now - n.timestamp < 10000), // Giữ notifications trong 10 giây
+      setNotifications(
+        prev => prev.filter(n => now - n.timestamp < 10000), // Giữ notifications trong 10 giây
       );
     }, 1000);
 
@@ -174,12 +170,11 @@ const HomeScreen = () => {
     }
   }, [isConnected, emit]);
 
-
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-orange-500">
+    <SafeAreaView edges={['top']}className="flex-1">
       <StatusBar
         barStyle="light-content"
-        backgroundColor="#EA580C"
+        backgroundColor="#EA7001"
         translucent={false}
       />
 
@@ -188,9 +183,7 @@ const HomeScreen = () => {
         <View style={styles.errorBanner}>
           <View style={styles.errorContent}>
             <Ionicons name="warning" size={16} color="#FFFFFF" />
-            <Text style={styles.errorText}>
-              {socketError}
-            </Text>
+            <Text style={styles.errorText}>{socketError}</Text>
           </View>
           <TouchableOpacity
             onPress={() => {
@@ -231,12 +224,17 @@ const HomeScreen = () => {
         </Animated.View>
       )}
 
-      {/* Header + Search */}
-      <View
-        className="bg-orange-600 pb-4 shadow-md"
-        style={styles.headerContainer}>
-        <Header />
-        <View className="px-4 mt-2">
+      {/* Header */}
+      <View style={styles.headerWrapper}>
+        <LinearGradient
+          colors={['#EA7001', '#EA7001', '#FF8C42', '#FFA07A']}
+          start={{x: 0, y: 0}}
+          end={{x: 0, y: 1}}
+          style={styles.headerContainer}>
+          <Header />
+        </LinearGradient>
+        {/* Search Bar - Overlap giữa header và content */}
+        <View style={styles.searchBarWrapper}>
           <SearchBar value={query} onChange={setQuery} />
         </View>
       </View>
@@ -245,8 +243,7 @@ const HomeScreen = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollViewContent}
-        style={styles.scrollViewContainer} // ✅ trùng màu header
-      >
+        style={styles.scrollViewContainer}>
         {/* White Container (Rounded Top) */}
         <View style={styles.whiteContainer}>
           {/* Banner */}
@@ -342,34 +339,47 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  headerWrapper: {
+    position: 'relative',
+    zIndex: 10,
+    marginBottom: 0,
+  },
   headerContainer: {
-    zIndex: 2,
+    paddingBottom: 50,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  searchBarWrapper: {
+    position: 'absolute',
+    bottom: -32, // Đặt search bar ở cuối header, overlap với white container
+    left: 0,
+    right: 0,
+    zIndex: 20,
+    paddingHorizontal: 16,
   },
   scrollViewContent: {
     paddingBottom: 0,
   },
   scrollViewContainer: {
     flex: 1,
-    backgroundColor: '#EA580C',
+    backgroundColor: '#EA7001',
   },
   whiteContainer: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    marginTop: 5, // ✅ overlap nhẹ để dính liền
+    marginTop: -10, // Overlap nhẹ với header và search bar để tạo hiệu ứng hòa quyện
+    paddingTop: 40, // Padding để bù lại marginTop âm và tạo khoảng cách với search bar
     paddingBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: -2},
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
     overflow: 'hidden',
+    zIndex: 1,
   },
   flashSaleContainer: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
   },
   popularItemsContainer: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
   },
   notificationContainer: {
     position: 'absolute',

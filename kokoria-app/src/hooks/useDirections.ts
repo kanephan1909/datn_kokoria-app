@@ -25,6 +25,7 @@ export const useDirections = () => {
       try {
         setIsCalculating(true);
 
+
         const directionsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=${GOOGLE_MAPS_API_KEY}&language=vi&mode=driving`;
 
         const response = await fetch(directionsUrl);
@@ -97,7 +98,19 @@ export const useDirections = () => {
           setRoute(newRoute);
           return newRoute;
         } else {
-          console.error('❌ Directions API error:', data.status, data.error_message);
+          const errorMessage = data.error_message || data.status;
+          console.error('❌ Directions API error:', data.status, errorMessage);
+          
+          // Hiển thị thông báo lỗi chi tiết hơn
+          if (data.status === 'REQUEST_DENIED') {
+            console.error(
+              '⚠️ REQUEST_DENIED: Vui lòng kiểm tra:\n' +
+              '1. Bật Billing trong Google Cloud Console: https://console.cloud.google.com/project/_/billing/enable\n' +
+              '2. Enable Directions API: https://console.cloud.google.com/apis/library/directions-backend.googleapis.com\n' +
+              '3. Kiểm tra API key có đúng không và có quyền truy cập Directions API'
+            );
+          }
+          
           // Fallback: tạo route đơn giản từ origin đến destination
           const fallbackRoute: Route = {
             coordinates: [origin, destination],

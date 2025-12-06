@@ -465,8 +465,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   logoGradient: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 100,
     borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
