@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   logoGradient: {
     width: 100,
     height: 100,
-    borderRadius: 40,
+    borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
@@ -479,8 +479,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   logoImage: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 100,
   },
   appName: {
     fontSize: 24,

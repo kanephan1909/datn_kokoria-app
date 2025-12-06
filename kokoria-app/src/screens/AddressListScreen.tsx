@@ -5,14 +5,15 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Platform,
+  StatusBar,
 } from 'react-native';
-import React, {useState} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import React, {useState, useCallback} from 'react';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {fetchAddresses, deleteAddress} from '../../api/apiClient';
 import {MainRoutes} from '../navigation/Routes';
-import {useCallback} from 'react';
 
 interface Address {
   id: string;
@@ -32,7 +33,7 @@ const mapBackendToFrontend = (backendAddress: any): Address => {
   const localityParts = backendAddress.locality
     ? backendAddress.locality.split(',').map((s: string) => s.trim())
     : [];
-  
+
   return {
     id: backendAddress.id,
     name: backendAddress.name || '',
@@ -46,6 +47,8 @@ const mapBackendToFrontend = (backendAddress: any): Address => {
 };
 
 const AddressListScreen = () => {
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   const navigation = useNavigation();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -103,7 +106,7 @@ const AddressListScreen = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView edges={['top']} className="flex-1 bg-gray-50">
+      <SafeAreaView edges={[]} className="flex-1 bg-gray-50">
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#F97316" />
         </View>
@@ -112,9 +115,9 @@ const AddressListScreen = () => {
   }
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-gray-50">
+    <SafeAreaView edges={[]} className="flex-1 bg-gray-50">
       {/* Header */}
-      <View className="bg-orange-500 px-4 py-4 flex-row items-center">
+      <View className="bg-orange-500 px-4 py-4 flex-row items-center" style={{paddingTop: statusBarHeight + 16}}>
         <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>

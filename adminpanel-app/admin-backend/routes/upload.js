@@ -8,12 +8,11 @@ const router = express.Router();
 
 /**
  * POST /upload/image
- * Upload ảnh lên Cloudinary - Chỉ ADMIN
+ * Upload ảnh lên Cloudinary - Cho phép ADMIN và USER
  */
 router.post(
   '/image',
   authMiddleware,
-  authorize(['ADMIN']),
   upload.single('image'),
   uploadImage
 );

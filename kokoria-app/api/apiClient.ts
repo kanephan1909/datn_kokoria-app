@@ -144,6 +144,17 @@ export const logout = async () => {
 
 export const getMe = async () => (await api.get('/auth/me')).data;
 
+// ==================== USER API ====================
+export const updateUser = async (
+  id: string,
+  data: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    avatarUrl?: string;
+  },
+) => (await api.put(`/users/${id}`, data)).data;
+
 // ==================== FORGOT PASSWORD API ====================
 /**
  * Gửi email chứa mã xác nhận để đặt lại mật khẩu

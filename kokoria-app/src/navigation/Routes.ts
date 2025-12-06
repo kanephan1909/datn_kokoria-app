@@ -40,7 +40,8 @@ export enum MainRoutes {
     Chatbot = 'Chatbot',
     EditLocation = 'Chỉnh sửa vị trí',
     Chat = 'Chat',
-    OrderDelivered = 'Đơn hàng đã giao'
+    OrderDelivered = 'Đơn hàng đã giao',
+    EditProfile = 'Chỉnh sửa hồ sơ'
 }
 
 // Type for the root stack param list
@@ -88,7 +89,14 @@ export type MainStackParamList = {
     [MainRoutes.Notifications]:undefined;
     [MainRoutes.AddressList]:undefined;
     [MainRoutes.AddAddress]:undefined;
-    [MainRoutes.EditAddress]:{addressId:string};
+    [MainRoutes.EditAddress]:{
+      addressId: string;
+      selectedLocation?: {
+        latitude: number;
+        longitude: number;
+        address?: string;
+      };
+    };
     [MainRoutes.Payment]:{orderDraft: any};
     [MainRoutes.PaymentWebView]:{
       paymentUrl: string;
@@ -110,4 +118,5 @@ export type MainStackParamList = {
     [MainRoutes.OrderDelivered]:{
       orderId: string;
     };
+    [MainRoutes.EditProfile]:undefined;
 }

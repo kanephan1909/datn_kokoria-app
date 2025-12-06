@@ -6,9 +6,12 @@ import {
   StyleSheet,
   Alert,
   Switch,
+  Platform,
+  StatusBar,
+  Image,
 } from 'react-native';
 import React, {useState} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useAuth} from '../context/AuthContext';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {useNavigation} from '@react-navigation/native';
@@ -28,6 +31,8 @@ interface SettingItem {
 
 const SettingsScreen = () => {
   const {logout, user} = useAuth();
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   const navigation = useNavigation();
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
@@ -170,9 +175,9 @@ const SettingsScreen = () => {
   ];
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+    <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, {paddingTop: statusBarHeight + 16}]}>
         <TouchableOpacity
           style={styles.backButton}
           activeOpacity={0.7}
@@ -189,7 +194,12 @@ const SettingsScreen = () => {
         {/* User Info Section */}
         <View style={styles.userSection}>
           <View style={styles.avatarContainer}>
-            {user?.name ? (
+            {(user as any)?.avatarUrl ? (
+              <Image
+                source={{uri: (user as any).avatarUrl}}
+                style={styles.avatar}
+              />
+            ) : user?.name ? (
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>
                   {user.name
@@ -278,7 +288,7 @@ const SettingsScreen = () => {
         {/* Version Info */}
         <Text style={styles.versionText}>Version 1.0.0</Text>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

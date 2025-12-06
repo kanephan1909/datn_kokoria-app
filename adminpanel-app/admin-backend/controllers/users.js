@@ -167,7 +167,7 @@ async function createUser(req, res) {
 // PUT /users/:id - Cập nhật user
 async function updateUser(req, res) {
   const { id } = req.params;
-  const { name, email, phone, role, deviceToken, password } = req.body;
+  const { name, email, phone, role, deviceToken, password, avatarUrl } = req.body;
 
   try {
     // Kiểm tra quyền: USER chỉ cập nhật được thông tin của mình
@@ -183,6 +183,7 @@ async function updateUser(req, res) {
       ...(name && { name }),
       ...(email && { email }),
       ...(phone && { phone }),
+      ...(avatarUrl !== undefined && { avatarUrl: avatarUrl === '' ? null : avatarUrl }),
       ...(deviceToken !== undefined && { deviceToken }),
     };
 

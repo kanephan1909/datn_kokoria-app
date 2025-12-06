@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
+  Platform,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import React, {useState, useEffect, useRef} from 'react';
 import Header from '../components/dashboard/Header';
 import SearchBar from '../components/dashboard/SearchBar';
@@ -29,6 +30,8 @@ const HomeScreen = () => {
   const [flashSaleTimeLeft, setFlashSaleTimeLeft] = useState<number | null>(
     null,
   );
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   const [notifications, setNotifications] = useState<
     Array<{id: string; message: string; type: string; timestamp: number}>
   >([]);
@@ -171,11 +174,11 @@ const HomeScreen = () => {
   }, [isConnected, emit]);
 
   return (
-    <SafeAreaView edges={['top']}className="flex-1">
+    <View className="flex-1" style={styles.safeAreaContainer}>
       <StatusBar
         barStyle="light-content"
         backgroundColor="#EA7001"
-        translucent={false}
+        translucent={true}
       />
 
       {/* Socket Connection Status - Chỉ hiển thị khi có lỗi quan trọng */}
@@ -230,7 +233,7 @@ const HomeScreen = () => {
           colors={['#EA7001', '#EA7001', '#FF8C42', '#FFA07A']}
           start={{x: 0, y: 0}}
           end={{x: 0, y: 1}}
-          style={styles.headerContainer}>
+          style={[styles.headerContainer, {paddingTop: statusBarHeight + 8}]}>
           <Header />
         </LinearGradient>
         {/* Search Bar - Overlap giữa header và content */}
@@ -334,11 +337,15 @@ const HomeScreen = () => {
         onPress={() => navigation.navigate(MainRoutes.Chatbot)}
         visible={true}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  safeAreaContainer: {
+    flex: 1,
+    backgroundColor: '#EA7001',
+  },
   headerWrapper: {
     position: 'relative',
     zIndex: 10,

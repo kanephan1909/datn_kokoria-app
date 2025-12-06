@@ -27,6 +27,7 @@ const updateUserSchema = z.object({
     email: z.string().email().optional(),
     password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự').optional(),
     phone: z.string().optional(),
+    avatarUrl: z.union([z.string().url('URL ảnh không hợp lệ'), z.literal('')]).optional(),
     role: z.enum(['USER', 'ADMIN', 'DRIVER']).optional(),
     deviceToken: z.string().optional(),
 });

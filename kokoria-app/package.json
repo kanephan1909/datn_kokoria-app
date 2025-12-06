@@ -30,6 +30,7 @@
     "nativewind": "^4.2.1",
     "react": "19.0.0",
     "react-native": "0.79.0",
+    "react-native-image-picker": "^8.2.1",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-maps": "1.26.0",
     "react-native-reanimated": "^4.1.3",

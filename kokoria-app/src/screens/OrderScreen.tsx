@@ -7,10 +7,12 @@ import {
   ActivityIndicator,
   Image,
   StyleSheet,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useCallback} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useNavigation, useRoute, useFocusEffect} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {useCart} from '../store/useCartStore';
 import {fetchAddresses} from '../../api/apiClient';
@@ -48,10 +50,18 @@ const mapBackendToFrontend = (backendAddress: any): Address => {
 
 const OrderScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const {cartItems, totalPrice, updateItem, removeItem} = useCart();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
+
+  // Kiểm tra xem có phải là tab screen không
+  const isTabScreen = route.name === MainRoutes.Order;
+  // Chỉ hiển thị back button nếu không phải tab screen và có thể quay lại
+  const canGoBack = !isTabScreen && navigation.canGoBack();
 
   const loadAddresses = useCallback(async () => {
     try {
@@ -136,7 +146,7 @@ const OrderScreen = () => {
 
   if (isLoadingAddresses) {
     return (
-      <SafeAreaView edges={['top']} style={styles.container}>
+      <SafeAreaView edges={[]} style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#EA580C" />
         </View>
@@ -146,14 +156,17 @@ const OrderScreen = () => {
 
   if (cartItems.length === 0) {
     return (
-      <SafeAreaView edges={['top']} style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
+      <SafeAreaView edges={[]} style={styles.container}>
+        <View style={[styles.header, {paddingTop: statusBarHeight + 16}]}>
+          {canGoBack && (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#000" />
+            </TouchableOpacity>
+          )}
+          {!canGoBack && <View style={styles.placeholder} />}
+          <Text style={styles.headerTitle}>Đơn hàng của bạn</Text>
           <View style={styles.placeholder} />
         </View>
         <View style={styles.emptyContainer}>
@@ -168,17 +181,25 @@ const OrderScreen = () => {
   }
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+    <SafeAreaView edges={[]} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
+        {canGoBack && (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+        )}
+        {!canGoBack && <View style={styles.placeholder} />}
+        <Text style={styles.headerTitle}>Giỏ hàng</Text>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
-        <TouchableOpacity style={styles.searchButton} activeOpacity={0.7}>
-          <Ionicons name="search" size={24} color="#000" />
+          style={styles.searchButton}
+          activeOpacity={0.7}
+          onPress={() => {
+            (navigation as any).navigate(MainRoutes.OrderHistory);
+          }}>
+          <Ionicons name="time-outline" size={24} color="#000" />
         </TouchableOpacity>
       </View>
 
@@ -271,7 +292,7 @@ const OrderScreen = () => {
                 const fullAddress = fullAddressParts.length > 0
                   ? fullAddressParts.join(', ')
                   : address.address || 'Chưa có địa chỉ';
-                
+
                 return (
                   <TouchableOpacity
                     key={address.id}
@@ -322,7 +343,7 @@ const OrderScreen = () => {
           <TouchableOpacity
             style={styles.placeOrderButton}
             onPress={handlePlaceOrder}>
-            <Text style={styles.placeOrderText}>Đặt hàng</Text>
+            <Text style={styles.placeOrderText}>Thanh toán</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

@@ -10,8 +10,9 @@ import {
   ScrollView,
   ActivityIndicator,
   Animated,
+  StatusBar,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {useGeminiChat, ChatMessage} from '../hooks/useGeminiChat';
 
@@ -81,6 +82,8 @@ const TypingIndicator: React.FC = () => {
 };
 
 const ChatbotScreen: React.FC<ChatbotScreenProps> = ({navigation}) => {
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   const {messages, isLoading, sendMessage, clearChat} = useGeminiChat();
   const [inputText, setInputText] = useState('');
   const [showQuickReplies, setShowQuickReplies] = useState(true);
@@ -195,11 +198,11 @@ const ChatbotScreen: React.FC<ChatbotScreenProps> = ({navigation}) => {
 
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-white">
+    <SafeAreaView edges={[]} className="flex-1 bg-white">
       {/* Header with gradient */}
       <View
         className="px-4 py-3 flex-row items-center justify-between shadow-lg"
-        style={styles.headerGradient}>
+        style={[styles.headerGradient, {paddingTop: statusBarHeight + 12}]}>
         <View className="flex-row items-center flex-1">
           {navigation && (
             <TouchableOpacity

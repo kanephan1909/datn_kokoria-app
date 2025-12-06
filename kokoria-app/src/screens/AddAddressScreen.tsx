@@ -9,9 +9,10 @@ import {
   Platform,
   StyleSheet,
   ActivityIndicator,
+  StatusBar,
 } from 'react-native';
 import React, {useState} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {createAddress} from '../../api/apiClient';
@@ -26,6 +27,8 @@ const AddAddressScreen = () => {
   const [city, setCity] = useState('');
   const [isDefault, setIsDefault] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
 
   const handleSave = async () => {
     if (!name.trim() || !phone.trim() || !address.trim() || !ward.trim() || !district.trim() || !city.trim()) {
@@ -83,12 +86,12 @@ const AddAddressScreen = () => {
   };
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+    <SafeAreaView edges={[]} style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flex1}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, {paddingTop: statusBarHeight + 16}]}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={styles.backButton}

@@ -4,9 +4,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import React, {useState} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 
@@ -22,6 +24,8 @@ interface Notification {
 type TabType = 'all' | 'orders' | 'promotions';
 
 const NotificationsScreen = () => {
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState<TabType>('all');
 
@@ -133,9 +137,9 @@ const NotificationsScreen = () => {
   );
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+    <SafeAreaView edges={[]} style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, {paddingTop: statusBarHeight + 16}]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}

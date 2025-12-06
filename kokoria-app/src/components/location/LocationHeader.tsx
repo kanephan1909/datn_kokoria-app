@@ -1,6 +1,7 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, ActivityIndicator} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Platform, StatusBar} from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 interface LocationHeaderProps {
   onBack: () => void;
@@ -13,8 +14,11 @@ const LocationHeader: React.FC<LocationHeaderProps> = ({
   onSearch,
   isSearching = false,
 }) => {
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
+
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, {paddingTop: statusBarHeight + 12}]}>
       <TouchableOpacity
         onPress={onBack}
         style={styles.headerButton}

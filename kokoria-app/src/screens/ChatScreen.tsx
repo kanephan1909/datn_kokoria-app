@@ -10,8 +10,9 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  StatusBar,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {fetchOrderMessages, sendMessage, Message, fetchOrderById} from '../../api/apiClient';
@@ -28,6 +29,8 @@ interface RouteParams {
 const ChatScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   const queryClient = useQueryClient();
   const {orderId, recipientName, recipientId} = route.params as RouteParams;
   const [messageText, setMessageText] = useState('');
@@ -168,9 +171,9 @@ const ChatScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={[]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, {paddingTop: statusBarHeight + 16}]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}>

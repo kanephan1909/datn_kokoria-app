@@ -7,8 +7,9 @@ import {
   StyleSheet,
   Image,
   FlatList,
+  Platform,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import React, {useState} from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {useQuery} from '@tanstack/react-query';
@@ -34,6 +35,8 @@ interface Category {
 }
 
 const MenuScreen = () => {
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const {addItem} = useCart();
   const navigation = useNavigation();
@@ -136,11 +139,11 @@ const MenuScreen = () => {
   );
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent={false} />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, {paddingTop: statusBarHeight}]}>
         <Text style={styles.headerTitle}>Menu</Text>
         <TouchableOpacity style={styles.searchButton} activeOpacity={0.7}>
           <Ionicons name="search" size={24} color="#000" />
@@ -228,7 +231,7 @@ const MenuScreen = () => {
 
       {/* Cart Bottom Bar */}
       <CartBottomBar />
-    </SafeAreaView>
+    </View>
   );
 };
 

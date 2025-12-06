@@ -8,9 +8,11 @@ import {
   Image,
   Dimensions,
   StyleSheet,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useEffect, useCallback, useMemo} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {fetchProductById, Product} from '../../api/apiClient';
@@ -28,6 +30,8 @@ const ProductDetailsScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   // State để lưu các options đã chọn: { variantType: optionId }
   const [selectedOptions, setSelectedOptions] = useState<{
     [key: string]: string;
@@ -184,7 +188,7 @@ const ProductDetailsScreen = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView edges={['top']} style={styles.container}>
+      <SafeAreaView edges={[]} style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#EA580C" />
         </View>
@@ -197,7 +201,7 @@ const ProductDetailsScreen = () => {
   }
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+      <SafeAreaView edges={[]} style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Hero Image Section */}
         <View style={styles.heroContainer}>
@@ -215,13 +219,13 @@ const ProductDetailsScreen = () => {
 
           {/* Header Buttons */}
           <TouchableOpacity
-            style={styles.backButton}
+            style={[styles.backButton, {top: statusBarHeight + 16}]}
             onPress={() => navigation.goBack()}
             activeOpacity={0.7}>
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.favoriteButton}
+            style={[styles.favoriteButton, {top: statusBarHeight + 16}]}
             onPress={() => setIsFavorite(!isFavorite)}
             activeOpacity={0.7}>
             <Ionicons

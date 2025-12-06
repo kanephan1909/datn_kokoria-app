@@ -10,13 +10,15 @@ import {
   Alert,
   Linking,
   Image,
+  Platform,
+  StatusBar,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {fetchOrderById, submitOrderRating} from '../../api/apiClient';
 import {MainRoutes} from '../navigation/Routes';
-import {formatPrice, formatDate} from '../utils/formatters';
+import {formatPrice} from '../utils/formatters';
 
 interface OrderItem {
   id?: string;
@@ -64,6 +66,8 @@ interface Order {
 const OrderDeliveredScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   const {orderId} = route.params as {orderId: string};
 
   const [order, setOrder] = useState<Order | null>(null);
@@ -160,9 +164,10 @@ const OrderDeliveredScreen = () => {
   };
 
   const formatTime = (dateString?: string) => {
-    if (!dateString) return '';
+    if (!dateString) {
+      return '';
+    }
     const date = new Date(dateString);
-    const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const ampm = date.getHours() >= 12 ? 'PM' : 'AM';
     const displayHours = date.getHours() % 12 || 12;
@@ -170,7 +175,9 @@ const OrderDeliveredScreen = () => {
   };
 
   const getAddressString = () => {
-    if (!order?.address) return '';
+    if (!order?.address) {
+      return '';
+    }
     return order.address.address || '';
   };
 
@@ -195,13 +202,13 @@ const OrderDeliveredScreen = () => {
   const driverName = order.driver?.name || 'Nhat Khang';
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safeArea} edges={[]}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, {paddingTop: statusBarHeight + 16}]}>
           <TouchableOpacity
             style={styles.closeButton}
             onPress={handleClose}

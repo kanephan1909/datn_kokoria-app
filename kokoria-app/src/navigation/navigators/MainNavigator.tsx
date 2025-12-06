@@ -22,6 +22,7 @@ import EditLocationScreen from '../../screens/EditLocationScreen';
 import NotificationsScreen from '../../screens/NotificationsScreen';
 import ChatScreen from '../../screens/ChatScreen';
 import OrderDeliveredScreen from '../../screens/OrderDeliveredScreen';
+import EditProfileScreen from '../../screens/EditProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -74,6 +75,10 @@ const MainNavigator = () => {
       <Stack.Screen
         name={MainRoutes.OrderDelivered}
         component={OrderDeliveredScreen}
+      />
+      <Stack.Screen
+        name={MainRoutes.EditProfile}
+        component={EditProfileScreen}
       />
     </Stack.Navigator>
   );

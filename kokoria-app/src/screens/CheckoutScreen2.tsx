@@ -7,9 +7,11 @@ import {
   ActivityIndicator,
   StyleSheet,
   Image,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useCallback, useRef, useEffect} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation, useRoute, useFocusEffect} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {useCart} from '../store/useCartStore';
@@ -88,6 +90,8 @@ type PaymentMethod = 'CASH' | 'MOMO' | 'VNPAY';
 
 const CheckoutScreen2 = () => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   const route = useRoute();
   const {addressId, selectedLocation} = (route.params as any) || {};
   const {cartItems, totalPrice, clear, loadCart} = useCart();
@@ -518,7 +522,7 @@ const CheckoutScreen2 = () => {
 
   if (isLoadingAddresses) {
     return (
-      <SafeAreaView edges={['top']} style={styles.container}>
+      <SafeAreaView edges={[]} style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#EA580C" />
         </View>
@@ -527,9 +531,9 @@ const CheckoutScreen2 = () => {
   }
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+    <SafeAreaView edges={[]} style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, {paddingTop: statusBarHeight + 16}]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}>

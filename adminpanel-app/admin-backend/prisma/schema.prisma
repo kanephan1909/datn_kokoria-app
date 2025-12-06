@@ -17,6 +17,7 @@ model User {
   password    String?
   googleId    String?
   phone       String?
+  avatarUrl   String?
   role        Role     @default(USER)
   deviceToken String?
   createdAt   DateTime @default(now())

@@ -6,14 +6,14 @@ import {
   ActivityIndicator,
   Image,
   StyleSheet,
-  Alert,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import React, {useEffect, useState, useCallback} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {fetchOrders} from '../../api/apiClient';
-import {useCart} from '../store/useCartStore';
 import {MainRoutes} from '../navigation/Routes';
 
 interface Order {
@@ -46,14 +46,14 @@ interface Order {
 }
 
 const OrderHistoryScreen = () => {
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   const navigation = useNavigation();
-  const route = useRoute();
-  const {cartItems, totalPrice, updateItem, removeItem} = useCart();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const isTabScreen = route.name === MainRoutes.Order;
-  const canGoBack = !isTabScreen && navigation.canGoBack();
+  // Luôn hiển thị nút back nếu có thể quay lại
+  const canGoBack = navigation.canGoBack();
 
   const loadOrders = useCallback(async () => {
     try {
@@ -111,12 +111,6 @@ const OrderHistoryScreen = () => {
     loadOrders();
   }, [loadOrders]);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(price);
-  };
 
   const getStatusText = (status: string) => {
     const statusMap: {[key: string]: string} = {
@@ -138,53 +132,22 @@ const OrderHistoryScreen = () => {
     return '#EF4444';
   };
 
-  const handleQuantityChange = async (itemId: string, newQuantity: number) => {
-    if (newQuantity < 1) {
-      // Nếu số lượng về 0 hoặc nhỏ hơn 1, xóa sản phẩm khỏi giỏ hàng
-      handleRemoveItem(itemId);
-      return;
-    }
-    await updateItem(itemId, newQuantity);
-  };
 
-  const handleRemoveItem = async (itemId: string) => {
-    Alert.alert(
-      'Xác nhận',
-      'Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?',
-      [
-        {
-          text: 'Hủy',
-          style: 'cancel',
-        },
-        {
-          text: 'Xóa',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await removeItem(itemId);
-            } catch (error) {
-              Alert.alert('Lỗi', 'Không thể xóa sản phẩm');
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+    <SafeAreaView edges={[]} style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        {canGoBack && (
+      <View style={[styles.header, {paddingTop: statusBarHeight + 16}]}>
+        {canGoBack ? (
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
+        ) : (
+          <View style={styles.placeholder} />
         )}
-        <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
+        <Text style={styles.headerTitle}>Lịch sử đơn hàng</Text>
         <TouchableOpacity style={styles.searchButton} activeOpacity={0.7}>
           <Ionicons name="search" size={24} color="#000" />
         </TouchableOpacity>
@@ -193,96 +156,6 @@ const OrderHistoryScreen = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}>
-        {/* Order Summary Section */}
-        {cartItems.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tóm tắt đơn hàng</Text>
-            <View style={styles.summaryCard}>
-              {cartItems.map((item) => (
-                <View key={item.id} style={styles.orderItem}>
-                  <View style={styles.itemImageContainer}>
-                    {item.product.imageUrl ? (
-                      <Image
-                        source={{uri: item.product.imageUrl}}
-                        style={styles.itemImage}
-                        resizeMode="cover"
-                      />
-                    ) : (
-                      <View style={styles.placeholderImage}>
-                        <Ionicons name="restaurant" size={24} color="#9CA3AF" />
-                      </View>
-                    )}
-                  </View>
-                  <View style={styles.itemInfo}>
-                    <TouchableOpacity
-                      onPress={() => handleRemoveItem(item.id)}
-                      style={styles.deleteButton}
-                      hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-                      <Ionicons name="trash-outline" size={20} color="#EF4444" />
-                    </TouchableOpacity>
-                    <View style={styles.itemHeader}>
-                      <Text style={styles.itemName} numberOfLines={1}>
-                        {item.product.name}
-                      </Text>
-                    </View>
-                    {item.product.description && (
-                      <Text style={styles.itemDescription} numberOfLines={1}>
-                        {item.product.description}
-                      </Text>
-                    )}
-                    {item.note && (
-                      <Text style={styles.itemNote} numberOfLines={1}>
-                        {item.note}
-                      </Text>
-                    )}
-                    <View style={styles.itemFooter}>
-                      <View style={styles.quantitySelector}>
-                        <TouchableOpacity
-                          onPress={() =>
-                            handleQuantityChange(item.id, item.quantity - 1)
-                          }
-                          style={styles.quantityButton}>
-                          <Ionicons name="remove" size={16} color="#000" />
-                        </TouchableOpacity>
-                        <Text style={styles.quantityText}>{item.quantity}</Text>
-                        <TouchableOpacity
-                          onPress={() =>
-                            handleQuantityChange(item.id, item.quantity + 1)
-                          }
-                          style={styles.quantityButton}>
-                          <Ionicons name="add" size={16} color="#000" />
-                        </TouchableOpacity>
-                      </View>
-                      <Text style={styles.itemPrice}>
-                        {formatPrice(item.price)}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              ))}
-              <View style={styles.summaryTotal}>
-                <Text style={styles.totalItemsText}>
-                  Tổng {totalItems} sản phẩm
-                </Text>
-                <Text style={styles.totalPriceText}>
-                  {formatPrice(totalPrice)}
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={styles.placeOrderButton}
-                activeOpacity={0.7}
-                onPress={() => {
-                  console.log('Place Order button pressed');
-                  // Navigate to OrderScreen (Checkout screen) để đặt hàng
-                  (navigation as any).navigate(MainRoutes.Checkout);
-                }}
-                hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-                <Text style={styles.placeOrderText}>Đặt hàng</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
         {/* Ordered Items Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -392,6 +265,9 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 12,
+  },
+  placeholder: {
+    width: 40,
   },
   headerTitle: {
     flex: 1,

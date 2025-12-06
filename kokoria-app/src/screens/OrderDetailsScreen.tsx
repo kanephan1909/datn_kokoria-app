@@ -7,9 +7,11 @@ import {
   Alert,
   Image,
   StyleSheet,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import React, {useEffect, useState, useCallback} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import LinearGradient from 'react-native-linear-gradient';
@@ -53,6 +55,8 @@ const OrderDetailsScreen = () => {
   const {orderId} = route.params as {orderId: string};
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
 
   const parseAddress = (addressData: any) => {
     if (!addressData) {
@@ -222,7 +226,7 @@ const OrderDetailsScreen = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <SafeAreaView style={styles.safeArea} edges={[]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#F97316" />
         </View>
@@ -253,13 +257,13 @@ const OrderDetailsScreen = () => {
     : '';
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={[]}>
       {/* Header */}
       <LinearGradient
         colors={['#F97316', '#EA580C']}
         start={{x: 0, y: 0}}
         end={{x: 1, y: 0}}
-        style={styles.header}>
+        style={[styles.header, {paddingTop: statusBarHeight + 16}]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}

@@ -1135,3 +1135,114 @@
 {"level":"info","message":"Socket connected: BNxMqtTPb2tiFFjiAACJ (User: admin@gmail.com)","timestamp":"2025-12-06T06:33:23.698Z"}
 {"level":"info","message":"Socket disconnected: BNxMqtTPb2tiFFjiAACJ - Reason: client namespace disconnect","timestamp":"2025-12-06T06:33:27.313Z"}
 {"level":"info","message":"Socket connected: UgOWA3gfmAa8IXJoAACL (User: admin@gmail.com)","timestamp":"2025-12-06T06:33:27.379Z"}
+{"level":"info","message":"SocketService initialized","timestamp":"2025-12-06T07:22:33.389Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-06T07:22:33.396Z"}
+{"level":"info","message":"Socket.IO server is ready for connections","timestamp":"2025-12-06T07:22:33.396Z"}
+{"level":"info","message":"Socket connected: Ub9tme3P3uRWfjrKAAAB (User: admin@gmail.com)","timestamp":"2025-12-06T07:22:33.846Z"}
+{"level":"info","message":"SocketService initialized","timestamp":"2025-12-06T07:22:35.817Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-06T07:22:35.826Z"}
+{"level":"info","message":"Socket.IO server is ready for connections","timestamp":"2025-12-06T07:22:35.826Z"}
+{"level":"info","message":"Socket connected: vYGqy25-LUgx4PeJAAAB (User: admin@gmail.com)","timestamp":"2025-12-06T07:22:36.589Z"}
+{"level":"info","message":"SocketService initialized","timestamp":"2025-12-06T07:22:40.538Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-06T07:22:40.544Z"}
+{"level":"info","message":"Socket.IO server is ready for connections","timestamp":"2025-12-06T07:22:40.545Z"}
+{"level":"info","message":"Socket connected: -Cd6gkWfsp8ORiT3AAAB (User: admin@gmail.com)","timestamp":"2025-12-06T07:22:41.087Z"}
+{"level":"info","message":"SocketService initialized","timestamp":"2025-12-06T07:23:25.679Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-06T07:23:25.684Z"}
+{"level":"info","message":"Socket.IO server is ready for connections","timestamp":"2025-12-06T07:23:25.684Z"}
+{"level":"info","message":"Socket connected: tKOxSVsDulvVVCr6AAAB (User: admin@gmail.com)","timestamp":"2025-12-06T07:23:40.069Z"}
+{"level":"info","message":"Socket disconnected: tKOxSVsDulvVVCr6AAAB - Reason: transport close","timestamp":"2025-12-06T07:25:18.792Z"}
+{"level":"info","message":"Socket connected: vRpjWASWramueGxoAAAD (User: admin@gmail.com)","timestamp":"2025-12-06T07:33:30.485Z"}
+{"level":"info","message":"Socket disconnected: vRpjWASWramueGxoAAAD - Reason: transport close","timestamp":"2025-12-06T07:34:25.891Z"}
+{"level":"info","message":"Socket connected: tq1NUzOE2_KeDnOfAAAF (User: admin@gmail.com)","timestamp":"2025-12-06T07:35:43.463Z"}
+{"level":"info","message":"Socket disconnected: tq1NUzOE2_KeDnOfAAAF - Reason: transport close","timestamp":"2025-12-06T07:38:19.808Z"}
+{"level":"info","message":"Socket connected: EgVYVmofg6M85Rx8AAAH (User: admin@gmail.com)","timestamp":"2025-12-06T07:38:22.666Z"}
+{"level":"info","message":"Socket disconnected: EgVYVmofg6M85Rx8AAAH - Reason: client namespace disconnect","timestamp":"2025-12-06T07:39:22.894Z"}
+{"level":"info","message":"Socket connected: GpURppNeKlivUvy2AAAJ (User: admin@gmail.com)","timestamp":"2025-12-06T07:39:23.002Z"}
+{"level":"info","message":"Socket disconnected: GpURppNeKlivUvy2AAAJ - Reason: client namespace disconnect","timestamp":"2025-12-06T07:39:36.479Z"}
+{"level":"info","message":"Socket connected: uRx717rkceEWwCJWAAAL (User: admin@gmail.com)","timestamp":"2025-12-06T07:39:36.545Z"}
+{"level":"info","message":"Socket disconnected: uRx717rkceEWwCJWAAAL - Reason: transport close","timestamp":"2025-12-06T07:44:15.652Z"}
+{"level":"info","message":"Socket connected: rhDGR7QwCE--pHG2AAAN (User: admin@gmail.com)","timestamp":"2025-12-06T08:07:42.565Z"}
+{"level":"error","message":"Error updating user: PrismaClientValidationError: \nInvalid `prisma.user.update()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\users.js:200:36\n\n  197   updateData.password = await bcrypt.hash(password, 10);\n  198 }\n  199 \n→ 200 const user = await prisma.user.update({\n        where: {\n          id: \"691d7a8cc72e36faabede69a\"\n        },\n        data: {\n          name: \"Administrator\",\n          email: \"admin@gmail.com\",\n          phone: \"0833233446\",\n          avatarUrl: \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1765008585/kokoria-app/kciwlcu3oyuzzofoxj3l.jpg\",\n          ~~~~~~~~~\n      ?   password?: String | NullableStringFieldUpdateOperationsInput | Null,\n      ?   googleId?: String | NullableStringFieldUpdateOperationsInput | Null,\n      ?   role?: Role | EnumRoleFieldUpdateOperationsInput,\n      ?   deviceToken?: String | NullableStringFieldUpdateOperationsInput | Null,\n      ?   createdAt?: DateTime | DateTimeFieldUpdateOperationsInput,\n      ?   updatedAt?: DateTime | DateTimeFieldUpdateOperationsInput,\n      ?   orders?: OrderUpdateManyWithoutUserNestedInput,\n      ?   addresses?: AddressUpdateManyWithoutUserNestedInput,\n      ?   carts?: CartUpdateManyWithoutUserNestedInput\n        }\n      })\n\nUnknown argument `avatarUrl`. Available options are marked with ?.","timestamp":"2025-12-06T08:09:48.290Z"}
+{"level":"error","message":"Error updating user: PrismaClientValidationError: \nInvalid `prisma.user.update()` invocation in\nF:\\datn_kokoria-app\\adminpanel-app\\admin-backend\\controllers\\users.js:200:36\n\n  197   updateData.password = await bcrypt.hash(password, 10);\n  198 }\n  199 \n→ 200 const user = await prisma.user.update({\n        where: {\n          id: \"691d7a8cc72e36faabede69a\"\n        },\n        data: {\n          name: \"Administrator\",\n          email: \"admin@gmail.com\",\n          phone: \"0833233446\",\n          avatarUrl: \"https://res.cloudinary.com/dgyrvjpmj/image/upload/v1765008585/kokoria-app/kciwlcu3oyuzzofoxj3l.jpg\",\n          ~~~~~~~~~\n      ?   password?: String | NullableStringFieldUpdateOperationsInput | Null,\n      ?   googleId?: String | NullableStringFieldUpdateOperationsInput | Null,\n      ?   role?: Role | EnumRoleFieldUpdateOperationsInput,\n      ?   deviceToken?: String | NullableStringFieldUpdateOperationsInput | Null,\n      ?   createdAt?: DateTime | DateTimeFieldUpdateOperationsInput,\n      ?   updatedAt?: DateTime | DateTimeFieldUpdateOperationsInput,\n      ?   orders?: OrderUpdateManyWithoutUserNestedInput,\n      ?   addresses?: AddressUpdateManyWithoutUserNestedInput,\n      ?   carts?: CartUpdateManyWithoutUserNestedInput\n        }\n      })\n\nUnknown argument `avatarUrl`. Available options are marked with ?.","timestamp":"2025-12-06T08:11:01.427Z"}
+{"level":"info","message":"SocketService initialized","timestamp":"2025-12-06T08:11:57.249Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-06T08:11:57.256Z"}
+{"level":"info","message":"Socket.IO server is ready for connections","timestamp":"2025-12-06T08:11:57.256Z"}
+{"level":"info","message":"Socket connected: U_juHz-r7W3B4aatAAAB (User: admin@gmail.com)","timestamp":"2025-12-06T08:33:31.787Z"}
+{"level":"info","message":"Socket disconnected: U_juHz-r7W3B4aatAAAB - Reason: client namespace disconnect","timestamp":"2025-12-06T08:35:18.706Z"}
+{"level":"info","message":"Socket connected: uStVx2Ev1RJRD7JLAAAD (User: admin@gmail.com)","timestamp":"2025-12-06T08:35:18.825Z"}
+{"level":"info","message":"Socket disconnected: uStVx2Ev1RJRD7JLAAAD - Reason: client namespace disconnect","timestamp":"2025-12-06T08:37:51.742Z"}
+{"level":"info","message":"Socket connected: 4eqGyq0hrwHdH4tLAAAF (User: admin@gmail.com)","timestamp":"2025-12-06T08:37:52.636Z"}
+{"level":"info","message":"Socket disconnected: 4eqGyq0hrwHdH4tLAAAF - Reason: transport close","timestamp":"2025-12-06T08:40:53.996Z"}
+{"level":"info","message":"Socket connected: AkOOFOUjTlY4WFvAAAAH (User: admin@gmail.com)","timestamp":"2025-12-06T08:42:15.417Z"}
+{"level":"info","message":"Socket disconnected: AkOOFOUjTlY4WFvAAAAH - Reason: transport close","timestamp":"2025-12-06T08:42:24.220Z"}
+{"level":"info","message":"Socket connected: Gq26b1pmdZnRPO9HAAAJ (User: admin@gmail.com)","timestamp":"2025-12-06T08:42:27.445Z"}
+{"level":"info","message":"Socket disconnected: Gq26b1pmdZnRPO9HAAAJ - Reason: transport close","timestamp":"2025-12-06T08:42:28.166Z"}
+{"level":"info","message":"Socket connected: 4qKqgdO3A9gT0AFbAAAL (User: admin@gmail.com)","timestamp":"2025-12-06T08:42:33.691Z"}
+{"level":"info","message":"Socket disconnected: 4qKqgdO3A9gT0AFbAAAL - Reason: client namespace disconnect","timestamp":"2025-12-06T08:42:46.053Z"}
+{"level":"info","message":"Socket connected: WskdFatoKABvU0MyAAAN (User: admin@gmail.com)","timestamp":"2025-12-06T08:52:57.885Z"}
+{"level":"info","message":"Socket connected: gWGSJgYXJ_wGUvSCAAAP (User: admin@gmail.com)","timestamp":"2025-12-06T08:54:02.283Z"}
+{"level":"info","message":"Socket disconnected: gWGSJgYXJ_wGUvSCAAAP - Reason: client namespace disconnect","timestamp":"2025-12-06T08:54:12.670Z"}
+{"level":"info","message":"Socket connected: 8kO-rDp2QTRhbLFXAAAR (User: admin@gmail.com)","timestamp":"2025-12-06T08:56:17.033Z"}
+{"level":"info","message":"Socket disconnected: 8kO-rDp2QTRhbLFXAAAR - Reason: client namespace disconnect","timestamp":"2025-12-06T08:56:23.057Z"}
+{"level":"info","message":"Socket disconnected: WskdFatoKABvU0MyAAAN - Reason: client namespace disconnect","timestamp":"2025-12-06T09:01:17.349Z"}
+{"level":"info","message":"Socket connected: xdU00drhPdIg8dsyAAAT (User: admin@gmail.com)","timestamp":"2025-12-06T09:01:17.616Z"}
+{"level":"info","message":"Socket disconnected: xdU00drhPdIg8dsyAAAT - Reason: client namespace disconnect","timestamp":"2025-12-06T09:01:27.378Z"}
+{"level":"info","message":"Socket connected: b9cqWYwr0EkmjFvQAAAV (User: admin@gmail.com)","timestamp":"2025-12-06T09:01:43.535Z"}
+{"level":"info","message":"Socket disconnected: b9cqWYwr0EkmjFvQAAAV - Reason: client namespace disconnect","timestamp":"2025-12-06T09:05:57.745Z"}
+{"level":"info","message":"Socket connected: ak9ujXb9ruG688bEAAAX (User: admin@gmail.com)","timestamp":"2025-12-06T09:06:11.227Z"}
+{"level":"info","message":"Socket disconnected: ak9ujXb9ruG688bEAAAX - Reason: transport close","timestamp":"2025-12-06T09:08:46.909Z"}
+{"level":"info","message":"Socket connected: wcxnewP0-TT4a5tYAAAZ (User: admin@gmail.com)","timestamp":"2025-12-06T09:13:02.633Z"}
+{"level":"info","message":"Socket disconnected: wcxnewP0-TT4a5tYAAAZ - Reason: client namespace disconnect","timestamp":"2025-12-06T09:16:48.232Z"}
+{"level":"info","message":"Socket connected: PUAdAFhDxpKwlLaCAAAb (User: admin@gmail.com)","timestamp":"2025-12-06T09:16:48.305Z"}
+{"level":"info","message":"Socket disconnected: PUAdAFhDxpKwlLaCAAAb - Reason: client namespace disconnect","timestamp":"2025-12-06T09:16:53.375Z"}
+{"level":"info","message":"Socket connected: I6gWdhP8WQtypKiMAAAd (User: admin@gmail.com)","timestamp":"2025-12-06T09:16:53.441Z"}
+{"level":"info","message":"Socket disconnected: I6gWdhP8WQtypKiMAAAd - Reason: client namespace disconnect","timestamp":"2025-12-06T09:17:29.131Z"}
+{"level":"info","message":"Socket connected: JHYxrtI5G-zZbt3gAAAf (User: admin@gmail.com)","timestamp":"2025-12-06T09:17:29.207Z"}
+{"level":"info","message":"Socket disconnected: JHYxrtI5G-zZbt3gAAAf - Reason: client namespace disconnect","timestamp":"2025-12-06T09:17:31.621Z"}
+{"level":"info","message":"Socket connected: 55qXtZIxU0XyXDIRAAAh (User: admin@gmail.com)","timestamp":"2025-12-06T09:17:31.688Z"}
+{"level":"info","message":"Socket disconnected: 55qXtZIxU0XyXDIRAAAh - Reason: client namespace disconnect","timestamp":"2025-12-06T09:17:43.351Z"}
+{"level":"info","message":"Socket connected: 5P3VoQEF2evFDbobAAAj (User: admin@gmail.com)","timestamp":"2025-12-06T09:17:43.438Z"}
+{"level":"info","message":"Socket disconnected: 5P3VoQEF2evFDbobAAAj - Reason: client namespace disconnect","timestamp":"2025-12-06T09:17:45.283Z"}
+{"level":"info","message":"Socket connected: YdAgDWW19M2-goAxAAAl (User: admin@gmail.com)","timestamp":"2025-12-06T09:17:45.342Z"}
+{"level":"info","message":"Socket disconnected: YdAgDWW19M2-goAxAAAl - Reason: client namespace disconnect","timestamp":"2025-12-06T09:17:58.446Z"}
+{"level":"info","message":"Socket connected: kkz0ysVrhwlTWX4cAAAn (User: admin@gmail.com)","timestamp":"2025-12-06T09:17:58.521Z"}
+{"level":"info","message":"Socket disconnected: kkz0ysVrhwlTWX4cAAAn - Reason: client namespace disconnect","timestamp":"2025-12-06T09:18:01.784Z"}
+{"level":"info","message":"Socket connected: EZSK-_NbS2TpHbxeAAAp (User: admin@gmail.com)","timestamp":"2025-12-06T09:18:01.845Z"}
+{"level":"info","message":"Socket disconnected: EZSK-_NbS2TpHbxeAAAp - Reason: client namespace disconnect","timestamp":"2025-12-06T09:18:03.180Z"}
+{"level":"info","message":"Socket connected: WnjxC8wZtVDZH12gAAAr (User: admin@gmail.com)","timestamp":"2025-12-06T09:18:03.280Z"}
+{"level":"info","message":"Socket disconnected: WnjxC8wZtVDZH12gAAAr - Reason: client namespace disconnect","timestamp":"2025-12-06T09:19:45.529Z"}
+{"level":"info","message":"Socket connected: iiMBkUeAalfoRfCEAAAt (User: admin@gmail.com)","timestamp":"2025-12-06T09:19:45.597Z"}
+{"level":"info","message":"Socket disconnected: iiMBkUeAalfoRfCEAAAt - Reason: client namespace disconnect","timestamp":"2025-12-06T09:19:47.970Z"}
+{"level":"info","message":"Socket connected: A_R5X5TQVRan0vQNAAAv (User: admin@gmail.com)","timestamp":"2025-12-06T09:19:48.037Z"}
+{"level":"info","message":"Socket disconnected: A_R5X5TQVRan0vQNAAAv - Reason: client namespace disconnect","timestamp":"2025-12-06T09:19:49.010Z"}
+{"level":"info","message":"Socket connected: AR6In9mqx6ups53XAAAx (User: admin@gmail.com)","timestamp":"2025-12-06T09:19:49.076Z"}
+{"level":"info","message":"Socket disconnected: AR6In9mqx6ups53XAAAx - Reason: client namespace disconnect","timestamp":"2025-12-06T09:20:02.813Z"}
+{"level":"info","message":"Socket connected: LZQeLZSX8r9Hfa_jAAAz (User: admin@gmail.com)","timestamp":"2025-12-06T09:20:03.177Z"}
+{"level":"info","message":"Socket disconnected: LZQeLZSX8r9Hfa_jAAAz - Reason: client namespace disconnect","timestamp":"2025-12-06T09:20:03.726Z"}
+{"level":"info","message":"Socket connected: KDBKdTzdId_o5BGvAAA1 (User: admin@gmail.com)","timestamp":"2025-12-06T09:20:03.793Z"}
+{"level":"info","message":"Socket disconnected: KDBKdTzdId_o5BGvAAA1 - Reason: client namespace disconnect","timestamp":"2025-12-06T09:20:26.621Z"}
+{"level":"info","message":"Socket connected: RFC92lmC0lNrhYFPAAA3 (User: admin@gmail.com)","timestamp":"2025-12-06T09:20:26.687Z"}
+{"level":"info","message":"Socket disconnected: RFC92lmC0lNrhYFPAAA3 - Reason: client namespace disconnect","timestamp":"2025-12-06T09:21:03.985Z"}
+{"level":"info","message":"Socket connected: 5m6xidYfAYVwlk8EAAA5 (User: admin@gmail.com)","timestamp":"2025-12-06T09:21:04.054Z"}
+{"level":"info","message":"Socket disconnected: 5m6xidYfAYVwlk8EAAA5 - Reason: client namespace disconnect","timestamp":"2025-12-06T09:21:13.176Z"}
+{"level":"info","message":"Socket connected: L_Npe1-1DFUbjuhiAAA7 (User: admin@gmail.com)","timestamp":"2025-12-06T09:21:13.248Z"}
+{"level":"info","message":"Socket disconnected: L_Npe1-1DFUbjuhiAAA7 - Reason: client namespace disconnect","timestamp":"2025-12-06T09:23:49.200Z"}
+{"level":"info","message":"Socket connected: ecP7TTQScWv30vQuAAA9 (User: admin@gmail.com)","timestamp":"2025-12-06T09:23:49.259Z"}
+{"level":"info","message":"Socket disconnected: ecP7TTQScWv30vQuAAA9 - Reason: client namespace disconnect","timestamp":"2025-12-06T09:23:54.640Z"}
+{"level":"info","message":"Socket connected: 9xc8mI6cn9g19e5BAAA_ (User: admin@gmail.com)","timestamp":"2025-12-06T09:23:54.654Z"}
+{"level":"info","message":"Socket disconnected: 9xc8mI6cn9g19e5BAAA_ - Reason: transport close","timestamp":"2025-12-06T09:26:46.896Z"}
+{"level":"info","message":"Socket connected: zFoEFbVnIhM1b_1tAABB (User: admin@gmail.com)","timestamp":"2025-12-06T09:29:33.199Z"}
+{"level":"info","message":"Socket disconnected: zFoEFbVnIhM1b_1tAABB - Reason: client namespace disconnect","timestamp":"2025-12-06T09:29:35.083Z"}
+{"level":"info","message":"Socket connected: HYg7OszZsdfEpzl9AABD (User: admin@gmail.com)","timestamp":"2025-12-06T09:29:40.864Z"}
+{"level":"info","message":"Socket disconnected: HYg7OszZsdfEpzl9AABD - Reason: client namespace disconnect","timestamp":"2025-12-06T09:59:31.372Z"}
+{"level":"info","message":"Socket connected: x1YEblIbSBUR8fvIAABF (User: admin@gmail.com)","timestamp":"2025-12-06T09:59:33.135Z"}
+{"level":"info","message":"Socket disconnected: x1YEblIbSBUR8fvIAABF - Reason: client namespace disconnect","timestamp":"2025-12-06T10:13:07.484Z"}
+{"level":"info","message":"Socket connected: wTXMP1QVLh8HfBfxAABH (User: admin@gmail.com)","timestamp":"2025-12-06T10:13:08.578Z"}
+{"level":"info","message":"Socket disconnected: wTXMP1QVLh8HfBfxAABH - Reason: transport close","timestamp":"2025-12-06T10:18:24.811Z"}
+{"level":"info","message":"Socket connected: J7habjNHsuOAgbZIAABJ (User: admin@gmail.com)","timestamp":"2025-12-06T10:18:28.183Z"}
+{"amount":354000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"📤 MoMo REQUEST:","momoOrderId":"251206_173206_545da524","partnerCode":"MOMO","requestId":"251206_173206_ncp4ez","timestamp":"2025-12-06T10:32:06.580Z"}
+{"deeplink":"momo://app?action=payWithApp&isScanQR=false&serviceType=app&sid=TU9NT3wyNTEyMDZfMTczMjA2XzU0NWRhNTI0&v=3.0","level":"info","message":"📥 MoMo RESPONSE FULL: Thành công.","payUrl":"https://test-payment.momo.vn/v2/gateway/pay?t=TU9NT3wyNTEyMDZfMTczMjA2XzU0NWRhNTI0&s=78b34f5964ed5b7b62daf7a7a1c1d97b57f154f67241b1c6ba90753f52ff35f2","qrCodeUrl":"momo://app?action=payWithApp&isScanQR=true&serviceType=qr&sid=TU9NT3wyNTEyMDZfMTczMjA2XzU0NWRhNTI0&v=3.0&sr=0","resultCode":0,"timestamp":"2025-12-06T10:32:06.913Z"}
+{"amount":354000,"endpoint":"https://test-payment.momo.vn/v2/gateway/api/create","level":"info","message":"📤 MoMo REQUEST:","momoOrderId":"251206_173848_545da528","partnerCode":"MOMO","requestId":"251206_173848_q3pynf","timestamp":"2025-12-06T10:38:48.885Z"}
+{"deeplink":"momo://app?action=payWithApp&isScanQR=false&serviceType=app&sid=TU9NT3wyNTEyMDZfMTczODQ4XzU0NWRhNTI4&v=3.0","level":"info","message":"📥 MoMo RESPONSE FULL: Thành công.","payUrl":"https://test-payment.momo.vn/v2/gateway/pay?t=TU9NT3wyNTEyMDZfMTczODQ4XzU0NWRhNTI4&s=48d80da07600f728ee4e40a70f554c72196a847334f9e280098542c1251dc1cc","qrCodeUrl":"momo://app?action=payWithApp&isScanQR=true&serviceType=qr&sid=TU9NT3wyNTEyMDZfMTczODQ4XzU0NWRhNTI4&v=3.0&sr=0","resultCode":0,"timestamp":"2025-12-06T10:38:48.966Z"}
+{"body":{"address":"189 Cong Hoa","city":"TP HCM","district":"Tan Binh","isDefault":true,"latitude":null,"longitude":null,"name":"Phan Lam Nhat Khang","phone":"0833233446","ward":"Tan Binh"},"errors":[{"field":"latitude","message":"Invalid input: expected number, received null"},{"field":"longitude","message":"Invalid input: expected number, received null"}],"level":"error","message":"Validation failed for PUT /691d7bd24f1180e671e4540c:","timestamp":"2025-12-06T10:42:13.677Z"}

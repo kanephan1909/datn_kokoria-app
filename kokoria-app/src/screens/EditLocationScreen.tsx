@@ -32,6 +32,8 @@ interface RouteParams {
     longitude: number;
   };
   address?: string;
+  returnTo?: string;
+  addressId?: string;
 }
 
 interface Location {
@@ -44,9 +46,14 @@ const EditLocationScreen = () => {
   const route = useRoute();
   const params = (route.params as RouteParams) || {};
 
-  const [mapLocation, setMapLocation] = useState<Location>(
-    params.initialLocation || defaultLocation,
-  );
+  // Khởi tạo state: nếu có initialLocation thì dùng, nếu không thì dùng defaultLocation
+  // Nhưng nếu chỉ có address, sẽ geocode ngay trong useEffect
+  const [mapLocation, setMapLocation] = useState<Location>(() => {
+    if (params.initialLocation) {
+      return params.initialLocation;
+    }
+    return defaultLocation;
+  });
   const [currentAddress, setCurrentAddress] = useState<string>(
     params.address || '',
   );
@@ -172,28 +179,130 @@ const EditLocationScreen = () => {
 
   // Xác nhận vị trí
   const handleConfirm = useCallback(() => {
-    (navigation as any).navigate({
-      name: MainRoutes.Checkout2,
-      params: {
-        selectedLocation: {
-          latitude: mapLocation.latitude,
-          longitude: mapLocation.longitude,
-          address: currentAddress,
+    const selectedLocation = {
+      latitude: mapLocation.latitude,
+      longitude: mapLocation.longitude,
+      address: currentAddress,
+    };
+
+    if (params.returnTo === 'EditAddress' && params.addressId) {
+      // Quay lại EditAddressScreen với location đã chọn
+      (navigation as any).navigate({
+        name: MainRoutes.EditAddress,
+        params: {
+          addressId: params.addressId,
+          selectedLocation,
         },
-      },
-      merge: true,
-    });
-  }, [navigation, mapLocation, currentAddress]);
+        merge: true,
+      });
+    } else {
+      // Mặc định navigate đến Checkout2
+      (navigation as any).navigate({
+        name: MainRoutes.Checkout2,
+        params: {
+          selectedLocation,
+        },
+        merge: true,
+      });
+    }
+  }, [params.returnTo, params.addressId, navigation, mapLocation, currentAddress]);
+
+  // Hàm helper để animate map đến vị trí với retry
+  const animateToLocation = useCallback(
+    (location: Location, retries = 5, delay = 300) => {
+      const tryAnimate = (attempt: number) => {
+        if (mapViewRef.current) {
+          mapViewRef.current.animateToRegion(
+            {
+              ...location,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            },
+            500,
+          );
+          console.log('Map animated to location:', location);
+        } else if (attempt < retries) {
+          // Nếu map chưa sẵn sàng, thử lại sau một chút
+          setTimeout(() => tryAnimate(attempt + 1), delay);
+        } else {
+          console.warn('Map ref not ready after retries');
+        }
+      };
+      tryAnimate(0);
+    },
+    [],
+  );
 
   // Load địa chỉ ban đầu
   useEffect(() => {
     const loadInitialAddress = async () => {
-      const location = params.initialLocation || defaultLocation;
-      const address = await reverseGeocode(location.latitude, location.longitude);
-      if (address) {
-        setCurrentAddress(address);
+      // Nếu có initialLocation, sử dụng nó
+      if (params.initialLocation) {
+        const location = params.initialLocation;
+        console.log('Using initialLocation:', location);
+        // Ưu tiên sử dụng address string nếu có (chính xác hơn)
+        if (params.address) {
+          setCurrentAddress(params.address);
+        } else {
+          // Nếu không có address string, reverse geocode từ tọa độ
+          const address = await reverseGeocode(location.latitude, location.longitude);
+          if (address) {
+            setCurrentAddress(address);
+          } else {
+            setCurrentAddress('Không thể xác định địa chỉ');
+          }
+        }
+        // Set location và animate map
+        setMapLocation(location);
+        // Đợi một chút để map render xong rồi mới animate
+        setTimeout(() => {
+          animateToLocation(location);
+        }, 500);
+      } else if (params.address && params.address.trim()) {
+        // Nếu có address string nhưng không có initialLocation, geocode address NGAY
+        console.log('Geocoding address:', params.address);
+        try {
+          const location = await geocodeAddress(params.address.trim());
+          if (location) {
+            console.log('Geocode thành công:', location);
+            // Set location và address
+            setMapLocation(location);
+            setCurrentAddress(params.address);
+            // Animate map đến vị trí sau khi geocode xong
+            // Đợi một chút để map render xong
+            setTimeout(() => {
+              animateToLocation(location);
+            }, 500);
+          } else {
+            console.log('Geocode thất bại, sử dụng default location');
+            // Nếu geocode thất bại, sử dụng default location
+            setMapLocation(defaultLocation);
+            const address = await reverseGeocode(
+              defaultLocation.latitude,
+              defaultLocation.longitude,
+            );
+            if (address) {
+              setCurrentAddress(address);
+            } else {
+              setCurrentAddress('Không thể xác định địa chỉ');
+            }
+          }
+        } catch (error) {
+          console.error('Error geocoding:', error);
+          // Nếu có lỗi, vẫn sử dụng default location
+          setMapLocation(defaultLocation);
+          setCurrentAddress(params.address || 'Không thể xác định địa chỉ');
+        }
       } else {
-        setCurrentAddress('Không thể xác định địa chỉ');
+        // Không có gì, sử dụng default location
+        console.log('No params, using default location');
+        const location = defaultLocation;
+        const address = await reverseGeocode(location.latitude, location.longitude);
+        if (address) {
+          setCurrentAddress(address);
+        } else {
+          setCurrentAddress('Không thể xác định địa chỉ');
+        }
       }
     };
     loadInitialAddress();
@@ -201,7 +310,7 @@ const EditLocationScreen = () => {
   }, []);
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+    <SafeAreaView edges={[]} style={styles.container}>
       <LocationHeader
         onBack={() => navigation.goBack()}
         onSearch={handleSearch}

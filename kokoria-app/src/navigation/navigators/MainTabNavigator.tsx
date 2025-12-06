@@ -3,7 +3,7 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {MainRoutes} from '../Routes';
 import HomeScreen from '../../screens/HomeScreen';
-import OrderHistoryScreen from '../../screens/OrderHistoryScreen';
+import OrderScreen from '../../screens/OrderScreen';
 import {FontAwesome} from '@react-native-vector-icons/fontawesome';
 import UserScreen from '../../screens/UserScreen';
 import MenuScreen from '../../screens/MenuScreen';
@@ -60,7 +60,7 @@ const MainTabNavigator = () => {
       />
       <Tab.Screen
         name={MainRoutes.Order}
-        component={OrderHistoryScreen}
+        component={OrderScreen}
         options={{
           tabBarIcon: OrderIcon,
         }}

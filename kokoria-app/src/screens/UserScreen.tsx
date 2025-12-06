@@ -5,9 +5,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import React, {useState} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useAuth} from '../context/AuthContext';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {MainRoutes} from '../navigation/Routes';
@@ -19,6 +22,8 @@ const UserScreen = () => {
   const {user} = useAuth();
   const navigation = useNavigation();
   const [ordersCount, setOrdersCount] = useState(0);
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
 
   // Fetch orders count - chỉ đếm đơn hàng đã thanh toán thành công
   useQuery({
@@ -146,9 +151,9 @@ const UserScreen = () => {
   };
 
   return (
-    <SafeAreaView edges={['top']} style={styles.container}>
+    <SafeAreaView edges={[]} style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, {paddingTop: statusBarHeight + 16}]}>
         <Text style={styles.headerTitle}>Tài khoản</Text>
         <TouchableOpacity
           style={styles.settingsButton}
@@ -167,7 +172,12 @@ const UserScreen = () => {
         <View style={styles.profileCard}>
           <View style={styles.profileHeader}>
             <View style={styles.avatarContainer}>
-              {user?.name ? (
+              {(user as any)?.avatarUrl ? (
+                <Image
+                  source={{uri: (user as any).avatarUrl}}
+                  style={styles.avatar}
+                />
+              ) : user?.name ? (
                 <View style={styles.avatar}>
                   <Text style={styles.avatarText}>
                     {getUserInitials(user.name)}
@@ -188,8 +198,7 @@ const UserScreen = () => {
               style={styles.editButton}
               activeOpacity={0.7}
               onPress={() => {
-                // TODO: Navigate to edit profile
-                console.log('Edit profile');
+                (navigation as any).navigate(MainRoutes.EditProfile);
               }}>
               <Text style={styles.editButtonText}>Chỉnh sửa</Text>
             </TouchableOpacity>

@@ -62,7 +62,7 @@ const CartBottomBar = () => {
         onPress={handleCheckoutPress}
         style={styles.checkoutButton}
         activeOpacity={0.8}>
-        <Text style={styles.checkoutText}>Thanh toán</Text>
+        <Text style={styles.checkoutText}>Đặt hàng</Text>
       </TouchableOpacity>
     </View>
   );

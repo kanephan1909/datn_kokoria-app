@@ -6,8 +6,10 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  Platform,
+  StatusBar,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import LinearGradient from 'react-native-linear-gradient';
@@ -50,6 +52,8 @@ interface Order {
 }
 
 const OrderConfirmationScreen = () => {
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   const route = useRoute();
   const navigation = useNavigation();
   const {orderId} = route.params as {orderId: string};
@@ -141,7 +145,7 @@ const OrderConfirmationScreen = () => {
     : '';
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={[]}>
       {/* Success Header */}
       <LinearGradient
         colors={['#FFF4E6', '#FFE4CC', '#FFFFFF']}
@@ -149,7 +153,7 @@ const OrderConfirmationScreen = () => {
         end={{x: 0, y: 1}}
         locations={[0, 0.5, 1]}
         style={styles.headerGradient}>
-        <View style={styles.headerContent}>
+        <View style={[styles.headerContent, {paddingTop: statusBarHeight + 16}]}>
           {/* Success Icon với decorative circles */}
           <View style={styles.successIconWrapper}>
             {/* Outer decorative circle */}
