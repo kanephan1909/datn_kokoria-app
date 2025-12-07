@@ -36,6 +36,7 @@ interface CartState {
   removeItem: (itemId: string) => Promise<void>;
   clear: () => Promise<void>;
   refreshCart: () => Promise<void>;
+  reset: () => void; // Reset cart state (dùng khi logout)
 }
 
 // Helper để tính toán totalPrice và totalItems
@@ -293,6 +294,15 @@ export const useCartStore = create<CartState>((set, get) => {
     refreshCart: async () => {
       await get().loadCart();
     },
+
+    // Reset cart state (dùng khi logout hoặc đăng nhập user mới)
+    reset: () => {
+      set({
+        cartItems: [],
+        isLoading: false,
+        isInitialized: false,
+      });
+    },
   };
 });
 
@@ -316,6 +326,7 @@ export const useCart = () => {
     removeItem: store.removeItem,
     clear: store.clear,
     refreshCart: store.refreshCart,
+    reset: store.reset,
   };
 };
 

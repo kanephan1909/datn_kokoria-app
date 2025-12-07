@@ -55,6 +55,38 @@ async function register(req, res) {
             },
         });
 
+        // Nếu role là DRIVER, tự động tạo Driver record
+        if (user.role === 'DRIVER') {
+            try {
+                const driverPhone = phone || `user_${user.id.slice(-8)}`;
+                // Kiểm tra xem driver đã tồn tại chưa (theo phone)
+                let driver = await prisma.driver.findUnique({
+                    where: { phone: driverPhone },
+                });
+
+                if (!driver) {
+                    driver = await prisma.driver.create({
+                        data: {
+                            name: name || 'Driver',
+                            phone: driverPhone,
+                            avatar: null,
+                            isOnline: false,
+                        },
+                    });
+                    logger.info(`[register] Created driver record for user ${user.id}: driver.id=${driver.id}, driver.phone="${driver.phone}"`);
+                } else {
+                    logger.info(`[register] Driver already exists for user ${user.id}: driver.id=${driver.id}`);
+                }
+            } catch (driverError) {
+                // Nếu lỗi do duplicate phone, log và tiếp tục (không fail registration)
+                if (driverError.code === 'P2002') {
+                    logger.warn(`[register] Driver with phone already exists, skipping driver creation for user ${user.id}`);
+                } else {
+                    logger.error(`[register] Error creating driver for user ${user.id}: ${driverError.message}`);
+                }
+            }
+        }
+
         // Tạo token
         const { accessToken, refreshToken } = generateToken(user);
 
