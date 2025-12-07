@@ -123,6 +123,18 @@ const OrderDetailScreen = () => {
   const getAddressString = (address: any) => {
     if (typeof address === 'string') return address;
     if (typeof address === 'object' && address) {
+      // Format mới: name, phone, address, ward, district, city
+      if (address.address || address.ward || address.district || address.city) {
+        const parts = [
+          address.address,
+          address.ward,
+          address.district,
+          address.city,
+        ].filter(Boolean);
+        return parts.join(', ') || 'Địa chỉ không xác định';
+      }
+      
+      // Format cũ: flatNo, street, buildingName, locality
       const parts = [
         address.flatNo,
         address.street,
@@ -162,6 +174,7 @@ const OrderDetailScreen = () => {
   }
 
   if (error || !order) {
+    const errorMessage = error?.response?.data?.message || error?.message || 'Không thể tải đơn hàng';
     return (
       <View className="flex-1 items-center justify-center px-6" style={{ backgroundColor: '#F0F9FF' }}>
         <View 
@@ -179,12 +192,27 @@ const OrderDetailScreen = () => {
         <Text className="text-gray-900 text-center mt-4 text-xl font-bold">
           Không thể tải đơn hàng
         </Text>
+        <Text className="text-gray-600 text-center mt-2 text-sm px-4">
+          {errorMessage}
+        </Text>
+        <TouchableOpacity
+          className="mt-6 bg-blue-500 px-6 py-3 rounded-lg"
+          onPress={() => {
+            queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+          }}>
+          <Text className="text-white font-semibold">Thử lại</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="mt-3"
+          onPress={() => navigation.goBack()}>
+          <Text className="text-blue-500 font-semibold">Quay lại</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
-  const isAvailable = order.status === 'READY_FOR_PICKUP' && !order.driverId;
-  const isMyOrder = order.driverId && ['PICKED_UP', 'DELIVERING'].includes(order.status);
+  const isAvailable = !order.driverId && ['PENDING', 'CONFIRMED', 'PREPARING', 'READY_FOR_PICKUP'].includes(order.status);
+  const isMyOrder = order.driverId && ['CONFIRMED', 'PREPARING', 'READY_FOR_PICKUP', 'PICKED_UP', 'DELIVERING'].includes(order.status);
 
   const getStatusInfo = (status: string) => {
     const statusMap: { [key: string]: { text: string; color: string; bgColor: string } } = {
@@ -303,7 +331,7 @@ const OrderDetailScreen = () => {
         )}
 
         {/* Customer Info & Chat */}
-        {order.user && (
+        {order.user && isMyOrder && (
           <View className="border-t border-gray-100 pt-5 mt-5">
             <Text className="text-gray-500 text-xs font-semibold mb-3 uppercase tracking-wide">
               Khách hàng
@@ -384,6 +412,33 @@ const OrderDetailScreen = () => {
 
       {isMyOrder && (
         <View className="px-4 pb-6">
+          {/* Nút xác nhận đã lấy hàng (khi đã nhận đơn nhưng chưa lấy hàng) */}
+          {['CONFIRMED', 'PREPARING', 'READY_FOR_PICKUP'].includes(order.status) && (
+            <TouchableOpacity
+              className="bg-orange-500 rounded-2xl py-5 mb-3"
+              style={{
+                shadowColor: '#F59E0B',
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.4,
+                shadowRadius: 12,
+                elevation: 8,
+              }}
+              onPress={() => updateStatusMutation.mutate({ status: 'PICKED_UP' })}
+              disabled={updateStatusMutation.isPending}
+            >
+              {updateStatusMutation.isPending ? (
+                <ActivityIndicator color="white" size="large" />
+              ) : (
+                <View className="flex-row items-center justify-center">
+                  <Ionicons name="cube" size={24} color="white" />
+                  <Text className="text-white font-bold text-center text-lg ml-2">
+                    Đã lấy hàng
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
+
           {/* Hiển thị khoảng cách khi đã nhận đơn (PICKED_UP) */}
           {order.status === 'PICKED_UP' && distanceResult && (
             <View className="bg-green-50 rounded-xl p-4 mb-3 border-l-4" style={{ borderLeftColor: '#10B981' }}>

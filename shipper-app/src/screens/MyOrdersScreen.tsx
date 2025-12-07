@@ -30,6 +30,9 @@ const MyOrdersScreen = () => {
 
   const getStatusInfo = (status: string) => {
     const statusMap: { [key: string]: { text: string; color: string; bgColor: string } } = {
+      CONFIRMED: { text: 'Đã xác nhận', color: '#10B981', bgColor: '#D1FAE5' },
+      PREPARING: { text: 'Đang chuẩn bị', color: '#F59E0B', bgColor: '#FEF3C7' },
+      READY_FOR_PICKUP: { text: 'Sẵn sàng lấy', color: '#3B82F6', bgColor: '#DBEAFE' },
       PICKED_UP: { text: 'Đã lấy hàng', color: '#F59E0B', bgColor: '#FEF3C7' },
       DELIVERING: { text: 'Đang giao', color: '#3B82F6', bgColor: '#DBEAFE' },
       COMPLETED: { text: 'Đã giao', color: '#10B981', bgColor: '#D1FAE5' },
@@ -40,6 +43,18 @@ const MyOrdersScreen = () => {
   const getAddressString = (address: any) => {
     if (typeof address === 'string') return address;
     if (typeof address === 'object' && address) {
+      // Format mới: name, phone, address, ward, district, city
+      if (address.address || address.ward || address.district || address.city) {
+        const parts = [
+          address.address,
+          address.ward,
+          address.district,
+          address.city,
+        ].filter(Boolean);
+        return parts.join(', ') || 'Địa chỉ không xác định';
+      }
+      
+      // Format cũ: flatNo, street, buildingName, locality
       const parts = [
         address.flatNo,
         address.street,
@@ -143,7 +158,7 @@ const MyOrdersScreen = () => {
             Tất cả
           </Text>
         </TouchableOpacity>
-        {['PICKED_UP', 'DELIVERING', 'COMPLETED'].map((status) => {
+        {['CONFIRMED', 'PREPARING', 'READY_FOR_PICKUP', 'PICKED_UP', 'DELIVERING', 'COMPLETED'].map((status) => {
           const info = getStatusInfo(status);
           const isSelected = selectedStatus === status;
           return (

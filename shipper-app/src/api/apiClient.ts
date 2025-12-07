@@ -111,7 +111,7 @@ export const acceptOrder = async (orderId: string) => {
         throw new Error('Không thể lấy thông tin driver');
     }
     const driverId = response.data.id;
-    return (await api.post(`/orders/${orderId}/accept`, { driverId })).data;
+    return (await api.put(`/orders/${orderId}/accept`, { driverId })).data;
 };
 
 // Cập nhật trạng thái đơn

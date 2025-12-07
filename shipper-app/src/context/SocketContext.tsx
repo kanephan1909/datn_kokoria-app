@@ -20,8 +20,13 @@ export const SocketProvider = ({children}: {children: ReactNode}) => {
       // Nhận đơn hàng mới
       'order:new': (data: {order: any}) => {
         console.log('📦 New order received:', data);
+        console.log('📦 Order ID:', data?.order?.id);
+        console.log('📦 Order Status:', data?.order?.status);
+        console.log('📦 Order Driver ID:', data?.order?.driverId);
         // Invalidate queries để refresh danh sách đơn hàng
         queryClient.invalidateQueries({queryKey: ['availableOrders']});
+        // Refetch ngay lập tức để đảm bảo đơn hàng mới được hiển thị
+        queryClient.refetchQueries({queryKey: ['availableOrders']});
       },
 
       // Đơn hàng đã được nhận bởi driver khác
