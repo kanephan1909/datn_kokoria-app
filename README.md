@@ -62,7 +62,6 @@ datn_kokoria-app/
 │   └── src/                 # Admin Panel Frontend
 ├── kokoria-app/             # App Khách Hàng
 ├── shipper-app/             # App Shipper
-├── HUONG_DAN_DEMO.md        # Hướng dẫn demo chi tiết
 ├── start-demo.ps1           # Script helper (Windows)
 └── start-demo.sh            # Script helper (Mac/Linux)
 ```
