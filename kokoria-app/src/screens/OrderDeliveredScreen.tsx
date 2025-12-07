@@ -129,13 +129,13 @@ const OrderDeliveredScreen = () => {
     try {
       const response = await submitOrderRating(orderId, {
         rating,
-        feedback: feedback.trim() || undefined,
+        comment: feedback.trim() || undefined,
       });
 
       if (response.success) {
         Alert.alert('Cảm ơn bạn!', 'Đánh giá của bạn đã được ghi nhận', [
           {
-            text: 'OK',
+            text: 'Đồng ý',
             onPress: () => {
               // Reset form
               setRating(0);
@@ -168,10 +168,12 @@ const OrderDeliveredScreen = () => {
       return '';
     }
     const date = new Date(dateString);
+    const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
-    const ampm = date.getHours() >= 12 ? 'PM' : 'AM';
-    const displayHours = date.getHours() % 12 || 12;
-    return `${displayHours}:${minutes} ${ampm}`;
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${hours}:${minutes} - ${day}/${month}/${year}`;
   };
 
   const getAddressString = () => {
@@ -215,7 +217,7 @@ const OrderDeliveredScreen = () => {
             hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
             <Ionicons name="close" size={24} color="#000000" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Enjoy your meal!</Text>
+          <Text style={styles.headerTitle}>Chúc bạn ngon miệng!</Text>
         </View>
 
         {/* Order Summary Card */}
@@ -233,9 +235,9 @@ const OrderDeliveredScreen = () => {
           </View>
 
           <Text style={styles.totalPaid}>
-            Total paid: {formatPrice(total)}
+            Tổng thanh toán: {formatPrice(total)}
           </Text>
-          <Text style={styles.orderDelivered}>Order delivered</Text>
+          <Text style={styles.orderDelivered}>Đơn hàng đã giao</Text>
 
           {/* Order items preview */}
           {order.items && order.items.length > 0 && (
@@ -261,12 +263,12 @@ const OrderDeliveredScreen = () => {
         {/* Delivery Details Card */}
         <View style={styles.card}>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Address</Text>
+            <Text style={styles.detailLabel}>Địa chỉ</Text>
             <Text style={styles.detailValue}>{getAddressString()}</Text>
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Delivered at</Text>
+            <Text style={styles.detailLabel}>Giao lúc</Text>
             <Text style={styles.detailValue}>{formatTime(deliveredTime)}</Text>
           </View>
 
@@ -283,7 +285,7 @@ const OrderDeliveredScreen = () => {
                 </Text>
               </View>
               <View style={styles.driverTextContainer}>
-                <Text style={styles.driverLabel}>Delivered by</Text>
+                <Text style={styles.driverLabel}>Giao bởi</Text>
                 <Text style={styles.driverName}>{driverName}</Text>
               </View>
             </View>
@@ -304,7 +306,7 @@ const OrderDeliveredScreen = () => {
 
         {/* Rating Section */}
         <View style={styles.card}>
-          <Text style={styles.ratingTitle}>How was your experience?</Text>
+          <Text style={styles.ratingTitle}>Bạn cảm thấy thế nào?</Text>
 
           {/* Star Rating */}
           <View style={styles.starContainer}>
@@ -315,7 +317,7 @@ const OrderDeliveredScreen = () => {
                 hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Ionicons
                   name={star <= rating ? 'star' : 'star-outline'}
-                  size={40}
+                  size={36}
                   color="#FF6B35"
                 />
               </TouchableOpacity>
@@ -325,7 +327,7 @@ const OrderDeliveredScreen = () => {
           {/* Feedback Input */}
           <TextInput
             style={styles.feedbackInput}
-            placeholder="Share your thoughts..."
+            placeholder="Chia sẻ suy nghĩ của bạn..."
             placeholderTextColor="#9CA3AF"
             value={feedback}
             onChangeText={setFeedback}
@@ -339,7 +341,7 @@ const OrderDeliveredScreen = () => {
             <TouchableOpacity
               style={styles.submitRatingButton}
               onPress={handleSubmitRating}>
-              <Text style={styles.submitRatingText}>Submit Rating</Text>
+              <Text style={styles.submitRatingText}>Gửi đánh giá</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -350,7 +352,7 @@ const OrderDeliveredScreen = () => {
         <TouchableOpacity
           style={styles.orderDetailsButton}
           onPress={handleViewOrderDetails}>
-          <Text style={styles.orderDetailsButtonText}>Order Details</Text>
+          <Text style={styles.orderDetailsButtonText}>Chi tiết đơn hàng</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -367,7 +369,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingTop: 8,
     paddingBottom: 100,
   },
   loadingContainer: {
@@ -376,7 +378,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    paddingVertical: 16,
+    paddingVertical: 12,
     position: 'relative',
   },
   closeButton: {
@@ -386,19 +388,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#000000',
-    marginTop: 8,
+    marginTop: 4,
   },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    padding: 16,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
@@ -445,15 +447,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   totalPaid: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#6B7280',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   orderDelivered: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#000000',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   itemsPreview: {
     flexDirection: 'row',
@@ -481,7 +483,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
@@ -554,33 +556,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   ratingTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#000000',
-    marginBottom: 20,
+    marginBottom: 16,
     textAlign: 'center',
   },
   starContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 20,
+    gap: 10,
+    marginBottom: 16,
   },
   feedbackInput: {
     borderWidth: 2,
     borderColor: '#FF6B35',
     borderRadius: 12,
-    padding: 16,
+    padding: 12,
     fontSize: 14,
     color: '#000000',
-    minHeight: 100,
+    minHeight: 80,
     textAlignVertical: 'top',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   submitRatingButton: {
     backgroundColor: '#FF6B35',
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
   },
@@ -594,14 +596,15 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 20,
+    padding: 16,
+    paddingBottom: 20,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#F3F4F6',
   },
   orderDetailsButton: {
     backgroundColor: '#FF6B35',
-    paddingVertical: 16,
+    paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
   },

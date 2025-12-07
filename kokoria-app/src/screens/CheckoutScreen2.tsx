@@ -360,7 +360,16 @@ const CheckoutScreen2 = () => {
                 paymentMethod: backendPaymentMethod,
               };
 
+              console.log('Creating order with data:', {
+                paymentMethod: backendPaymentMethod,
+                totalAmount: finalTotal,
+                itemsCount: cartItems.length,
+                address: addressObject,
+              });
+
               const response = await createOrder(orderData);
+
+              console.log('Order creation response:', response);
 
               if (response.success) {
                 const orderId = response.data.id;
@@ -507,12 +516,28 @@ const CheckoutScreen2 = () => {
                 orderRequestIdRef.current = null;
               }
 
-              Alert.alert(
-                'Lỗi',
-                error.response?.data?.message ||
-                  error.message ||
-                  'Không thể tạo đơn hàng',
-              );
+              // Log chi tiết lỗi để debug
+              console.error('Error creating order:', error);
+              console.error('Error response:', error.response?.data);
+
+              // Hiển thị lỗi chi tiết hơn
+              let errorMessage = 'Không thể tạo đơn hàng';
+              
+              if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+              } else if (error.response?.data?.errors) {
+                // Nếu có validation errors, hiển thị chi tiết
+                const errors = error.response.data.errors;
+                if (Array.isArray(errors)) {
+                  errorMessage = errors.map((e: any) => `${e.field}: ${e.message}`).join('\n');
+                } else {
+                  errorMessage = JSON.stringify(errors);
+                }
+              } else if (error.message) {
+                errorMessage = error.message;
+              }
+
+              Alert.alert('Lỗi', errorMessage);
             }
           },
         },

@@ -69,12 +69,17 @@ const HomeScreen = () => {
         message?: string;
       }) => {
         const statusMessages: {[key: string]: string} = {
+          pending: '⏳ Đơn hàng đang chờ xác nhận',
           confirmed: '✅ Đơn hàng đã được xác nhận',
           preparing: '👨‍🍳 Đơn hàng đang được chuẩn bị',
           ready: '📦 Đơn hàng đã sẵn sàng',
+          ready_for_pickup: '📦 Đơn hàng sẵn sàng lấy hàng',
+          picked_up: '🛍️ Shipper đã lấy hàng',
           delivering: '🚚 Đơn hàng đang được giao',
+          completed: '🎉 Đơn hàng đã được giao thành công',
           delivered: '🎉 Đơn hàng đã được giao',
           cancelled: '❌ Đơn hàng đã bị hủy',
+          canceled: '❌ Đơn hàng đã bị hủy',
         };
         showNotification(
           data.message || statusMessages[data.status] || 'Cập nhật đơn hàng',

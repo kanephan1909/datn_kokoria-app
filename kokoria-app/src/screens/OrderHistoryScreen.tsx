@@ -114,13 +114,16 @@ const OrderHistoryScreen = () => {
 
   const getStatusText = (status: string) => {
     const statusMap: {[key: string]: string} = {
-      pending: 'Đang đến',
-      confirmed: 'Đang đến',
-      preparing: 'Đang đến',
-      ready: 'Đang đến',
-      delivering: 'Đang đến',
-      completed: 'Đã giao',
+      pending: 'Chờ xác nhận',
+      confirmed: 'Đã xác nhận',
+      preparing: 'Đang chuẩn bị',
+      ready: 'Sẵn sàng',
+      ready_for_pickup: 'Sẵn sàng lấy hàng',
+      picked_up: 'Shipper đã lấy hàng',
+      delivering: 'Đang giao hàng',
+      completed: 'Đã giao hàng',
       cancelled: 'Đã hủy',
+      canceled: 'Đã hủy',
     };
     return statusMap[status.toLowerCase()] || status;
   };

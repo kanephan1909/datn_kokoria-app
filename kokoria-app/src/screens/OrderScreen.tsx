@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import React, {useState, useCallback} from 'react';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useNavigation, useRoute, useFocusEffect} from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {useCart} from '../store/useCartStore';
 import {fetchAddresses} from '../../api/apiClient';
@@ -50,7 +50,6 @@ const mapBackendToFrontend = (backendAddress: any): Address => {
 
 const OrderScreen = () => {
   const navigation = useNavigation();
-  const route = useRoute();
   const {cartItems, totalPrice, updateItem, removeItem} = useCart();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
@@ -58,10 +57,8 @@ const OrderScreen = () => {
   const insets = useSafeAreaInsets();
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
 
-  // Kiểm tra xem có phải là tab screen không
-  const isTabScreen = route.name === MainRoutes.Order;
-  // Chỉ hiển thị back button nếu không phải tab screen và có thể quay lại
-  const canGoBack = !isTabScreen && navigation.canGoBack();
+  // Luôn hiển thị nút back nếu có thể quay lại
+  const canGoBack = navigation.canGoBack();
 
   const loadAddresses = useCallback(async () => {
     try {

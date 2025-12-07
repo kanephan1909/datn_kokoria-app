@@ -12,6 +12,8 @@ import {useRoute, useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import {usePaymentWebView} from '../hooks/usePaymentWebView';
 import {getPaymentInjectedScript} from '../utils/paymentInjectedScript';
+import {testMoMoPaymentSuccess} from '../../api/apiClient';
+import {MainRoutes} from '../navigation/Routes';
 
 // Import WebView với error handling
 let WebView: any;
@@ -129,7 +131,40 @@ const PaymentWebViewScreen = () => {
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{getPaymentMethodName()}</Text>
-        <View style={styles.placeholder} />
+        {/* TEST Button - chỉ hiển thị khi paymentMethod là MOMO và đang ở môi trường dev */}
+        {paymentMethod === 'MOMO' && __DEV__ ? (
+          <TouchableOpacity
+            onPress={async () => {
+              Alert.alert(
+                'Test Payment',
+                'Bạn có muốn simulate thanh toán thành công?',
+                [
+                  {text: 'Hủy', style: 'cancel'},
+                  {
+                    text: 'OK',
+                    onPress: async () => {
+                      try {
+                        await testMoMoPaymentSuccess(orderId);
+                        // Navigate to confirmation screen
+                        setTimeout(() => {
+                          (navigation as any).replace(MainRoutes.OrderConfirmation, {
+                            orderId: orderId,
+                          });
+                        }, 500);
+                      } catch (error: any) {
+                        Alert.alert('Lỗi', error?.response?.data?.message || 'Không thể test payment');
+                      }
+                    },
+                  },
+                ],
+              );
+            }}
+            style={styles.testButton}>
+            <Text style={styles.testButtonText}>TEST</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.placeholder} />
+        )}
       </View>
 
       {/* WebView */}
@@ -247,6 +282,17 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  testButton: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  testButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
     fontWeight: '600',
   },
 });

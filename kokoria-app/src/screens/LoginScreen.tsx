@@ -15,9 +15,25 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { useAuth } from '../context/AuthContext';
-import { login as apiLogin, getMe } from '../../api/apiClient';
+import { login as apiLogin, getMe, socialLogin } from '../../api/apiClient';
 import { AuthRoutes } from '../navigation/Routes';
 import { handleApiError } from '../utils/errorHandler';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { LoginManager, AccessToken, GraphRequest, GraphRequestManager } from 'react-native-fbsdk-next';
+import appleAuth, {
+  AppleRequestOperation,
+  AppleRequestScope,
+} from '@invertase/react-native-apple-authentication';
+
+// Kiểm tra xem module Google Sign-In có sẵn sàng không
+const isGoogleSignInAvailable = () => {
+  try {
+    // Thử truy cập module để kiểm tra
+    return GoogleSignin && typeof GoogleSignin.configure === 'function';
+  } catch (error) {
+    return false;
+  }
+};
 
 
 
@@ -52,6 +68,21 @@ const LoginScreen = () => {
         useNativeDriver: true,
       }),
     ]).start();
+
+    // Khởi tạo Google Sign-In (chỉ khi module đã được link)
+    // Lưu ý: Cần rebuild app sau khi cài đặt native modules
+    if ((Platform.OS === 'android' || Platform.OS === 'ios') && isGoogleSignInAvailable()) {
+      try {
+        GoogleSignin.configure({
+          webClientId: '232946850530-fu8gj3p6o604h9m511tmmbrhnkd4e9id.apps.googleusercontent.com',
+          offlineAccess: true,
+        });
+      } catch (error) {
+        console.warn('Google Sign-In module chưa được link. Vui lòng rebuild app:', error);
+      }
+    } else {
+      console.warn('Google Sign-In module chưa sẵn sàng. Vui lòng rebuild app.');
+    }
   }, [fadeAnim, slideAnim, scaleAnim]);
 
   const handleLogin = async () => {
@@ -78,6 +109,147 @@ const LoginScreen = () => {
     } catch (error: any) {
       // Sử dụng error handler để hiển thị thông báo lỗi thân thiện
       handleApiError(error, 'Đã xảy ra lỗi khi đăng nhập');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSocialLogin = async (provider: 'google' | 'facebook' | 'apple') => {
+    setIsLoading(true);
+    try {
+      let providerId = '';
+      let socialEmail = '';
+      let socialName = '';
+      let avatarUrl = '';
+      let phone = '';
+
+      if (provider === 'google') {
+        // Google Sign-In
+        if (!isGoogleSignInAvailable()) {
+          Alert.alert(
+            'Lỗi',
+            'Google Sign-In chưa được cấu hình. Vui lòng rebuild ứng dụng sau khi cài đặt module.'
+          );
+          setIsLoading(false);
+          return;
+        }
+        try {
+          await GoogleSignin.hasPlayServices();
+          const userInfo = await GoogleSignin.signIn();
+          if (userInfo.user) {
+            providerId = userInfo.user.id;
+            socialEmail = userInfo.user.email || '';
+            socialName = userInfo.user.name || '';
+            avatarUrl = userInfo.user.photo || '';
+          }
+        } catch (error: any) {
+          if (error.code === 'SIGN_IN_CANCELLED') {
+            setIsLoading(false);
+            return;
+          }
+          throw error;
+        }
+      } else if (provider === 'facebook') {
+        // Facebook Login
+        const loginResult = await LoginManager.logInWithPermissions(['public_profile', 'email']);
+        if (loginResult.isCancelled) {
+          setIsLoading(false);
+          return;
+        }
+        const data = await AccessToken.getCurrentAccessToken();
+        if (!data) {
+          Alert.alert('Lỗi', 'Không thể lấy thông tin từ Facebook');
+          setIsLoading(false);
+          return;
+        }
+
+        providerId = data.userID;
+
+        // Lấy thông tin user từ Facebook Graph API
+        const userInfo = await new Promise<any>((resolve, reject) => {
+          const responseInfoCallback = (error: any, fbResult: any) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(fbResult);
+            }
+          };
+
+          const infoRequest = new GraphRequest(
+            '/me',
+            {
+              parameters: {
+                fields: {
+                  string: 'email,name,picture.type(large)',
+                },
+              },
+            },
+            responseInfoCallback,
+          );
+          new GraphRequestManager().addRequest(infoRequest).start();
+        });
+
+        socialEmail = userInfo.email || '';
+        socialName = userInfo.name || '';
+        avatarUrl = userInfo.picture?.data?.url || '';
+      } else if (provider === 'apple') {
+        // Apple Sign-In (chỉ iOS)
+        if (Platform.OS !== 'ios') {
+          Alert.alert('Thông báo', 'Đăng nhập Apple chỉ khả dụng trên iOS');
+          setIsLoading(false);
+          return;
+        }
+
+        const appleAuthRequestResponse = await appleAuth.performRequest({
+          requestedOperation: AppleRequestOperation.LOGIN,
+          requestedScopes: [AppleRequestScope.EMAIL, AppleRequestScope.FULL_NAME],
+        });
+
+        if (!appleAuthRequestResponse.identityToken) {
+          setIsLoading(false);
+          return;
+        }
+
+        providerId = appleAuthRequestResponse.user;
+        socialEmail = appleAuthRequestResponse.email || '';
+        socialName = appleAuthRequestResponse.fullName
+          ? `${appleAuthRequestResponse.fullName.givenName || ''} ${appleAuthRequestResponse.fullName.familyName || ''}`.trim()
+          : '';
+      }
+
+      if (!providerId || !socialEmail || !socialName) {
+        Alert.alert('Lỗi', 'Không thể lấy thông tin từ tài khoản xã hội');
+        setIsLoading(false);
+        return;
+      }
+
+      // Gọi API đăng nhập xã hội
+      const response = await socialLogin({
+        provider,
+        providerId,
+        email: socialEmail,
+        name: socialName,
+        avatarUrl: avatarUrl || undefined,
+        phone: phone || undefined,
+      });
+
+      if (response.success) {
+        // Lấy thông tin user sau khi login thành công
+        const userResponse = await getMe();
+        if (userResponse.success && userResponse.data) {
+          setUser(userResponse.data);
+        } else {
+          Alert.alert('Lỗi', 'Không thể lấy thông tin người dùng');
+        }
+      } else {
+        Alert.alert('Lỗi', response.message || 'Đăng nhập thất bại');
+      }
+    } catch (error: any) {
+      if (error.code === 'SIGN_IN_CANCELLED' || error.code === 'E_SIGN_IN_CANCELLED') {
+        // User đã hủy đăng nhập
+        return;
+      }
+      handleApiError(error, `Đã xảy ra lỗi khi đăng nhập bằng ${provider}`);
     } finally {
       setIsLoading(false);
     }
@@ -183,7 +355,7 @@ const LoginScreen = () => {
                   </View>
 
                   {/* Forgot password */}
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.forgotButton}
                     onPress={() => navigation.navigate(AuthRoutes.ForgotPassword as never)}>
                     <Text style={styles.forgotText}>Quên mật khẩu?</Text>
@@ -212,15 +384,26 @@ const LoginScreen = () => {
 
                   {/* Social login buttons */}
                   <View style={styles.socialContainer}>
-                    <TouchableOpacity style={styles.socialButton}>
+                    <TouchableOpacity
+                      style={styles.socialButton}
+                      onPress={() => handleSocialLogin('google')}
+                      disabled={isLoading}>
                       <Ionicons name="logo-google" size={24} color="#4285F4" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.socialButton}>
+                    <TouchableOpacity
+                      style={styles.socialButton}
+                      onPress={() => handleSocialLogin('facebook')}
+                      disabled={isLoading}>
                       <Ionicons name="logo-facebook" size={24} color="#1877F2" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.socialButton}>
-                      <Ionicons name="logo-apple" size={24} color="#000000" />
-                    </TouchableOpacity>
+                    {Platform.OS === 'ios' && (
+                      <TouchableOpacity
+                        style={styles.socialButton}
+                        onPress={() => handleSocialLogin('apple')}
+                        disabled={isLoading}>
+                        <Ionicons name="logo-apple" size={24} color="#000000" />
+                      </TouchableOpacity>
+                    )}
                   </View>
                 </View>
               </View>

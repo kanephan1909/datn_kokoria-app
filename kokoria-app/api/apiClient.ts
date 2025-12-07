@@ -144,6 +144,23 @@ export const logout = async () => {
 
 export const getMe = async () => (await api.get('/auth/me')).data;
 
+// ==================== SOCIAL LOGIN API ====================
+export const socialLogin = async (data: {
+  provider: 'google' | 'facebook' | 'apple';
+  providerId: string;
+  email: string;
+  name: string;
+  avatarUrl?: string;
+  phone?: string;
+}) => {
+  const response = await api.post('/auth/social-login', data);
+  if (response.data.success) {
+    await AsyncStorage.setItem('accessToken', response.data.data.accessToken);
+    await AsyncStorage.setItem('refreshToken', response.data.data.refreshToken);
+  }
+  return response.data;
+};
+
 // ==================== USER API ====================
 export const updateUser = async (
   id: string,
@@ -338,6 +355,10 @@ export const verifyPayment = async (orderId: string) =>
 
 export const confirmPaymentSuccess = async (orderId: string, paymentData?: any) =>
   (await api.post('/payments/confirm-success', {orderId, paymentData})).data;
+
+// TEST: Simulate MoMo payment success (for testing only)
+export const testMoMoPaymentSuccess = async (orderId: string) =>
+  (await api.post('/payments/momo/test-success', {orderId})).data;
 
 // ==================== CARTS API ====================
 // Get current user's cart (creates if doesn't exist)
@@ -694,18 +715,26 @@ export const fetchRestaurantById = async (id: string) =>
   (await api.get(`/restaurants/${id}`)).data;
 
 // ==================== RATINGS/REVIEWS API ====================
-// TODO: Implement rating/review API endpoint in backend
 export const submitOrderRating = async (orderId: string, data: {
   rating: number;
-  feedback?: string;
+  comment?: string;
 }) => {
-  // Placeholder - cần implement endpoint trong backend
-  // return (await api.post(`/orders/${orderId}/rating`, data)).data;
-  return Promise.resolve({
-    success: true,
-    message: 'Đánh giá đã được ghi nhận',
-    data: { orderId, ...data },
-  });
+  return (await api.post('/ratings', {
+    orderId,
+    rating: data.rating,
+    comment: data.comment,
+  })).data;
+};
+
+export const getOrderRating = async (orderId: string) => {
+  return (await api.get(`/ratings/order/${orderId}`)).data;
+};
+
+export const getDriverRatings = async (driverId: string, params?: { page?: number; limit?: number }) => {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append('page', params.page.toString());
+  if (params?.limit) queryParams.append('limit', params.limit.toString());
+  return (await api.get(`/ratings/driver/${driverId}?${queryParams.toString()}`)).data;
 };
 
 // ==================== UPLOAD API ====================

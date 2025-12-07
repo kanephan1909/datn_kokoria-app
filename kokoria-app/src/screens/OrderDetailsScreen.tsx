@@ -16,6 +16,8 @@ import {useRoute, useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import LinearGradient from 'react-native-linear-gradient';
 import {fetchOrderById, cancelOrder} from '../../api/apiClient';
+import {MainRoutes} from '../navigation/Routes';
+import {useSocket} from '../hooks/useSocket';
 
 interface OrderItem {
   id?: string;
@@ -45,7 +47,19 @@ interface Order {
     district: string;
     city: string;
   };
+  driver?: {
+    id: string;
+    name: string;
+    phone?: string;
+  } | null;
   createdAt: string;
+  confirmedAt?: string;
+  preparedAt?: string;
+  readyAt?: string;
+  pickedUpAt?: string;
+  deliveringAt?: string;
+  deliveredAt?: string;
+  canceledAt?: string;
   note?: string;
 }
 
@@ -140,6 +154,48 @@ const OrderDetailsScreen = () => {
     loadOrder();
   }, [loadOrder]);
 
+  // Socket listener để nhận cập nhật trạng thái đơn hàng
+  useSocket({
+    autoConnect: true,
+    events: {
+      'order:statusUpdate': (data: {
+        orderId: string;
+        status: string;
+        message?: string;
+        order?: Order;
+      }) => {
+        // Chỉ xử lý nếu là đơn hàng hiện tại
+        if (data.orderId === orderId) {
+          // Cập nhật order state nếu có order data
+          if (data.order) {
+            const orderData = data.order;
+            if (orderData.address) {
+              const addressObj =
+                typeof orderData.address === 'string'
+                  ? JSON.parse(orderData.address)
+                  : orderData.address;
+              const parsedAddress = parseAddress(addressObj);
+              orderData.address = parsedAddress;
+            }
+            setOrder(orderData);
+          } else {
+            // Nếu không có order data, reload từ API
+            loadOrder();
+          }
+
+          // Nếu đơn hàng đã hoàn thành, tự động navigate đến màn hình đánh giá
+          if (data.status === 'COMPLETED' && data.order?.driver) {
+            setTimeout(() => {
+              (navigation as any).navigate(MainRoutes.OrderDelivered, {
+                orderId: orderId,
+              });
+            }, 1500);
+          }
+        }
+      },
+    },
+  });
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -185,11 +241,145 @@ const OrderDetailsScreen = () => {
       confirmed: 'Đã xác nhận',
       preparing: 'Đang chuẩn bị',
       ready: 'Sẵn sàng',
-      delivering: 'Đang giao',
-      completed: 'Hoàn thành',
+      ready_for_pickup: 'Sẵn sàng lấy hàng',
+      picked_up: 'Shipper đã lấy hàng',
+      delivering: 'Đang giao hàng',
+      completed: 'Đã giao hàng',
       cancelled: 'Đã hủy',
+      canceled: 'Đã hủy',
     };
     return statusMap[status.toLowerCase()] || status;
+  };
+
+  // Render status timeline
+  const renderStatusTimeline = (orderData: Order) => {
+    const statusSteps = [
+      {
+        key: 'PENDING',
+        label: 'Chờ xác nhận',
+        icon: 'hourglass-outline',
+        date: orderData.createdAt,
+      },
+      {
+        key: 'CONFIRMED',
+        label: 'Đã xác nhận',
+        icon: 'checkmark-circle-outline',
+        date: orderData.confirmedAt,
+      },
+      {
+        key: 'PREPARING',
+        label: 'Đang chuẩn bị',
+        icon: 'restaurant-outline',
+        date: orderData.preparedAt,
+      },
+      {
+        key: 'READY_FOR_PICKUP',
+        label: 'Sẵn sàng lấy hàng',
+        icon: 'cube-outline',
+        date: orderData.readyAt,
+      },
+      {
+        key: 'PICKED_UP',
+        label: 'Shipper đã lấy hàng',
+        icon: 'bag-outline',
+        date: orderData.pickedUpAt,
+      },
+      {
+        key: 'DELIVERING',
+        label: 'Đang giao hàng',
+        icon: 'bicycle-outline',
+        date: orderData.deliveringAt,
+      },
+      {
+        key: 'COMPLETED',
+        label: 'Đã giao hàng',
+        icon: 'checkmark-done-circle-outline',
+        date: orderData.deliveredAt,
+      },
+    ];
+
+    const currentStatusIndex = statusSteps.findIndex(
+      step => step.key === orderData.status.toUpperCase(),
+    );
+    const isCanceled = orderData.status.toUpperCase() === 'CANCELED';
+
+    return (
+      <View style={styles.timelineContainer}>
+        {statusSteps.map((step, index) => {
+          const isActive = index <= currentStatusIndex && !isCanceled;
+          const isCurrent = index === currentStatusIndex && !isCanceled;
+          const showLine = index < statusSteps.length - 1;
+
+          return (
+            <View key={step.key} style={styles.timelineItem}>
+              <View style={styles.timelineLeft}>
+                <View
+                  style={[
+                    styles.timelineIcon,
+                    isActive
+                      ? isCurrent
+                        ? styles.timelineIconCurrent
+                        : styles.timelineIconCompleted
+                      : styles.timelineIconPending,
+                  ]}>
+                  <Ionicons
+                    name={step.icon as any}
+                    size={20}
+                    color={isActive ? '#FFFFFF' : '#9CA3AF'}
+                  />
+                </View>
+                {showLine && (
+                  <View
+                    style={[
+                      styles.timelineLine,
+                      isActive && index < currentStatusIndex
+                        ? styles.timelineLineActive
+                        : styles.timelineLineInactive,
+                    ]}
+                  />
+                )}
+              </View>
+              <View style={styles.timelineRight}>
+                <Text
+                  style={[
+                    styles.timelineLabel,
+                    isActive ? styles.timelineLabelActive : styles.timelineLabelInactive,
+                  ]}>
+                  {step.label}
+                </Text>
+                {step.date && (
+                  <Text style={styles.timelineDate}>
+                    {formatDate(step.date)}
+                  </Text>
+                )}
+                {isCurrent && !step.date && (
+                  <Text style={styles.timelineDate}>Đang xử lý...</Text>
+                )}
+              </View>
+            </View>
+          );
+        })}
+        {isCanceled && (
+          <View style={styles.timelineItem}>
+            <View style={styles.timelineLeft}>
+              <View style={[styles.timelineIcon, styles.timelineIconCanceled]}>
+                <Ionicons name="close-circle-outline" size={20} color="#FFFFFF" />
+              </View>
+            </View>
+            <View style={styles.timelineRight}>
+              <Text style={[styles.timelineLabel, styles.timelineLabelCanceled]}>
+                Đơn hàng đã bị hủy
+              </Text>
+              {orderData.canceledAt && (
+                <Text style={styles.timelineDate}>
+                  {formatDate(orderData.canceledAt)}
+                </Text>
+              )}
+            </View>
+          </View>
+        )}
+      </View>
+    );
   };
 
   const handleCancelOrder = () => {
@@ -324,6 +514,20 @@ const OrderDetailsScreen = () => {
             </View>
             <Text style={styles.infoValue}>{formatDate(order.createdAt)}</Text>
           </View>
+        </View>
+
+        {/* Order Status Timeline */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.cardTitleRow}>
+              <View style={styles.iconBadge}>
+                <Ionicons name="time-outline" size={20} color="#F97316" />
+              </View>
+              <Text style={styles.cardTitle}>Theo dõi đơn hàng</Text>
+            </View>
+          </View>
+          <View style={styles.cardDivider} />
+          {renderStatusTimeline(order)}
         </View>
 
         {/* Delivery Address Card */}
@@ -461,6 +665,60 @@ const OrderDetailsScreen = () => {
           </View>
         )}
 
+        {/* Driver Info & Chat Card */}
+        {order.driver && (
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <View style={styles.cardTitleRow}>
+                <View style={styles.iconBadge}>
+                  <Ionicons
+                    name="car-outline"
+                    size={20}
+                    color="#F97316"
+                  />
+                </View>
+                <Text style={styles.cardTitle}>Tài xế giao hàng</Text>
+              </View>
+            </View>
+
+            <View style={styles.cardDivider} />
+
+            <View style={styles.driverSection}>
+              <View style={styles.driverInfo}>
+                <View style={styles.driverAvatar}>
+                  <Text style={styles.driverAvatarText}>
+                    {order.driver.name
+                      ?.split(' ')
+                      .map(n => n[0])
+                      .join('')
+                      .toUpperCase()
+                      .slice(0, 2) || 'TX'}
+                  </Text>
+                </View>
+                <View style={styles.driverDetails}>
+                  <Text style={styles.driverName}>{order.driver.name || 'Tài xế'}</Text>
+                  {order.driver.phone && (
+                    <Text style={styles.driverPhone}>{order.driver.phone}</Text>
+                  )}
+                </View>
+              </View>
+              <TouchableOpacity
+                style={styles.chatButton}
+                onPress={() => {
+                  (navigation as any).navigate(MainRoutes.Chat, {
+                    orderId: order.id,
+                    recipientName: order.driver?.name,
+                    recipientId: order.driver?.id,
+                  });
+                }}
+                activeOpacity={0.8}>
+                <Ionicons name="chatbubble-ellipses" size={20} color="#FFFFFF" />
+                <Text style={styles.chatButtonText}>Nhắn tin</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
         {/* Total Card */}
         <View style={styles.card}>
           <View style={styles.totalSection}>
@@ -470,9 +728,9 @@ const OrderDetailsScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Cancel Button */}
-      {canCancel && (
-        <View style={styles.actionsContainer}>
+      {/* Actions */}
+      <View style={styles.actionsContainer}>
+        {canCancel && (
           <TouchableOpacity
             onPress={handleCancelOrder}
             style={styles.cancelButton}
@@ -480,8 +738,21 @@ const OrderDetailsScreen = () => {
             <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
             <Text style={styles.cancelButtonText}>Hủy đơn hàng</Text>
           </TouchableOpacity>
-        </View>
-      )}
+        )}
+        {order.status.toLowerCase() === 'completed' && order.driver && (
+          <TouchableOpacity
+            onPress={() => {
+              (navigation as any).navigate(MainRoutes.OrderDelivered, {
+                orderId: order.id,
+              });
+            }}
+            style={styles.ratingButton}
+            activeOpacity={0.8}>
+            <Ionicons name="star-outline" size={20} color="#F97316" />
+            <Text style={styles.ratingButtonText}>Đánh giá tài xế</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </SafeAreaView>
   );
 };
@@ -748,6 +1019,146 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#EF4444',
     marginLeft: 8,
+  },
+  ratingButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF4E6',
+    borderRadius: 14,
+    paddingVertical: 16,
+    borderWidth: 1.5,
+    borderColor: '#FFE4CC',
+  },
+  ratingButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#F97316',
+    marginLeft: 8,
+  },
+  timelineContainer: {
+    paddingVertical: 8,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  timelineLeft: {
+    width: 40,
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  timelineIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+  },
+  timelineIconPending: {
+    backgroundColor: '#F3F4F6',
+    borderColor: '#E5E7EB',
+  },
+  timelineIconCurrent: {
+    backgroundColor: '#F97316',
+    borderColor: '#F97316',
+  },
+  timelineIconCompleted: {
+    backgroundColor: '#10B981',
+    borderColor: '#10B981',
+  },
+  timelineIconCanceled: {
+    backgroundColor: '#EF4444',
+    borderColor: '#EF4444',
+  },
+  timelineLine: {
+    width: 2,
+    flex: 1,
+    marginTop: 4,
+    minHeight: 30,
+  },
+  timelineLineActive: {
+    backgroundColor: '#10B981',
+  },
+  timelineLineInactive: {
+    backgroundColor: '#E5E7EB',
+  },
+  timelineRight: {
+    flex: 1,
+    paddingTop: 8,
+  },
+  timelineLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  timelineLabelActive: {
+    color: '#111827',
+  },
+  timelineLabelInactive: {
+    color: '#9CA3AF',
+  },
+  timelineLabelCanceled: {
+    color: '#EF4444',
+  },
+  timelineDate: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  driverSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+  },
+  driverInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  driverAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#3B82F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  driverAvatarText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  driverDetails: {
+    flex: 1,
+  },
+  driverName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  driverPhone: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  chatButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    marginLeft: 12,
+  },
+  chatButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 6,
   },
 });
 

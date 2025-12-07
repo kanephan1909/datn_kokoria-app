@@ -32,7 +32,7 @@ const ChatScreen = () => {
   const insets = useSafeAreaInsets();
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
   const queryClient = useQueryClient();
-  const {orderId, recipientName, recipientId} = route.params as RouteParams;
+  const {orderId, recipientName} = route.params as RouteParams;
   const [messageText, setMessageText] = useState('');
   const flatListRef = useRef<FlatList>(null);
   const {user} = useAuth();
@@ -46,13 +46,16 @@ const ChatScreen = () => {
   });
 
   const order = orderData?.data;
-  const recipient = order?.driver || order?.user;
+  // Xác định recipient dựa trên role của user hiện tại
+  // USER chat với driver, DRIVER chat với user
+  const recipient = user?.role === 'USER'
+    ? order?.driver
+    : order?.user;
 
   // Load messages
   const {
     data: messagesData,
     isLoading,
-    refetch,
   } = useQuery({
     queryKey: ['messages', orderId],
     queryFn: () => fetchOrderMessages(orderId, {page: 1, limit: 100}),
@@ -181,9 +184,9 @@ const ChatScreen = () => {
         </TouchableOpacity>
         <View style={styles.headerInfo}>
           <Text style={styles.headerName}>
-            {recipientName || recipient?.name || 'Người nhận'}
+            {recipientName || recipient?.name || (user?.role === 'USER' ? 'Tài xế' : 'Khách hàng')}
           </Text>
-          {isConnected && (
+          {isConnected && recipient && (
             <View style={styles.statusIndicator}>
               <View style={styles.statusDot} />
               <Text style={styles.statusText}>Đang hoạt động</Text>
@@ -205,7 +208,13 @@ const ChatScreen = () => {
           <Ionicons name="chatbubbles-outline" size={64} color="#9CA3AF" />
           <Text style={styles.emptyTitle}>Chưa có tin nhắn nào</Text>
           <Text style={styles.emptyText}>
-            Bắt đầu cuộc trò chuyện với shipper
+            {!recipient
+              ? (user?.role === 'USER'
+                  ? 'Đang chờ tài xế nhận đơn hàng'
+                  : 'Đang chờ khách hàng')
+              : (user?.role === 'USER'
+                  ? 'Bắt đầu cuộc trò chuyện với tài xế'
+                  : 'Bắt đầu cuộc trò chuyện với khách hàng')}
           </Text>
         </View>
       ) : (
@@ -238,11 +247,11 @@ const ChatScreen = () => {
           <TouchableOpacity
             style={[
               styles.sendButton,
-              (!messageText.trim() || sendMessageMutation.isPending) &&
+              (!messageText.trim() || sendMessageMutation.isPending || !recipient) &&
                 styles.sendButtonDisabled,
             ]}
             onPress={handleSendMessage}
-            disabled={!messageText.trim() || sendMessageMutation.isPending}>
+            disabled={!messageText.trim() || sendMessageMutation.isPending || !recipient}>
             {sendMessageMutation.isPending ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
