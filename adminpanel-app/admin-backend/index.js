@@ -24,6 +24,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const uploadRoutes = require('./routes/upload');
 const paymentsRoutes = require('./routes/payments');
 const chatbotRoutes = require('./routes/chatbot');
+const ratingsRoutes = require('./routes/ratings');
 const socketService = require('./services/socketService');
 
 const app = express();
@@ -187,6 +188,7 @@ app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/payments', paymentsRoutes);
 app.use('/api/v1/chatbot', chatbotRoutes);
+app.use('/api/v1/ratings', ratingsRoutes);
 
 // Error handler phải đặt sau tất cả routes
 app.use(errorHandler);

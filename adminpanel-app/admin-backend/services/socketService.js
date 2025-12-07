@@ -25,8 +25,11 @@ class SocketService {
       logger.warn('SocketService: io not initialized');
       return;
     }
+    // Log số lượng clients đang kết nối
+    const connectedClients = this.io.sockets.sockets.size;
+    logger.info(`SocketService: Emitting ${eventName} to ${connectedClients} connected clients`);
     this.io.emit(eventName, data);
-    logger.info(`SocketService: Emitted ${eventName} to all clients`);
+    logger.info(`SocketService: ✅ Emitted ${eventName} to all clients`);
   }
 
   /**
@@ -72,11 +75,12 @@ class SocketService {
   /**
    * Emit order status update
    */
-  emitOrderStatusUpdate(userId, orderId, status, message) {
+  emitOrderStatusUpdate(userId, orderId, status, message, order = null) {
     const data = {
       orderId,
       status,
       message,
+      order, // Thêm order data để frontend có thể sử dụng
     };
     this.emitToUser(userId, 'order:statusUpdate', data);
   }

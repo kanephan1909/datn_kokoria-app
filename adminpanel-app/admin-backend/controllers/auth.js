@@ -201,6 +201,101 @@ async function logout(req, res) {
     });
 }
 
+// POST /auth/social-login - Đăng nhập bằng mạng xã hội (Google, Facebook, Apple)
+async function socialLogin(req, res) {
+    const { provider, providerId, email, name, avatarUrl, phone } = req.body;
+
+    try {
+        // Validate provider
+        const validProviders = ['google', 'facebook', 'apple'];
+        if (!validProviders.includes(provider)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid provider. Must be google, facebook, or apple',
+            });
+        }
+
+        if (!providerId || !email || !name) {
+            return res.status(400).json({
+                success: false,
+                message: 'Provider ID, email, and name are required',
+            });
+        }
+
+        // Tìm user theo provider ID hoặc email
+        let user = null;
+        
+        // Tìm theo provider ID
+        const providerField = `${provider}Id`;
+        user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { [providerField]: providerId },
+                    { email: email },
+                ],
+            },
+        });
+
+        if (user) {
+            // User đã tồn tại - cập nhật thông tin nếu cần
+            const updateData = {};
+            if (!user[providerField]) {
+                updateData[providerField] = providerId;
+            }
+            if (avatarUrl && !user.avatarUrl) {
+                updateData.avatarUrl = avatarUrl;
+            }
+            if (phone && !user.phone) {
+                updateData.phone = phone;
+            }
+
+            if (Object.keys(updateData).length > 0) {
+                user = await prisma.user.update({
+                    where: { id: user.id },
+                    data: updateData,
+                });
+            }
+        } else {
+            // Tạo user mới
+            const createData = {
+                name,
+                email,
+                [providerField]: providerId,
+                role: 'USER',
+            };
+
+            if (avatarUrl) createData.avatarUrl = avatarUrl;
+            if (phone) createData.phone = phone;
+
+            user = await prisma.user.create({
+                data: createData,
+            });
+        }
+
+        // Tạo token
+        const { accessToken, refreshToken } = generateToken(user);
+
+        // Loại bỏ password khỏi response
+        const { password: _, ...userWithoutPassword } = user;
+
+        res.json({
+            success: true,
+            data: {
+                user: userWithoutPassword,
+                accessToken,
+                refreshToken,
+            },
+            message: 'Social login successful',
+        });
+    } catch (error) {
+        logger.error(`Error in social login: ${error}`);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
+}
+
 // GET /auth/me - Lấy thông tin user hiện tại
 async function getMe(req, res) {
     try {
@@ -247,5 +342,6 @@ module.exports = {
     refreshToken,
     logout,
     getMe,
+    socialLogin,
 };
 

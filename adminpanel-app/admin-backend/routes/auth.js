@@ -5,6 +5,7 @@ const {
     refreshToken,
     logout,
     getMe,
+    socialLogin,
 } = require('../controllers/auth');
 
 const validate = require('../middlesware/validation');
@@ -53,6 +54,12 @@ router.post('/refresh', validate(refreshTokenSchema), refreshToken);
  * Đăng xuất (optional)
  */
 router.post('/logout', logout);
+
+/**
+ * POST /auth/social-login
+ * Đăng nhập bằng mạng xã hội (Google, Facebook, Apple)
+ */
+router.post('/social-login', socialLogin);
 
 /**
  * GET /auth/me

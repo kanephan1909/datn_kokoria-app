@@ -153,7 +153,127 @@ async function getDashboardStats(req, res) {
     }
 }
 
+// GET /dashboard/debug/orders - Debug endpoint để kiểm tra đơn hàng
+async function debugOrders(req, res) {
+    try {
+        // Đếm tổng số đơn hàng
+        const totalOrders = await prisma.order.count();
+
+        // Đếm đơn hàng theo trạng thái
+        const statusCounts = await prisma.order.groupBy({
+            by: ['status'],
+            _count: {
+                status: true,
+            },
+        });
+
+        // Đếm đơn hàng có driver và chưa có driver
+        // MongoDB có thể lưu null hoặc undefined, kiểm tra cả hai
+        const ordersWithDriver = await prisma.order.count({
+            where: {
+                AND: [
+                    { driverId: { not: null } },
+                    { driverId: { not: undefined } },
+                ],
+            },
+        });
+
+        const ordersWithoutDriver = await prisma.order.count({
+            where: {
+                OR: [
+                    { driverId: null },
+                    { driverId: undefined },
+                ],
+            },
+        });
+
+        // Đơn hàng shipper có thể thấy
+        // MongoDB có thể lưu null hoặc undefined, kiểm tra cả hai
+        const availableOrders = await prisma.order.findMany({
+            where: {
+                status: {
+                    in: ['PENDING', 'CONFIRMED', 'PREPARING', 'READY_FOR_PICKUP'],
+                },
+                OR: [
+                    { driverId: null },
+                    { driverId: undefined },
+                ],
+            },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        email: true,
+                        phone: true,
+                    },
+                },
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+            take: 10,
+        });
+
+        // 5 đơn hàng gần nhất
+        const recentOrders = await prisma.order.findMany({
+            take: 5,
+            orderBy: {
+                createdAt: 'desc',
+            },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                    },
+                },
+                driver: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+        });
+
+        res.json({
+            success: true,
+            data: {
+                totalOrders,
+                statusCounts: statusCounts.map((item) => ({
+                    status: item.status,
+                    count: item._count.status,
+                })),
+                ordersWithDriver,
+                ordersWithoutDriver,
+                availableOrdersCount: availableOrders.length,
+                availableOrders: availableOrders.map((order) => ({
+                    id: order.id,
+                    status: order.status,
+                    customerName: order.user?.name,
+                    totalAmount: order.totalAmount,
+                    createdAt: order.createdAt,
+                })),
+                recentOrders: recentOrders.map((order) => ({
+                    id: order.id,
+                    status: order.status,
+                    customerName: order.user?.name,
+                    driverName: order.driver?.name || 'Chưa có',
+                    totalAmount: order.totalAmount,
+                    createdAt: order.createdAt,
+                })),
+            },
+        });
+    } catch (error) {
+        logger.error(`Error in debugOrders: ${error}`);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message,
+        });
+    }
+}
+
 module.exports = {
     getDashboardStats,
+    debugOrders,
 };
 

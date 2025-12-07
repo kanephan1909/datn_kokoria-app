@@ -16,6 +16,8 @@ model User {
   email       String   @unique
   password    String?
   googleId    String?
+  facebookId  String?
+  appleId     String?
   phone       String?
   avatarUrl   String?
   role        Role     @default(USER)
@@ -26,6 +28,7 @@ model User {
   orders    Order[]
   addresses Address[]
   carts     Cart[]
+  ratings   Rating[]
 }
 
 enum Role {
@@ -125,6 +128,7 @@ model Driver {
 
   orders    Order[]
   locations DriverLocation[]
+  ratings   Rating[]
 }
 
 //
@@ -179,6 +183,7 @@ model Order {
   payments Payment[]
   logs     OrderLog[]
   messages Message[]
+  rating   Rating?
 }
 
 enum OrderStatus {
@@ -287,4 +292,22 @@ model Message {
   createdAt DateTime @default(now())
 
   order Order @relation(fields: [orderId], references: [id])
+}
+
+//
+// =================== RATING (ĐÁNH GIÁ TÀI XẾ) ===================
+//
+model Rating {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String   @unique @db.ObjectId
+  userId    String   @db.ObjectId
+  driverId  String   @db.ObjectId
+  rating    Int      // 1-5 sao
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order  Order  @relation(fields: [orderId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  driver Driver @relation(fields: [driverId], references: [id])
 }

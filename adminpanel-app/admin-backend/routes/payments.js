@@ -9,6 +9,7 @@ const {
   zaloPayCallback,
   verifyPayment,
   confirmPaymentSuccess,
+  testMoMoPaymentSuccess,
 } = require('../controllers/payments');
 
 const authMiddleware = require('../middlesware/authMiddleware');
@@ -32,6 +33,9 @@ router.post('/verify', authMiddleware, verifyPayment);
 
 // Confirm Payment Success (called from frontend)
 router.post('/confirm-success', authMiddleware, confirmPaymentSuccess);
+
+// TEST: Simulate MoMo payment success (for testing only - remove in production)
+router.post('/momo/test-success', testMoMoPaymentSuccess);
 
 module.exports = router;
 

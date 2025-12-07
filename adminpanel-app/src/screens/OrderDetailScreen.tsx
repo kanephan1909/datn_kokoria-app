@@ -88,6 +88,21 @@ const OrderDetailScreen = () => {
     }).format(amount);
   };
 
+  const getStatusText = (status: string) => {
+    const statusMap: { [key: string]: string } = {
+      PENDING: "Đang chờ",
+      CONFIRMED: "Đã xác nhận",
+      PREPARING: "Đang chuẩn bị",
+      READY_FOR_PICKUP: "Sẵn sàng lấy hàng",
+      PICKED_UP: "Đã lấy hàng",
+      DELIVERING: "Đang giao hàng",
+      COMPLETED: "Hoàn thành",
+      CANCELED: "Đã hủy",
+      CANCELLED: "Đã hủy",
+    };
+    return statusMap[status] || status;
+  };
+
   const getNextStatus = (currentStatus: string) => {
     const statusFlow: { [key: string]: string } = {
       PENDING: "CONFIRMED",
@@ -146,7 +161,7 @@ const OrderDetailScreen = () => {
                 order.status
               )}`}
             >
-              <Text className="text-xs font-semibold">{order.status}</Text>
+              <Text className="text-xs font-semibold">{getStatusText(order.status)}</Text>
             </View>
           </View>
           <Text className="text-2xl font-bold text-blue-600">
@@ -240,8 +255,8 @@ const OrderDetailScreen = () => {
                   {new Date(log.createdAt).toLocaleString("vi-VN")}
                 </Text>
                 <Text className="text-gray-800">
-                  {log.oldStatus && `${log.oldStatus} → `}
-                  {log.newStatus}
+                  {log.oldStatus && `${getStatusText(log.oldStatus)} → `}
+                  {getStatusText(log.newStatus)}
                 </Text>
                 {log.message && (
                   <Text className="text-gray-500 text-sm mt-1">
@@ -286,7 +301,7 @@ const OrderDetailScreen = () => {
               onPress={() => {
                 Alert.alert(
                   "Cập nhật",
-                  `Chuyển sang trạng thái ${nextStatus}?`,
+                  `Chuyển sang trạng thái ${getStatusText(nextStatus)}?`,
                   [
                     { text: "Hủy", style: "cancel" },
                     {
@@ -308,6 +323,40 @@ const OrderDetailScreen = () => {
               )}
             </TouchableOpacity>
           )}
+
+        {/* Cancel Order Button - Chỉ hiển thị khi đơn hàng có thể hủy */}
+        {(order.status === "PENDING" || order.status === "CONFIRMED") && (
+          <TouchableOpacity
+            className="bg-red-500 rounded-lg py-3 items-center mb-3"
+            onPress={() => {
+              Alert.alert(
+                "Hủy đơn hàng",
+                "Bạn có chắc chắn muốn hủy đơn hàng này?",
+                [
+                  { text: "Không", style: "cancel" },
+                  {
+                    text: "Có, hủy đơn",
+                    style: "destructive",
+                    onPress: () =>
+                      updateStatusMutation.mutate({
+                        status: "CANCELED",
+                        message: "Đơn hàng bị hủy bởi admin",
+                      }),
+                  },
+                ]
+              );
+            }}
+            disabled={updateStatusMutation.isPending}
+          >
+            {updateStatusMutation.isPending ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className="text-white font-bold text-lg">
+                Hủy đơn hàng
+              </Text>
+            )}
+          </TouchableOpacity>
+        )}
       </View>
     </ScrollView>
   );

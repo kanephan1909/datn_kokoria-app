@@ -19,7 +19,7 @@ const CategoriesStack = () => {
         headerTitleAlign: 'center',
     }}
     >
-      <Stack.Screen name="Categories" component={CategoriesScreen} options={{title: 'Danh Mục Sản Phẩm'}}/>
+      <Stack.Screen name="Categories" component={CategoriesScreen} options={{title: 'Danh Mục'}}/>
       <Stack.Screen name="AddCategory" component={AddCategoryScreen} options={{title: 'Thêm Danh Mục Sản Phẩm'}}/>
       <Stack.Screen name="EditCategory" component={EditCategoryScreen} options={{title: 'Chỉnh Sửa Danh Mục'}}/>
     </Stack.Navigator>

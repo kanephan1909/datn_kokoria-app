@@ -473,10 +473,51 @@ async function moMoCallback(req, res) {
 
     // Nếu payment thành công, cập nhật order status
     if (resultCode === 0) {
-      await prisma.order.update({
+      const socketService = require('../services/socketService');
+      
+      const updatedOrder = await prisma.order.update({
         where: { id: order.id },
-        data: { status: "CONFIRMED", confirmedAt: new Date() },
+        data: { 
+          status: "CONFIRMED", 
+          confirmedAt: new Date(),
+          paymentStatus: "PAYMENT_SUCCESS",
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       });
+
+      // Tạo log
+      await prisma.orderLog.create({
+        data: {
+          orderId: order.id,
+          oldStatus: order.status,
+          newStatus: "CONFIRMED",
+          message: "MoMo payment successful - Order confirmed",
+        },
+      });
+
+      // Emit socket event để thông báo cho shipper về đơn hàng mới
+      logger.info(`Emitting order:new event for order ${order.id} (MoMo - CONFIRMED)`);
+      socketService.emitToAll('order:new', {
+        order: updatedOrder,
+        message: 'Có đơn hàng mới cần giao',
+      });
+      logger.info(`✅ Order:new event emitted for order ${order.id}`);
+
+      // Emit cho customer để cập nhật trạng thái
+      socketService.emitOrderStatusUpdate(
+        updatedOrder.userId,
+        order.id,
+        "CONFIRMED",
+        'Thanh toán thành công! Đơn hàng đang chờ shipper nhận',
+        updatedOrder // Gửi kèm order data
+      );
       
       logger.info(`✅ MoMo payment success for order ${order.id}`);
     } else {
@@ -1187,13 +1228,21 @@ async function confirmPaymentSuccess(req, res) {
     }
 
     // Cập nhật order payment status thành SUCCESS
-    await prisma.order.update({
+    const updatedOrder = await prisma.order.update({
       where: { id: orderId },
       data: {
         paymentStatus: "PAYMENT_SUCCESS",
         status: order.status === "PENDING" ? "CONFIRMED" : order.status,
         confirmedAt:
           order.status === "PENDING" ? new Date() : order.confirmedAt,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -1206,6 +1255,34 @@ async function confirmPaymentSuccess(req, res) {
         },
       });
     }
+
+    // Tạo log cho việc xác nhận thanh toán
+    await prisma.orderLog.create({
+      data: {
+        orderId: orderId,
+        oldStatus: order.status,
+        newStatus: updatedOrder.status,
+        message: `Payment confirmed - Order ${order.paymentMethod === 'COD' ? 'COD' : 'Online'} payment successful`,
+      },
+    });
+
+    // Emit socket event để thông báo cho shipper về đơn hàng mới
+    const socketService = require('../services/socketService');
+    logger.info(`Emitting order:new event for order ${orderId} (confirmPaymentSuccess - CONFIRMED)`);
+    socketService.emitToAll('order:new', {
+      order: updatedOrder,
+      message: 'Có đơn hàng mới cần giao',
+    });
+    logger.info(`✅ Order:new event emitted for order ${orderId}`);
+
+    // Emit cho customer để cập nhật trạng thái
+    socketService.emitOrderStatusUpdate(
+      updatedOrder.userId,
+      orderId,
+      updatedOrder.status,
+      'Thanh toán thành công! Đơn hàng đang chờ shipper nhận',
+      updatedOrder // Gửi kèm order data
+    );
 
     logger.info(`Payment confirmed for order ${orderId} from frontend`);
 
@@ -1227,6 +1304,174 @@ async function confirmPaymentSuccess(req, res) {
   }
 }
 
+/**
+ * TEST: Simulate MoMo payment success (for testing only)
+ * POST /payments/momo/test-success
+ * Body: { orderId: string }
+ */
+async function testMoMoPaymentSuccess(req, res) {
+  const { orderId } = req.body;
+
+  try {
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Order ID là bắt buộc',
+      });
+    }
+
+    // Tìm order
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        payments: {
+          where: {
+            provider: 'MOMO',
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 1,
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
+    }
+
+    // Kiểm tra nếu đã thanh toán thành công rồi
+    if (order.paymentStatus === 'PAYMENT_SUCCESS') {
+      return res.json({
+        success: true,
+        data: {
+          orderId: order.id,
+          paymentStatus: order.paymentStatus,
+          alreadyPaid: true,
+        },
+        message: 'Order đã được thanh toán thành công rồi',
+      });
+    }
+
+    const socketService = require('../services/socketService');
+
+    // Tạo hoặc cập nhật payment record
+    let payment;
+    if (order.payments.length > 0) {
+      payment = await prisma.payment.update({
+        where: { id: order.payments[0].id },
+        data: {
+          status: 'PAYMENT_SUCCESS',
+          gatewayTransId: `TEST_${Date.now()}`,
+          gatewayCode: '0',
+          gatewayMessage: 'Test payment success',
+          gatewayResponse: {
+            resultCode: 0,
+            message: 'Success',
+            transId: `TEST_${Date.now()}`,
+          },
+          paidAt: new Date(),
+        },
+      });
+    } else {
+      // Tạo payment record mới nếu chưa có
+      payment = await prisma.payment.create({
+        data: {
+          orderId: order.id,
+          amount: order.totalAmount || order.total || 0,
+          provider: 'MOMO',
+          status: 'PAYMENT_SUCCESS',
+          gatewayOrderId: `TEST_${order.id}`,
+          gatewayTransId: `TEST_${Date.now()}`,
+          gatewayCode: '0',
+          gatewayMessage: 'Test payment success',
+          gatewayResponse: {
+            resultCode: 0,
+            message: 'Success',
+            transId: `TEST_${Date.now()}`,
+          },
+          paidAt: new Date(),
+        },
+      });
+    }
+
+    // Cập nhật order status
+    const updatedOrder = await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        paymentStatus: 'PAYMENT_SUCCESS',
+        status: order.status === 'PENDING' ? 'CONFIRMED' : order.status,
+        confirmedAt: order.status === 'PENDING' ? new Date() : order.confirmedAt,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    // Tạo log
+    await prisma.orderLog.create({
+      data: {
+        orderId: order.id,
+        oldStatus: order.status,
+        newStatus: updatedOrder.status,
+        message: 'TEST: MoMo payment successful - Order confirmed',
+      },
+    });
+
+    // Emit socket event để thông báo cho shipper về đơn hàng mới
+    logger.info(`TEST: Emitting order:new event for order ${order.id} (MoMo - CONFIRMED)`);
+    socketService.emitToAll('order:new', {
+      order: updatedOrder,
+      message: 'Có đơn hàng mới cần giao',
+    });
+    logger.info(`✅ TEST: Order:new event emitted for order ${order.id}`);
+
+    // Emit cho customer để cập nhật trạng thái
+    socketService.emitOrderStatusUpdate(
+      updatedOrder.userId,
+      order.id,
+      'CONFIRMED',
+      'Thanh toán thành công! Đơn hàng đang chờ shipper nhận',
+      updatedOrder
+    );
+
+    logger.info(`✅ TEST: MoMo payment success simulated for order ${order.id}`);
+
+    return res.json({
+      success: true,
+      data: {
+        orderId: updatedOrder.id,
+        paymentStatus: 'PAYMENT_SUCCESS',
+        status: updatedOrder.status,
+        paymentId: payment.id,
+      },
+      message: 'TEST: Payment success simulated successfully',
+    });
+  } catch (error) {
+    logger.error(`Error in testMoMoPaymentSuccess: ${error.message}`);
+    logger.error(`Error stack: ${error.stack}`);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+}
+
 module.exports = {
   createMoMoPayment,
   moMoCallback,
@@ -1237,4 +1482,5 @@ module.exports = {
   zaloPayCallback,
   verifyPayment,
   confirmPaymentSuccess,
+  testMoMoPaymentSuccess,
 };

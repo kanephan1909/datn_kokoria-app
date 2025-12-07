@@ -257,29 +257,65 @@ class VNPayService {
       // Cập nhật payment và order status
       if (responseCode === '00') {
         // Thanh toán thành công
-        await Promise.all([
-          prisma.order.update({
-            where: {id: order.id},
-            data: {
-              paymentStatus: 'PAYMENT_SUCCESS',
-              status: 'CONFIRMED',
-              confirmedAt: new Date(),
-              note: order.note
-                ? `${order.note}\nVNPay Transaction: ${transactionNo}`
-                : `VNPay Transaction: ${transactionNo}`,
+        const socketService = require('./socketService');
+        
+        const updatedOrder = await prisma.order.update({
+          where: {id: order.id},
+          data: {
+            paymentStatus: 'PAYMENT_SUCCESS',
+            status: 'CONFIRMED',
+            confirmedAt: new Date(),
+            note: order.note
+              ? `${order.note}\nVNPay Transaction: ${transactionNo}`
+              : `VNPay Transaction: ${transactionNo}`,
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+              },
             },
-          }),
-          prisma.payment.update({
-            where: {id: payment.id},
-            data: {
-              status: 'PAYMENT_SUCCESS',
-              gatewayTransId: transactionNo,
-              gatewayCode: responseCode,
-              gatewayMessage: 'Payment successful',
-              paidAt: new Date(),
-            },
-          }),
-        ]);
+          },
+        });
+
+        await prisma.payment.update({
+          where: {id: payment.id},
+          data: {
+            status: 'PAYMENT_SUCCESS',
+            gatewayTransId: transactionNo,
+            gatewayCode: responseCode,
+            gatewayMessage: 'Payment successful',
+            paidAt: new Date(),
+          },
+        });
+
+        // Tạo log
+        await prisma.orderLog.create({
+          data: {
+            orderId: order.id,
+            oldStatus: order.status,
+            newStatus: 'CONFIRMED',
+            message: `VNPay payment successful - Transaction: ${transactionNo}`,
+          },
+        });
+
+        // Emit socket event để thông báo cho shipper về đơn hàng mới
+        logger.info(`Emitting order:new event for order ${order.id} (VNPay - CONFIRMED)`);
+        socketService.emitToAll('order:new', {
+            order: updatedOrder,
+            message: 'Có đơn hàng mới cần giao',
+        });
+        logger.info(`✅ Order:new event emitted for order ${order.id}`);
+
+        // Emit cho customer để cập nhật trạng thái
+        socketService.emitOrderStatusUpdate(
+            updatedOrder.userId,
+            order.id,
+            'CONFIRMED',
+            'Thanh toán thành công! Đơn hàng đang chờ shipper nhận',
+            updatedOrder // Gửi kèm order data
+        );
 
         logger.info(
           `✅ VNPay: Order ${order.id} payment confirmed (Transaction: ${transactionNo})`

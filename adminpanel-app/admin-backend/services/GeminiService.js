@@ -429,7 +429,17 @@ class GeminiService {
       this._retryCount = 0;
       
       // Xử lý các lỗi cụ thể
-      if (error.message?.includes('API key') || error.message?.includes('API_KEY')) {
+      if (error.message?.includes('API key') || error.message?.includes('API_KEY') || error.status === 400) {
+        // Kiểm tra xem có phải lỗi API key không hợp lệ không
+        const isInvalidApiKey = error.message?.includes('API key not valid') || 
+                                error.message?.includes('API_KEY_INVALID') ||
+                                (error.status === 400 && error.message?.includes('API key'));
+        
+        if (isInvalidApiKey) {
+          logger.error(`Invalid Gemini API key detected. Please check GEMINI_API_KEY in .env file`);
+          throw new Error('API key không hợp lệ. Vui lòng kiểm tra cấu hình GEMINI_API_KEY trong file .env');
+        }
+        
         throw new Error('Lỗi cấu hình API key. Vui lòng liên hệ admin.');
       }
       

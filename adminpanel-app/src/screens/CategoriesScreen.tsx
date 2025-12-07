@@ -83,7 +83,7 @@ const CategoriesScreen = () => {
         <View className="flex-row items-center justify-between mb-3">
           <View>
             <Text className="text-2xl font-bold text-gray-900">
-              Danh Mục Sản Phẩm
+              Danh mục sản phẩm
             </Text>
             <Text className="text-sm text-gray-500 mt-1">
               {categories.length} danh mục

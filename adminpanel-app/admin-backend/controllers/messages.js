@@ -29,7 +29,7 @@ async function getOrderMessages(req, res) {
         }
 
         // Kiểm tra quyền: USER chỉ xem messages của orders của mình
-        // DRIVER chỉ xem messages của orders được gán cho mình
+        // DRIVER có thể xem messages của orders được gán cho mình hoặc orders chưa có driver (để nhận đơn)
         if (req.user) {
             if (req.user.role === 'USER' && order.userId !== req.user.id) {
                 return res.status(403).json({
@@ -38,11 +38,19 @@ async function getOrderMessages(req, res) {
                 });
             }
 
-            if (req.user.role === 'DRIVER' && order.driverId !== req.user.id) {
-                return res.status(403).json({
-                    success: false,
-                    message: 'Forbidden. You can only view messages of orders assigned to you.',
-                });
+            if (req.user.role === 'DRIVER') {
+                // DRIVER có thể xem messages nếu:
+                // 1. Order đã được gán cho họ (order.driverId === req.user.id)
+                // 2. Order chưa có driver (order.driverId == null) - để xem trước khi nhận đơn
+                const isAssignedToMe = order.driverId === req.user.id;
+                const hasNoDriver = order.driverId == null;
+                
+                if (!isAssignedToMe && !hasNoDriver) {
+                    return res.status(403).json({
+                        success: false,
+                        message: 'Forbidden. You can only view messages of orders assigned to you or available orders.',
+                    });
+                }
             }
         }
 
@@ -165,6 +173,15 @@ async function createMessage(req, res) {
                     message: 'Forbidden. You can only send messages to your own orders or orders assigned to you.',
                 });
             }
+        }
+
+        // Kiểm tra order phải có driver trước khi cho phép chat
+        // (USER chỉ chat được khi đã có driver nhận đơn)
+        if (req.user && req.user.role === 'USER' && !order.driverId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Đơn hàng chưa có tài xế nhận. Vui lòng chờ tài xế nhận đơn hàng.',
+            });
         }
 
         const message = await prisma.message.create({

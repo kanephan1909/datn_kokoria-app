@@ -56,10 +56,18 @@ async function sendChatbotMessage(req, res) {
       userId: req.user?.id || 'anonymous',
     });
     
+    // Xác định status code dựa trên loại lỗi
+    let statusCode = 500;
+    if (error.message?.includes('API key') || error.message?.includes('cấu hình')) {
+      statusCode = 503; // Service Unavailable - lỗi cấu hình
+    } else if (error.message?.includes('quota') || error.message?.includes('giới hạn')) {
+      statusCode = 429; // Too Many Requests
+    }
+    
     // Trả về error message chi tiết hơn cho client
     const errorMessage = error.message || 'Có lỗi xảy ra khi xử lý tin nhắn';
     
-    res.status(500).json({
+    res.status(statusCode).json({
       success: false,
       message: errorMessage,
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,
