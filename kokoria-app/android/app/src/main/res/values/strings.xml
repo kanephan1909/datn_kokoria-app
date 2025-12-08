@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">Kokoria</string>
-</resources>
-<resources>
-     <string name="facebook_app_id">232946850530-fu8gj3p6o604h9m511tmmbrhnkd4e9id.apps.googleusercontent.com</string>
-     <string name="fb_login_protocol_scheme">fb232946850530-fu8gj3p6o604h9m511tmmbrhnkd4e9id.apps.googleusercontent.com</string>
+    <string name="facebook_app_id">232946850530-fu8gj3p6o604h9m511tmmbrhnkd4e9id.apps.googleusercontent.com</string>
+    <string name="fb_login_protocol_scheme">fb232946850530-fu8gj3p6o604h9m511tmmbrhnkd4e9id.apps.googleusercontent.com</string>
 </resources>

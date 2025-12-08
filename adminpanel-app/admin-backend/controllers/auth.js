@@ -2,6 +2,7 @@ const logger = require('../utils/logger');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { normalizePhoneOrFallback } = require('../utils/phoneUtils');
 
 const prisma = new PrismaClient();
 
@@ -58,8 +59,11 @@ async function register(req, res) {
         // Nếu role là DRIVER, tự động tạo Driver record
         if (user.role === 'DRIVER') {
             try {
-                const driverPhone = phone || `user_${user.id.slice(-8)}`;
-                // Kiểm tra xem driver đã tồn tại chưa (theo phone)
+                // Normalize phone number: loại bỏ khoảng trắng và trim
+                // Đảm bảo nhất quán với các nơi khác (getOrders, acceptOrder)
+                const driverPhone = normalizePhoneOrFallback(phone, user.id);
+                
+                // Kiểm tra xem driver đã tồn tại chưa (theo phone đã normalize)
                 let driver = await prisma.driver.findUnique({
                     where: { phone: driverPhone },
                 });
@@ -68,7 +72,7 @@ async function register(req, res) {
                     driver = await prisma.driver.create({
                         data: {
                             name: name || 'Driver',
-                            phone: driverPhone,
+                            phone: driverPhone, // Lưu phone đã normalize
                             avatar: null,
                             isOnline: false,
                         },

@@ -439,6 +439,30 @@ const OrderDetailScreen = () => {
             </TouchableOpacity>
           )}
 
+          {/* Nút chat với khách hàng - hiển thị khi đã lấy hàng */}
+          {['PICKED_UP', 'DELIVERING'].includes(order.status) && order.user && (
+            <TouchableOpacity
+              className="bg-purple-500 rounded-2xl py-4 mb-3 flex-row items-center justify-center"
+              style={{
+                shadowColor: '#9333EA',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 6,
+              }}
+              onPress={() => (navigation as any).navigate('Chat', {
+                orderId: orderId,
+                recipientName: order.user?.name,
+                recipientId: order.userId,
+              })}
+            >
+              <Ionicons name="chatbubble-ellipses" size={24} color="white" />
+              <Text className="text-white font-bold text-center text-lg ml-2">
+                Nhắn tin với khách hàng
+              </Text>
+            </TouchableOpacity>
+          )}
+
           {/* Hiển thị khoảng cách khi đã nhận đơn (PICKED_UP) */}
           {order.status === 'PICKED_UP' && distanceResult && (
             <View className="bg-green-50 rounded-xl p-4 mb-3 border-l-4" style={{ borderLeftColor: '#10B981' }}>

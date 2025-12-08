@@ -86,6 +86,37 @@ const MyOrdersScreen = () => {
     );
   }
 
+  if (error) {
+    return (
+      <View className="flex-1 items-center justify-center" style={{ backgroundColor: '#F0F9FF' }}>
+        <View 
+          className="bg-white rounded-2xl p-6 mx-4"
+          style={{
+            shadowColor: '#EF4444',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 12,
+            elevation: 8,
+          }}
+        >
+          <Ionicons name="alert-circle" size={48} color="#EF4444" />
+          <Text className="text-red-600 text-lg font-bold mt-4 text-center">
+            Lỗi khi tải đơn hàng
+          </Text>
+          <Text className="text-gray-600 text-sm mt-2 text-center">
+            {((error as any)?.response?.data?.message) || ((error as any)?.message) || 'Đã xảy ra lỗi không xác định'}
+          </Text>
+          <TouchableOpacity
+            className="bg-blue-500 rounded-xl py-3 px-6 mt-4"
+            onPress={() => refetch()}
+          >
+            <Text className="text-white font-bold text-center">Thử lại</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1" style={{ backgroundColor: '#F0F9FF' }}>
       {/* Header với gradient */}

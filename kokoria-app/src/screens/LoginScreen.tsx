@@ -18,21 +18,69 @@ import { useAuth } from '../context/AuthContext';
 import { login as apiLogin, getMe, socialLogin } from '../../api/apiClient';
 import { AuthRoutes } from '../navigation/Routes';
 import { handleApiError } from '../utils/errorHandler';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { LoginManager, AccessToken, GraphRequest, GraphRequestManager } from 'react-native-fbsdk-next';
 import appleAuth, {
   AppleRequestOperation,
   AppleRequestScope,
 } from '@invertase/react-native-apple-authentication';
 
-// Kiểm tra xem module Google Sign-In có sẵn sàng không
-const isGoogleSignInAvailable = () => {
+// Import Google Sign-In một cách an toàn - sử dụng lazy loading
+// Không require module ở top level để tránh crash khi module chưa được link
+let GoogleSignin: any = null;
+let isGoogleSignInModuleAvailable = false;
+let moduleLoadAttempted = false;
+
+// Load Google Sign-In module một cách an toàn (lazy loading)
+// Chỉ load khi thực sự cần sử dụng
+const loadGoogleSignInModule = (): boolean => {
+  // Nếu đã thử load rồi, trả về kết quả đã biết
+  if (moduleLoadAttempted) {
+    return isGoogleSignInModuleAvailable;
+  }
+  
+  moduleLoadAttempted = true;
+  
   try {
-    // Thử truy cập module để kiểm tra
-    return GoogleSignin && typeof GoogleSignin.configure === 'function';
-  } catch (error) {
+    // Thử require module - nếu module chưa được link, sẽ throw error
+    const googleSignInModule = require('@react-native-google-signin/google-signin');
+    if (googleSignInModule && googleSignInModule.GoogleSignin) {
+      GoogleSignin = googleSignInModule.GoogleSignin;
+      // Kiểm tra xem module có đầy đủ methods không
+      if (typeof GoogleSignin.configure === 'function') {
+        isGoogleSignInModuleAvailable = true;
+        return true;
+      }
+    }
+    return false;
+  } catch (error: any) {
+    // Module chưa được link hoặc chưa cài đặt - không crash app
+    // Chỉ log warning một lần để tránh spam console
+    if (error?.message?.includes('RNGoogleSignin') || error?.message?.includes('TurboModuleRegistry')) {
+      console.warn('\n⚠️ Google Sign-In module chưa được link với native code.');
+      console.warn('Tính năng đăng nhập Google sẽ không khả dụng.\n');
+      console.warn('=== HƯỚNG DẪN KHẮC PHỤC ===');
+      console.warn('1. Đảm bảo package đã được cài:');
+      console.warn('   npm install @react-native-google-signin/google-signin\n');
+      console.warn('2. Clean và rebuild:');
+      console.warn('   Android: cd android && ./gradlew clean && cd .. && npm run android');
+      console.warn('   iOS: cd ios && pod install && cd .. && npm run ios\n');
+      console.warn('3. Nếu vẫn lỗi, thử clean toàn bộ:');
+      console.warn('   - Xóa node_modules: rm -rf node_modules && npm install');
+      console.warn('   - Xóa build folders: rm -rf android/app/build ios/build');
+      console.warn('   - Rebuild lại từ đầu\n');
+    }
+    isGoogleSignInModuleAvailable = false;
     return false;
   }
+};
+
+// Kiểm tra xem module Google Sign-In có sẵn sàng không
+const isGoogleSignInAvailable = () => {
+  // Thử load module nếu chưa load
+  if (!moduleLoadAttempted) {
+    loadGoogleSignInModule();
+  }
+  return isGoogleSignInModuleAvailable && GoogleSignin !== null;
 };
 
 
@@ -71,17 +119,18 @@ const LoginScreen = () => {
 
     // Khởi tạo Google Sign-In (chỉ khi module đã được link)
     // Lưu ý: Cần rebuild app sau khi cài đặt native modules
-    if ((Platform.OS === 'android' || Platform.OS === 'ios') && isGoogleSignInAvailable()) {
-      try {
-        GoogleSignin.configure({
-          webClientId: '232946850530-fu8gj3p6o604h9m511tmmbrhnkd4e9id.apps.googleusercontent.com',
-          offlineAccess: true,
-        });
-      } catch (error) {
-        console.warn('Google Sign-In module chưa được link. Vui lòng rebuild app:', error);
+    if (Platform.OS === 'android' || Platform.OS === 'ios') {
+      // Thử load module
+      if (loadGoogleSignInModule() && GoogleSignin) {
+        try {
+          GoogleSignin.configure({
+            webClientId: '232946850530-fu8gj3p6o604h9m511tmmbrhnkd4e9id.apps.googleusercontent.com',
+            offlineAccess: true,
+          });
+        } catch (error) {
+          console.warn('Lỗi khi configure Google Sign-In:', error);
+        }
       }
-    } else {
-      console.warn('Google Sign-In module chưa sẵn sàng. Vui lòng rebuild app.');
     }
   }, [fadeAnim, slideAnim, scaleAnim]);
 
@@ -125,7 +174,7 @@ const LoginScreen = () => {
 
       if (provider === 'google') {
         // Google Sign-In
-        if (!isGoogleSignInAvailable()) {
+        if (!isGoogleSignInAvailable() || !GoogleSignin) {
           Alert.alert(
             'Lỗi',
             'Google Sign-In chưa được cấu hình. Vui lòng rebuild ứng dụng sau khi cài đặt module.'

@@ -1,6 +1,7 @@
 const logger = require('../utils/logger');
 const { PrismaClient } = require('@prisma/client');
 const socketService = require('../services/socketService');
+const { normalizePhone, normalizePhoneOrFallback } = require('../utils/phoneUtils');
 
 const prisma = new PrismaClient();
 
@@ -46,48 +47,66 @@ async function getOrders(req, res) {
                 where.userId = req.user.id;
             } else if (req.user.role === 'DRIVER') {
                 // DRIVER chỉ xem được orders được gán cho mình
-                // Tìm driver từ user để lấy driver.id
-                logger.info(`[getOrders] DRIVER user: ${req.user.id}, phone: ${req.user.phone || 'N/A'}, email: ${req.user.email || 'N/A'}, name: ${req.user.name || 'N/A'}`);
+                // Lấy thông tin đầy đủ của user từ database (vì req.user chỉ có id, email, role)
+                const fullUser = await prisma.user.findUnique({
+                    where: { id: req.user.id },
+                    select: { id: true, phone: true, name: true, email: true, avatarUrl: true },
+                });
+                
+                if (!fullUser) {
+                    logger.error(`[getOrders] User not found: ${req.user.id}`);
+                    return res.json({
+                        success: true,
+                        data: [],
+                        pagination: {
+                            page: +page,
+                            limit: +limit,
+                            total: 0,
+                            totalPages: 0,
+                        },
+                        message: 'Orders fetched successfully',
+                    });
+                }
                 
                 let driver = null;
                 
                 // BƯỚC 1: Tìm driver bằng phone (ưu tiên nhất vì phone là unique)
-                if (req.user.phone) {
-                    const normalizedPhone = req.user.phone.replace(/\s+/g, '').trim();
-                    driver = await prisma.driver.findUnique({
-                        where: { phone: normalizedPhone },
-                        select: { id: true, phone: true, name: true },
-                    });
-                    
-                    // Nếu không tìm thấy, thử tìm bằng phone gốc (có thể có format khác)
-                    if (!driver && req.user.phone !== normalizedPhone) {
+                if (fullUser.phone) {
+                    const normalizedPhone = normalizePhone(fullUser.phone);
+                    if (normalizedPhone) {
                         driver = await prisma.driver.findUnique({
-                            where: { phone: req.user.phone },
+                            where: { phone: normalizedPhone },
                             select: { id: true, phone: true, name: true },
                         });
+                        
+                        // Nếu không tìm thấy, thử tìm bằng phone gốc (tương thích với records cũ)
+                        if (!driver && fullUser.phone !== normalizedPhone) {
+                            driver = await prisma.driver.findUnique({
+                                where: { phone: fullUser.phone },
+                                select: { id: true, phone: true, name: true },
+                            });
+                        }
                     }
                 }
                 
                 // BƯỚC 2: Nếu không tìm thấy bằng phone, thử tìm bằng name (chính xác)
-                if (!driver && req.user.name) {
+                if (!driver && fullUser.name) {
                     driver = await prisma.driver.findFirst({
-                        where: { name: req.user.name },
+                        where: { name: fullUser.name },
                         select: { id: true, phone: true, name: true },
                     });
                 }
                 
                 // BƯỚC 3: Nếu vẫn không tìm thấy, tạo driver mới từ user info
                 if (!driver) {
-                    logger.info(`[getOrders] Driver not found, creating/finding driver for user ${req.user.id}`);
-                    const driverPhone = req.user.phone || `user_${req.user.id.slice(-8)}`;
-                    const driverName = req.user.name || 'Driver';
+                    const driverName = fullUser.name || 'Driver';
                     
                     // Normalize phone trước khi tìm/tạo
-                    const normalizedPhone = driverPhone.replace(/\s+/g, '').trim();
+                    const driverPhone = normalizePhoneOrFallback(fullUser.phone, fullUser.id);
                     
                     // Thử tìm lại bằng phone được normalize
                     driver = await prisma.driver.findUnique({
-                        where: { phone: normalizedPhone },
+                        where: { phone: driverPhone },
                         select: { id: true, phone: true, name: true },
                     });
                     
@@ -97,23 +116,19 @@ async function getOrders(req, res) {
                             driver = await prisma.driver.create({
                                 data: {
                                     name: driverName,
-                                    phone: normalizedPhone,
-                                    avatar: req.user.avatarUrl,
+                                    phone: driverPhone,
+                                    avatar: fullUser.avatarUrl,
                                     isOnline: false,
                                 },
                                 select: { id: true, phone: true, name: true },
                             });
-                            logger.info(`[getOrders] Created new driver: ${driver.id} for user ${req.user.id} (name: "${driver.name}", phone: "${driver.phone}")`);
                         } catch (createError) {
                             // Nếu lỗi do duplicate phone, thử tìm lại
                             if (createError.code === 'P2002') {
                                 driver = await prisma.driver.findUnique({
-                                    where: { phone: normalizedPhone },
+                                    where: { phone: driverPhone },
                                     select: { id: true, phone: true, name: true },
                                 });
-                                if (driver) {
-                                    logger.info(`[getOrders] Found existing driver after duplicate error: ${driver.id}`);
-                                }
                             } else {
                                 logger.error(`[getOrders] Error creating driver: ${createError.message}`);
                             }
@@ -122,11 +137,10 @@ async function getOrders(req, res) {
                 }
                 
                 if (driver) {
-                    logger.info(`[getOrders] Using driver: ${driver.id} (name: "${driver.name}", phone: "${driver.phone}")`);
                     where.driverId = driver.id;
                 } else {
                     // Nếu không tìm được driver, trả về mảng rỗng
-                    logger.warn(`[getOrders] Could not find or create driver for user ${req.user.id}, returning empty orders list`);
+                    logger.warn(`[getOrders] Could not find or create driver for user ${fullUser.id}, returning empty orders list`);
                     where.driverId = 'nonexistent'; // Sẽ được xử lý ở dưới để trả về mảng rỗng
                 }
             }
@@ -333,6 +347,7 @@ async function getOrder(req, res) {
                 messages: {
                     orderBy: { createdAt: 'asc' },
                 },
+                rating: true, // Include rating để hiển thị đánh giá đã gửi
             },
         });
 
@@ -354,10 +369,46 @@ async function getOrder(req, res) {
             
             // DRIVER có thể xem:
             // 1. Đơn hàng chưa có driver (để nhận đơn) - order.driverId == null
-            // 2. Đơn hàng đã được gán cho họ - order.driverId === req.user.id
+            // 2. Đơn hàng đã được gán cho họ - order.driverId === driver.id
             if (req.user.role === 'DRIVER') {
                 const hasNoDriver = order.driverId == null;
-                const isAssignedToMe = order.driverId === req.user.id;
+                
+                // Tìm driver từ user để so sánh với order.driverId
+                let driver = null;
+                const fullUser = await prisma.user.findUnique({
+                    where: { id: req.user.id },
+                    select: { id: true, phone: true, name: true },
+                });
+                
+                if (fullUser) {
+                    // Tìm driver bằng phone
+                    if (fullUser.phone) {
+                        const normalizedPhone = normalizePhone(fullUser.phone);
+                        if (normalizedPhone) {
+                            driver = await prisma.driver.findUnique({
+                                where: { phone: normalizedPhone },
+                                select: { id: true },
+                            });
+                            
+                            if (!driver && fullUser.phone !== normalizedPhone) {
+                                driver = await prisma.driver.findUnique({
+                                    where: { phone: fullUser.phone },
+                                    select: { id: true },
+                                });
+                            }
+                        }
+                    }
+                    
+                    // Nếu không tìm thấy bằng phone, thử tìm bằng name
+                    if (!driver && fullUser.name) {
+                        driver = await prisma.driver.findFirst({
+                            where: { name: fullUser.name },
+                            select: { id: true },
+                        });
+                    }
+                }
+                
+                const isAssignedToMe = driver && order.driverId === driver.id;
                 
                 if (!hasNoDriver && !isAssignedToMe) {
                     return res.status(403).json({
@@ -583,11 +634,51 @@ async function updateOrderStatus(req, res) {
         }
 
         // Kiểm tra quyền: DRIVER chỉ cập nhật được orders được gán cho mình
-        if (req.user && req.user.role === 'DRIVER' && currentOrder.driverId !== req.user.id) {
-            return res.status(403).json({
-                success: false,
-                message: 'Forbidden. You can only update orders assigned to you.',
+        if (req.user && req.user.role === 'DRIVER') {
+            // Tìm driver từ user để so sánh với order.driverId
+            let driver = null;
+            const fullUser = await prisma.user.findUnique({
+                where: { id: req.user.id },
+                select: { id: true, phone: true, name: true },
             });
+            
+            if (fullUser) {
+                // Tìm driver bằng phone
+                if (fullUser.phone) {
+                    const normalizedPhone = normalizePhone(fullUser.phone);
+                    if (normalizedPhone) {
+                        driver = await prisma.driver.findUnique({
+                            where: { phone: normalizedPhone },
+                            select: { id: true },
+                        });
+                        
+                        if (!driver && fullUser.phone !== normalizedPhone) {
+                            driver = await prisma.driver.findUnique({
+                                where: { phone: fullUser.phone },
+                                select: { id: true },
+                            });
+                        }
+                    }
+                }
+                
+                // Nếu không tìm thấy bằng phone, thử tìm bằng name
+                if (!driver && fullUser.name) {
+                    driver = await prisma.driver.findFirst({
+                        where: { name: fullUser.name },
+                        select: { id: true },
+                    });
+                }
+            }
+            
+            // Kiểm tra xem order có được gán cho driver này không
+            const isAssignedToMe = driver && currentOrder.driverId === driver.id;
+            
+            if (!isAssignedToMe) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Forbidden. You can only update orders assigned to you.',
+                });
+            }
         }
 
         // Cập nhật trạng thái và timestamp tương ứng
@@ -951,15 +1042,17 @@ async function acceptOrder(req, res) {
             if (user && user.role === 'DRIVER') {
                 // Tìm driver bằng phone number từ user (ưu tiên)
                 if (user.phone) {
-                    const normalizedPhone = user.phone.replace(/\s+/g, '').trim();
-                    driver = await prisma.driver.findUnique({
-                        where: { phone: normalizedPhone },
-                    });
-                    // Nếu không tìm thấy, thử tìm bằng phone gốc
-                    if (!driver && user.phone !== normalizedPhone) {
+                    const normalizedPhone = normalizePhone(user.phone);
+                    if (normalizedPhone) {
                         driver = await prisma.driver.findUnique({
-                            where: { phone: user.phone },
+                            where: { phone: normalizedPhone },
                         });
+                        // Nếu không tìm thấy, thử tìm bằng phone gốc (tương thích với records cũ)
+                        if (!driver && user.phone !== normalizedPhone) {
+                            driver = await prisma.driver.findUnique({
+                                where: { phone: user.phone },
+                            });
+                        }
                     }
                 }
                 
@@ -972,7 +1065,7 @@ async function acceptOrder(req, res) {
                 
                 // Nếu vẫn không tìm thấy, tạo driver mới từ user info
                 if (!driver) {
-                    const driverPhone = user.phone ? user.phone.replace(/\s+/g, '').trim() : `user_${user.id.slice(-8)}`;
+                    const driverPhone = normalizePhoneOrFallback(user.phone, user.id);
                     const driverName = user.name || 'Driver';
                     
                     try {

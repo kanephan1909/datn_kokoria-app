@@ -16,7 +16,7 @@ import {
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import {fetchOrderById, submitOrderRating} from '../../api/apiClient';
+import {fetchOrderById, submitOrderRating, getOrderRating} from '../../api/apiClient';
 import {MainRoutes} from '../navigation/Routes';
 import {formatPrice} from '../utils/formatters';
 
@@ -74,6 +74,12 @@ const OrderDeliveredScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
+  const [submittedRating, setSubmittedRating] = useState<{
+    rating: number;
+    comment?: string;
+    createdAt?: string;
+  } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadOrder = useCallback(async () => {
     try {
@@ -81,6 +87,30 @@ const OrderDeliveredScreen = () => {
       const response = await fetchOrderById(orderId);
       if (response.success && response.data) {
         setOrder(response.data);
+        
+        // Kiểm tra xem order có rating không (từ include)
+        if (response.data.rating) {
+          setSubmittedRating({
+            rating: response.data.rating.rating,
+            comment: response.data.rating.comment || undefined,
+            createdAt: response.data.rating.createdAt,
+          });
+        } else {
+          // Nếu không có trong order, thử load riêng
+          try {
+            const ratingResponse = await getOrderRating(orderId);
+            if (ratingResponse.success && ratingResponse.data) {
+              setSubmittedRating({
+                rating: ratingResponse.data.rating,
+                comment: ratingResponse.data.comment || undefined,
+                createdAt: ratingResponse.data.createdAt,
+              });
+            }
+          } catch (ratingError) {
+            // Ignore error nếu không tìm thấy rating (có thể chưa đánh giá)
+            console.log('No rating found for order:', orderId);
+          }
+        }
       } else {
         Alert.alert('Lỗi', 'Không thể tải thông tin đơn hàng');
         (navigation as any).goBack();
@@ -127,22 +157,25 @@ const OrderDeliveredScreen = () => {
     }
 
     try {
+      setIsSubmitting(true);
       const response = await submitOrderRating(orderId, {
         rating,
         comment: feedback.trim() || undefined,
       });
 
       if (response.success) {
-        Alert.alert('Cảm ơn bạn!', 'Đánh giá của bạn đã được ghi nhận', [
-          {
-            text: 'Đồng ý',
-            onPress: () => {
-              // Reset form
-              setRating(0);
-              setFeedback('');
-            },
-          },
-        ]);
+        // Lưu rating đã submit để hiển thị
+        setSubmittedRating({
+          rating: response.data.rating,
+          comment: response.data.comment || undefined,
+          createdAt: response.data.createdAt,
+        });
+        
+        // Reset form
+        setRating(0);
+        setFeedback('');
+        
+        Alert.alert('Cảm ơn bạn!', 'Đánh giá của bạn đã được ghi nhận');
       } else {
         Alert.alert('Lỗi', response.message || 'Không thể gửi đánh giá');
       }
@@ -152,6 +185,8 @@ const OrderDeliveredScreen = () => {
         'Lỗi',
         error?.response?.data?.message || 'Không thể gửi đánh giá. Vui lòng thử lại.',
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -306,43 +341,97 @@ const OrderDeliveredScreen = () => {
 
         {/* Rating Section */}
         <View style={styles.card}>
-          <Text style={styles.ratingTitle}>Bạn cảm thấy thế nào?</Text>
+          <Text style={styles.ratingTitle}>
+            {submittedRating ? 'Đánh giá của bạn' : 'Bạn cảm thấy thế nào?'}
+          </Text>
 
-          {/* Star Rating */}
-          <View style={styles.starContainer}>
-            {[1, 2, 3, 4, 5].map(star => (
-              <TouchableOpacity
-                key={star}
-                onPress={() => setRating(star)}
-                hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-                <Ionicons
-                  name={star <= rating ? 'star' : 'star-outline'}
-                  size={36}
-                  color="#FF6B35"
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
+          {submittedRating ? (
+            /* Hiển thị đánh giá đã gửi */
+            <View style={styles.submittedRatingContainer}>
+              {/* Star Rating đã submit */}
+              <View style={styles.starContainer}>
+                {[1, 2, 3, 4, 5].map(star => (
+                  <Ionicons
+                    key={star}
+                    name={star <= submittedRating.rating ? 'star' : 'star-outline'}
+                    size={36}
+                    color="#FF6B35"
+                  />
+                ))}
+              </View>
 
-          {/* Feedback Input */}
-          <TextInput
-            style={styles.feedbackInput}
-            placeholder="Chia sẻ suy nghĩ của bạn..."
-            placeholderTextColor="#9CA3AF"
-            value={feedback}
-            onChangeText={setFeedback}
-            multiline
-            numberOfLines={4}
-            maxLength={500}
-          />
+              {/* Comment đã submit */}
+              {submittedRating.comment && (
+                <View style={styles.submittedCommentContainer}>
+                  <Text style={styles.submittedCommentLabel}>Nhận xét của bạn:</Text>
+                  <Text style={styles.submittedCommentText}>
+                    {submittedRating.comment}
+                  </Text>
+                </View>
+              )}
 
-          {/* Submit Rating Button */}
-          {rating > 0 && (
-            <TouchableOpacity
-              style={styles.submitRatingButton}
-              onPress={handleSubmitRating}>
-              <Text style={styles.submitRatingText}>Gửi đánh giá</Text>
-            </TouchableOpacity>
+              {/* Thời gian đánh giá */}
+              {submittedRating.createdAt && (
+                <Text style={styles.submittedRatingDate}>
+                  Đánh giá vào: {formatTime(submittedRating.createdAt)}
+                </Text>
+              )}
+
+              <View style={styles.thankYouMessage}>
+                <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+                <Text style={styles.thankYouText}>
+                  Cảm ơn bạn đã đánh giá!
+                </Text>
+              </View>
+            </View>
+          ) : (
+            /* Form đánh giá */
+            <>
+              {/* Star Rating */}
+              <View style={styles.starContainer}>
+                {[1, 2, 3, 4, 5].map(star => (
+                  <TouchableOpacity
+                    key={star}
+                    onPress={() => setRating(star)}
+                    hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                    <Ionicons
+                      name={star <= rating ? 'star' : 'star-outline'}
+                      size={36}
+                      color="#FF6B35"
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Feedback Input */}
+              <TextInput
+                style={styles.feedbackInput}
+                placeholder="Chia sẻ suy nghĩ của bạn..."
+                placeholderTextColor="#9CA3AF"
+                value={feedback}
+                onChangeText={setFeedback}
+                multiline
+                numberOfLines={4}
+                maxLength={500}
+              />
+
+              {/* Submit Rating Button */}
+              {rating > 0 && (
+                <TouchableOpacity
+                  style={[
+                    styles.submitRatingButton,
+                    isSubmitting && styles.submitRatingButtonDisabled,
+                  ]}
+                  onPress={handleSubmitRating}
+                  disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.submitRatingText}>Gửi đánh giá</Text>
+                  )}
+                </TouchableOpacity>
+              )}
+            </>
           )}
         </View>
       </ScrollView>
@@ -612,6 +701,53 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  submittedRatingContainer: {
+    alignItems: 'center',
+  },
+  submittedCommentContainer: {
+    width: '100%',
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#FF6B35',
+  },
+  submittedCommentLabel: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 8,
+    fontWeight: '600',
+  },
+  submittedCommentText: {
+    fontSize: 14,
+    color: '#111827',
+    lineHeight: 20,
+  },
+  submittedRatingDate: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 12,
+  },
+  thankYouMessage: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#D1FAE5',
+    borderRadius: 12,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  thankYouText: {
+    fontSize: 14,
+    color: '#059669',
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  submitRatingButtonDisabled: {
+    opacity: 0.6,
   },
 });
 

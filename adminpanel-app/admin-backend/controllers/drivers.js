@@ -1,5 +1,6 @@
 const logger = require('../utils/logger');
 const { PrismaClient } = require('@prisma/client');
+const { normalizePhone } = require('../utils/phoneUtils');
 
 const prisma = new PrismaClient();
 
@@ -102,9 +103,20 @@ async function createDriver(req, res) {
     const { name, phone, avatar, isOnline, deviceToken } = req.body;
 
     try {
-        // Kiểm tra phone đã tồn tại chưa
+        // Normalize phone number: loại bỏ khoảng trắng và trim
+        // Đảm bảo nhất quán với các nơi khác
+        const normalizedPhone = normalizePhone(phone);
+        
+        if (!normalizedPhone) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone number is required',
+            });
+        }
+
+        // Kiểm tra phone đã tồn tại chưa (tìm bằng phone đã normalize)
         const existingDriver = await prisma.driver.findUnique({
-            where: { phone },
+            where: { phone: normalizedPhone },
         });
 
         if (existingDriver) {
@@ -117,7 +129,7 @@ async function createDriver(req, res) {
         const driver = await prisma.driver.create({
             data: {
                 name,
-                phone,
+                phone: normalizedPhone, // Lưu phone đã normalize
                 avatar,
                 isOnline: isOnline !== undefined ? isOnline : false,
                 deviceToken,
@@ -160,17 +172,20 @@ async function updateDriver(req, res) {
         // Note: Cần map driver với user để kiểm tra quyền
         // Tạm thời: ADMIN có thể cập nhật bất kỳ driver nào
 
+        // Normalize phone number nếu được cập nhật
+        const updateData = {
+            ...(name && { name }),
+            ...(phone && { phone: normalizePhone(phone) }), // Normalize phone
+            ...(avatar !== undefined && { avatar }),
+            ...(isOnline !== undefined && { isOnline }),
+            ...(deviceToken !== undefined && { deviceToken }),
+            ...(currentLat !== undefined && { currentLat }),
+            ...(currentLng !== undefined && { currentLng }),
+        };
+
         const driver = await prisma.driver.update({
             where: { id },
-            data: {
-                ...(name && { name }),
-                ...(phone && { phone }),
-                ...(avatar !== undefined && { avatar }),
-                ...(isOnline !== undefined && { isOnline }),
-                ...(deviceToken !== undefined && { deviceToken }),
-                ...(currentLat !== undefined && { currentLat }),
-                ...(currentLng !== undefined && { currentLng }),
-            },
+            data: updateData,
         });
 
         res.json({
@@ -231,10 +246,43 @@ async function updateDriverLocation(req, res) {
     const { latitude, longitude } = req.body;
 
     try {
-        // Kiểm tra driver có tồn tại không
-        const driver = await prisma.driver.findUnique({
+        // id có thể là driver.id hoặc user.id (từ shipper app)
+        let driver = await prisma.driver.findUnique({
             where: { id },
         });
+
+        // Nếu không tìm thấy driver, có thể id là user.id (từ shipper app)
+        if (!driver && req.user && req.user.role === 'DRIVER') {
+            const fullUser = await prisma.user.findUnique({
+                where: { id: id },
+                select: { id: true, phone: true, name: true },
+            });
+
+            if (fullUser) {
+                // Tìm driver bằng phone
+                if (fullUser.phone) {
+                    const normalizedPhone = normalizePhone(fullUser.phone);
+                    if (normalizedPhone) {
+                        driver = await prisma.driver.findUnique({
+                            where: { phone: normalizedPhone },
+                        });
+                        
+                        if (!driver && fullUser.phone !== normalizedPhone) {
+                            driver = await prisma.driver.findUnique({
+                                where: { phone: fullUser.phone },
+                            });
+                        }
+                    }
+                }
+                
+                // Nếu không tìm thấy bằng phone, thử tìm bằng name
+                if (!driver && fullUser.name) {
+                    driver = await prisma.driver.findFirst({
+                        where: { name: fullUser.name },
+                    });
+                }
+            }
+        }
 
         if (!driver) {
             return res.status(404).json({
@@ -244,11 +292,51 @@ async function updateDriverLocation(req, res) {
         }
 
         // DRIVER chỉ cập nhật được vị trí của mình
-        // Note: Cần map driver với user để kiểm tra quyền
+        // Kiểm tra quyền: nếu là DRIVER, phải là driver của chính họ
+        if (req.user && req.user.role === 'DRIVER') {
+            const fullUser = await prisma.user.findUnique({
+                where: { id: req.user.id },
+                select: { id: true, phone: true, name: true },
+            });
+
+            if (fullUser) {
+                let userDriver = null;
+                
+                // Tìm driver của user hiện tại
+                if (fullUser.phone) {
+                    const normalizedPhone = normalizePhone(fullUser.phone);
+                    if (normalizedPhone) {
+                        userDriver = await prisma.driver.findUnique({
+                            where: { phone: normalizedPhone },
+                        });
+                        
+                        if (!userDriver && fullUser.phone !== normalizedPhone) {
+                            userDriver = await prisma.driver.findUnique({
+                                where: { phone: fullUser.phone },
+                            });
+                        }
+                    }
+                }
+                
+                if (!userDriver && fullUser.name) {
+                    userDriver = await prisma.driver.findFirst({
+                        where: { name: fullUser.name },
+                    });
+                }
+
+                // Kiểm tra xem driver có phải là driver của user hiện tại không
+                if (!userDriver || userDriver.id !== driver.id) {
+                    return res.status(403).json({
+                        success: false,
+                        message: 'Forbidden. You can only update your own location.',
+                    });
+                }
+            }
+        }
 
         // Cập nhật vị trí hiện tại trong bảng Driver
         await prisma.driver.update({
-            where: { id },
+            where: { id: driver.id },
             data: {
                 currentLat: latitude,
                 currentLng: longitude,
@@ -258,7 +346,7 @@ async function updateDriverLocation(req, res) {
         // Lưu vào lịch sử vị trí
         await prisma.driverLocation.create({
             data: {
-                driverId: id,
+                driverId: driver.id,
                 latitude,
                 longitude,
             },

@@ -44,8 +44,14 @@ app.use(cors(corsOptions));
  * Socket.IO Server Setup
  */
 const io = new Server(httpServer, {
-  cors: corsOptions,
-  transports: ['websocket', 'polling'],
+  cors: {
+    ...corsOptions,
+    methods: ['GET', 'POST'],
+  },
+  transports: ['polling', 'websocket'], // Ưu tiên polling trước
+  allowEIO3: true, // Tương thích với client cũ
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 // Socket.IO Authentication Middleware

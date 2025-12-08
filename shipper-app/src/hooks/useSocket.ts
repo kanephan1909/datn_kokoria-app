@@ -56,8 +56,11 @@ export const useSocket = (options: UseSocketOptions = {}) => {
         const socketUrl = getSocketUrl();
 
         // Tạo socket connection
+        // Ưu tiên polling trước vì websocket có thể bị chặn trên một số môi trường
         const socket = io(socketUrl, {
-          transports: ['websocket', 'polling'],
+          transports: ['polling', 'websocket'], // Đổi thứ tự: polling trước
+          upgrade: true,
+          rememberUpgrade: false,
           auth: token
             ? {
                 token,
@@ -65,10 +68,11 @@ export const useSocket = (options: UseSocketOptions = {}) => {
             : undefined,
           reconnection: true,
           reconnectionDelay: 1000,
-          reconnectionAttempts: 5,
+          reconnectionAttempts: Infinity, // Thử kết nối lại vô hạn
           reconnectionDelayMax: 5000,
           timeout: 20000,
           forceNew: false,
+          autoConnect: true,
         });
 
         socketRef.current = socket;
@@ -152,7 +156,9 @@ export const useSocket = (options: UseSocketOptions = {}) => {
       const socketUrl = getSocketUrl();
 
       const socket = io(socketUrl, {
-        transports: ['websocket', 'polling'],
+        transports: ['polling', 'websocket'], // Đổi thứ tự: polling trước
+        upgrade: true,
+        rememberUpgrade: false,
         auth: token
           ? {
               token,
@@ -160,10 +166,11 @@ export const useSocket = (options: UseSocketOptions = {}) => {
           : undefined,
         reconnection: true,
         reconnectionDelay: 1000,
-        reconnectionAttempts: 5,
+        reconnectionAttempts: Infinity, // Thử kết nối lại vô hạn
         reconnectionDelayMax: 5000,
         timeout: 20000,
         forceNew: false,
+        autoConnect: true,
       });
 
       socketRef.current = socket;
