@@ -6319,3 +6319,40 @@
 {"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-08T16:20:00.410Z"}
 {"level":"info","message":"Socket.IO server is ready for connections","timestamp":"2025-12-08T16:20:00.415Z"}
 {"level":"info","message":"Socket connected: vMAp4VnUilIgs1ExAAAB (User: shipper01@gmail.com)","timestamp":"2025-12-08T16:20:01.065Z"}
+{"level":"info","message":"SocketService initialized","timestamp":"2025-12-09T13:07:11.135Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2025-12-09T13:07:11.144Z"}
+{"level":"info","message":"Socket.IO server is ready for connections","timestamp":"2025-12-09T13:07:11.144Z"}
+{"level":"info","message":"Socket connected: 1caoX3Sqqucuz1i7AAAB (Anonymous)","timestamp":"2025-12-09T13:11:35.645Z"}
+{"level":"info","message":"Socket disconnected: 1caoX3Sqqucuz1i7AAAB - Reason: transport close","timestamp":"2025-12-09T13:11:51.154Z"}
+{"level":"info","message":"Socket connected: 2EiKciK9gyPGk92dAAAD (Anonymous)","timestamp":"2025-12-09T13:13:04.050Z"}
+{"level":"info","message":"getAvailableOrders: Found 11 orders with status PENDING/CONFIRMED/PREPARING/READY_FOR_PICKUP","timestamp":"2025-12-09T13:13:07.103Z"}
+{"level":"info","message":"Order 693302e9d1040acf64fc2451 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:13:07.104Z"}
+{"level":"info","message":"Order 693303017125d0adee61bf2c (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:13:07.105Z"}
+{"level":"info","message":"Order 693303338c1579ab171eaa8c (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:13:07.105Z"}
+{"level":"info","message":"Order 6933039c77247cc9bda18ca7 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:13:07.105Z"}
+{"level":"info","message":"Order 693303e2a8c4259e494f576f (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:13:07.106Z"}
+{"level":"info","message":"Order 69340625cc406050545da524 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:13:07.106Z"}
+{"level":"info","message":"Order 693407b8cc406050545da528 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:13:07.107Z"}
+{"level":"info","message":"Order 693408eccc406050545da52b (ONLINE, READY_FOR_PICKUP, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:13:07.108Z"}
+{"level":"info","message":"Order 69341b1183afcc4366fb68c9 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:13:07.108Z"}
+{"level":"info","message":"Order 69342c105d5fd34791d30754 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:13:07.108Z"}
+{"level":"info","message":"Order 69342e35df27af1e9ba8f516 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:13:07.109Z"}
+{"level":"info","message":"Available orders query: Found 11 total orders, 0 available orders (no driver + paid)","timestamp":"2025-12-09T13:13:07.109Z"}
+{"level":"info","message":"Socket disconnected: 2EiKciK9gyPGk92dAAAD - Reason: transport close","timestamp":"2025-12-09T13:13:12.260Z"}
+{"level":"info","message":"Socket connected: YYLNZsgtsmNIEFHPAAAF (User: kanephan@gmail.com)","timestamp":"2025-12-09T13:17:41.218Z"}
+{"level":"info","message":"Socket disconnected: YYLNZsgtsmNIEFHPAAAF - Reason: transport close","timestamp":"2025-12-09T13:20:44.580Z"}
+{"level":"info","message":"Socket connected: TW5zFMDhLcpO1FmgAAAH (Anonymous)","timestamp":"2025-12-09T13:20:46.029Z"}
+{"level":"info","message":"getAvailableOrders: Found 11 orders with status PENDING/CONFIRMED/PREPARING/READY_FOR_PICKUP","timestamp":"2025-12-09T13:20:47.189Z"}
+{"level":"info","message":"Order 693302e9d1040acf64fc2451 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:20:47.189Z"}
+{"level":"info","message":"Order 693303017125d0adee61bf2c (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:20:47.190Z"}
+{"level":"info","message":"Order 693303338c1579ab171eaa8c (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:20:47.190Z"}
+{"level":"info","message":"Order 6933039c77247cc9bda18ca7 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:20:47.190Z"}
+{"level":"info","message":"Order 693303e2a8c4259e494f576f (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:20:47.190Z"}
+{"level":"info","message":"Order 69340625cc406050545da524 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:20:47.190Z"}
+{"level":"info","message":"Order 693407b8cc406050545da528 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:20:47.191Z"}
+{"level":"info","message":"Order 693408eccc406050545da52b (ONLINE, READY_FOR_PICKUP, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:20:47.191Z"}
+{"level":"info","message":"Order 69341b1183afcc4366fb68c9 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:20:47.191Z"}
+{"level":"info","message":"Order 69342c105d5fd34791d30754 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:20:47.191Z"}
+{"level":"info","message":"Order 69342e35df27af1e9ba8f516 (ONLINE, PENDING, PAYMENT_PENDING) - NOT available: ONLINE payment status: PAYMENT_PENDING","timestamp":"2025-12-09T13:20:47.191Z"}
+{"level":"info","message":"Available orders query: Found 11 total orders, 0 available orders (no driver + paid)","timestamp":"2025-12-09T13:20:47.192Z"}
+{"level":"info","message":"Socket disconnected: TW5zFMDhLcpO1FmgAAAH - Reason: transport close","timestamp":"2025-12-09T13:20:54.273Z"}

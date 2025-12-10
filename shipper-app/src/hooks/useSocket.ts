@@ -1,5 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getBaseUrl } from '../api/apiClient';
 
 // Import socket.io-client
 let io: any = null;
@@ -10,11 +11,16 @@ try {
   console.warn('socket.io-client not installed');
 }
 
-// Socket server URL
+// Socket server URL - tự động lấy từ API base URL
 const getSocketUrl = () => {
-  // Mặc định cho Android emulator (socket.io thường chạy trên port 3000)
-  // Thay đổi theo môi trường của bạn
-  return 'http://10.0.2.2:3000';
+  // Có thể override bằng biến môi trường
+  if (process.env.SOCKET_URL) {
+    return process.env.SOCKET_URL;
+  }
+  
+  // Tự động lấy từ API base URL (bỏ /api/v1)
+  const baseUrl = getBaseUrl();
+  return baseUrl;
 };
 
 interface UseSocketOptions {

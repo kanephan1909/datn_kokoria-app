@@ -1,8 +1,39 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// API Base URL - tương tự adminpanel-app
-const API_BASE_URL = 'http://10.0.2.2:3000/api/v1';
+// ============================================
+// CẤU HÌNH API URL
+// ============================================
+// Để kết nối với thiết bị thật:
+// 1. Kiểm tra IP máy tính: 
+//    - Windows: mở CMD, gõ "ipconfig", tìm "IPv4 Address" (ví dụ: 192.168.1.100)
+//    - Mac/Linux: mở Terminal, gõ "ifconfig" hoặc "ip addr", tìm IP của máy
+// 2. Thay đổi SERVER_IP bên dưới bằng IP thật của máy tính
+// 3. Đảm bảo điện thoại và máy tính cùng mạng WiFi
+// ============================================
+
+// IP máy tính - THAY ĐỔI KHI KẾT NỐI VỚI THIẾT BỊ THẬT
+// Emulator: '10.0.2.2'
+// Thiết bị thật: IP máy tính (ví dụ: '192.168.1.100')
+const SERVER_IP = '10.0.2.2'; // ⚠️ THAY ĐỔI IP NÀY KHI DÙNG THIẾT BỊ THẬT
+const SERVER_PORT = '3000';
+
+const getApiBaseUrl = () => {
+  // Có thể override bằng biến môi trường
+  if (process.env.API_BASE_URL) {
+    return process.env.API_BASE_URL;
+  }
+  
+  return `http://${SERVER_IP}:${SERVER_PORT}/api/v1`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Export để dùng cho socket
+export const getBaseUrl = () => {
+  // Lấy base URL không có /api/v1
+  return API_BASE_URL.replace('/api/v1', '');
+};
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
