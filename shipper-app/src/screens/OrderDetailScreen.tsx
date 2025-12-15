@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Linking } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Linking, Platform } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { fetchOrderById, acceptOrder, updateOrderStatus } from '../api/apiClient';
+import { fetchOrderById, acceptOrder, updateOrderStatus, getOrderRating, Rating } from '../api/apiClient';
 import { useSocketContext } from '../context/SocketContext';
 import { useDriverLocation } from '../hooks/useDriverLocation';
 import { useDistanceMatrix } from '../hooks/useDistanceMatrix';
@@ -22,6 +22,16 @@ const OrderDetailScreen = () => {
   });
 
   const order = data?.data;
+
+  // Fetch rating của order này (nếu đã được đánh giá)
+  const { data: ratingData } = useQuery({
+    queryKey: ['orderRating', orderId],
+    queryFn: () => getOrderRating(orderId),
+    enabled: !!orderId && order?.status === 'COMPLETED', // Chỉ fetch khi order đã hoàn thành
+    retry: false, // Không retry nếu không tìm thấy rating (404)
+  });
+
+  const orderRating = ratingData?.success ? ratingData.data : null;
 
   // Bật tracking vị trí khi đang giao hàng (status = DELIVERING)
   const isDelivering = order?.status === 'DELIVERING';
@@ -330,6 +340,44 @@ const OrderDetailScreen = () => {
           </View>
         )}
 
+        {/* Rating Section - Hiển thị đánh giá từ khách hàng */}
+        {order.status === 'COMPLETED' && orderRating && (
+          <View className="border-t border-gray-100 pt-5 mt-5">
+            <Text className="text-gray-500 text-xs font-semibold mb-3 uppercase tracking-wide">
+              Đánh giá từ khách hàng
+            </Text>
+            <View className="bg-yellow-50 rounded-xl p-4 border-l-4" style={{ borderLeftColor: '#F59E0B' }}>
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-gray-900 font-semibold text-base">
+                  {orderRating.user?.name || 'Khách hàng'}
+                </Text>
+                <View className="flex-row items-center">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Ionicons
+                      key={star}
+                      name={star <= orderRating.rating ? 'star' : 'star-outline'}
+                      size={20}
+                      color={star <= orderRating.rating ? '#F59E0B' : '#D1D5DB'}
+                    />
+                  ))}
+                </View>
+              </View>
+              {orderRating.comment && (
+                <Text className="text-gray-700 text-sm mt-2 leading-5">
+                  "{orderRating.comment}"
+                </Text>
+              )}
+              <Text className="text-gray-400 text-xs mt-3">
+                {new Date(orderRating.createdAt).toLocaleDateString('vi-VN', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </Text>
+            </View>
+          </View>
+        )}
+
         {/* Customer Info & Chat */}
         {order.user && isMyOrder && (
           <View className="border-t border-gray-100 pt-5 mt-5">
@@ -577,9 +625,33 @@ const OrderDetailScreen = () => {
               )}
               {locationError && (
                 <View className="bg-yellow-50 rounded-xl p-4 mb-3 border-l-4" style={{ borderLeftColor: '#F59E0B' }}>
-                  <Text className="text-yellow-700 text-xs">
-                    ⚠️ {locationError}
-                  </Text>
+                  <View className="flex-row items-start mb-2">
+                    <Ionicons name="warning" size={20} color="#F59E0B" style={{ marginRight: 8, marginTop: 2 }} />
+                    <View className="flex-1">
+                      <Text className="text-yellow-800 font-semibold text-sm mb-1">
+                        Cảnh báo vị trí
+                      </Text>
+                      <Text className="text-yellow-700 text-xs leading-5">
+                        {locationError}
+                      </Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity
+                    className="mt-2 bg-yellow-600 px-4 py-2 rounded-lg self-start"
+                    onPress={async () => {
+                      try {
+                        if (Platform.OS === 'ios') {
+                          await Linking.openURL('app-settings:');
+                        } else {
+                          await Linking.openSettings();
+                        }
+                      } catch (err) {
+                        Alert.alert('Thông báo', 'Vui lòng mở Cài đặt thủ công và bật Location Services');
+                      }
+                    }}
+                  >
+                    <Text className="text-white text-xs font-semibold">Mở Cài đặt</Text>
+                  </TouchableOpacity>
                 </View>
               )}
               <TouchableOpacity

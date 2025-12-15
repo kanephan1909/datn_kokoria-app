@@ -3,6 +3,7 @@ const {
     createRating,
     getRatingByOrder,
     getRatingsByDriver,
+    getMyRatings,
 } = require('../controllers/ratings');
 
 const validate = require('../middlesware/validation');
@@ -31,8 +32,14 @@ router.post('/', authMiddleware, authorize(['USER']), validate(createRatingSchem
 router.get('/order/:orderId', authMiddleware, getRatingByOrder);
 
 /**
+ * GET /ratings/driver/me?page=1&limit=10
+ * Lấy ratings của driver hiện tại (tự động tìm driver từ user)
+ */
+router.get('/driver/me', authMiddleware, getMyRatings);
+
+/**
  * GET /ratings/driver/:driverId?page=1&limit=10
- * Lấy tất cả ratings của một driver
+ * Lấy tất cả ratings của một driver (public hoặc admin)
  */
 router.get('/driver/:driverId', getRatingsByDriver);
 

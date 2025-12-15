@@ -170,6 +170,68 @@ export const updateDriverStatus = async (isOnline: boolean) => {
     return (await api.put(`/drivers/${driverId}`, { isOnline })).data;
 };
 
+// ==================== RATINGS API ====================
+export interface Rating {
+    id: string;
+    orderId: string;
+    userId: string;
+    driverId: string;
+    rating: number; // 1-5
+    comment?: string;
+    createdAt: string;
+    updatedAt: string;
+    user?: {
+        id: string;
+        name: string;
+    };
+    order?: {
+        id: string;
+        totalAmount: number;
+    };
+}
+
+export interface DriverRatingsResponse {
+    ratings: Rating[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+    averageRating: number;
+}
+
+// Lấy ratings của driver hiện tại (tự động tìm driver từ user)
+export const fetchMyDriverRatings = async (params?: { page?: number; limit?: number }): Promise<DriverRatingsResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    const response = await api.get(`/ratings/driver/me?${queryParams.toString()}`);
+    return response.data.data; // Return data from response.data.data
+};
+
+// Lấy tất cả ratings của driver (by driverId - for admin or public)
+export const fetchDriverRatings = async (driverId: string, params?: { page?: number; limit?: number }): Promise<DriverRatingsResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    const response = await api.get(`/ratings/driver/${driverId}?${queryParams.toString()}`);
+    return response.data.data; // Return data from response.data.data
+};
+
+// Lấy rating của một order cụ thể
+export const getOrderRating = async (orderId: string): Promise<{ success: boolean; data?: Rating; message?: string }> => {
+    try {
+        const response = await api.get(`/ratings/order/${orderId}`);
+        return response.data;
+    } catch (error: any) {
+        if (error.response?.status === 404) {
+            return { success: false, message: 'Rating not found' };
+        }
+        throw error;
+    }
+};
+
 // ==================== MESSAGES API ====================
 export interface Message {
     id: string;

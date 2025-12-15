@@ -59,7 +59,9 @@ const ChatScreen = () => {
   } = useQuery({
     queryKey: ['messages', orderId],
     queryFn: () => fetchOrderMessages(orderId, {page: 1, limit: 100}),
-    refetchInterval: false,
+    // Refetch mỗi 5 giây khi có socket connection (backup nếu socket miss)
+    // Khi không có socket thì không refetch để tiết kiệm tài nguyên
+    refetchInterval: false, // Socket sẽ handle real-time, chỉ refetch khi có socket event
   });
 
   const messages = messagesData?.data || [];
@@ -69,13 +71,22 @@ const ChatScreen = () => {
     autoConnect: true,
     events: {
       'message:new': (data: {message: Message}) => {
-        console.log('📨 New message received:', data);
-        if (data.message.orderId === orderId) {
+        console.log('📨 New message received:', JSON.stringify(data, null, 2));
+        // Kiểm tra orderId trong message
+        const messageOrderId = data.message?.orderId;
+        console.log('🔍 Checking orderId - messageOrderId:', messageOrderId, 'current orderId:', orderId);
+        // Nếu orderId khớp
+        if (messageOrderId && messageOrderId === orderId) {
+          console.log('✅ Valid message for current order, refetching messages');
+          // Invalidate và refetch ngay để đảm bảo nhận được tin nhắn
           queryClient.invalidateQueries({queryKey: ['messages', orderId]});
+          queryClient.refetchQueries({queryKey: ['messages', orderId]});
           // Scroll to bottom when new message arrives
           setTimeout(() => {
             flatListRef.current?.scrollToEnd({animated: true});
-          }, 100);
+          }, 200);
+        } else {
+          console.log('❌ Message orderId mismatch:', messageOrderId, 'vs', orderId, 'Message ignored');
         }
       },
     },
@@ -86,9 +97,20 @@ const ChatScreen = () => {
   // Join order room khi mở chat
   useEffect(() => {
     if (isConnected && socket && orderId) {
+      console.log('🔌 Joining order room:', orderId);
       socket.emit('order:join', orderId);
+
+      // Listen để confirm join thành công
+      const onJoinSuccess = (data: any) => {
+        console.log('✅ Joined order room:', data);
+      };
+
+      socket.on('order:joined', onJoinSuccess);
+
       return () => {
+        console.log('🔌 Leaving order room:', orderId);
         socket.emit('order:leave', orderId);
+        socket.off('order:joined', onJoinSuccess);
       };
     }
   }, [isConnected, socket, orderId]);
@@ -98,7 +120,9 @@ const ChatScreen = () => {
     mutationFn: (text: string) => sendMessage(orderId, text),
     onSuccess: (data) => {
       setMessageText('');
+      // Invalidate và refetch ngay để hiển thị tin nhắn vừa gửi
       queryClient.invalidateQueries({queryKey: ['messages', orderId]});
+      queryClient.refetchQueries({queryKey: ['messages', orderId]});
       // Emit qua socket để notify recipient
       if (isConnected) {
         emit('message:sent', {orderId, message: data.data});
@@ -106,7 +130,7 @@ const ChatScreen = () => {
       // Scroll to bottom
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({animated: true});
-      }, 100);
+      }, 200);
     },
     onError: (error: any) => {
       Alert.alert('Lỗi', error?.response?.data?.message || 'Không thể gửi tin nhắn');

@@ -13,14 +13,6 @@ const OrdersScreen = () => {
     queryKey: ['availableOrders'],
     queryFn: () => fetchAvailableOrders({ page: 1, limit: 20 }),
     refetchInterval: isConnected ? false : 10000, // Nếu có socket thì không cần polling
-    onError: (err: any) => {
-      console.error('❌ Error fetching orders:', err);
-      console.error('Error details:', err?.response?.data || err?.message);
-    },
-    onSuccess: (response) => {
-      console.log('✅ Orders fetched:', response);
-      console.log('Orders count:', response?.data?.length || 0);
-    },
   });
 
   // Khi socket nhận đơn hàng mới, tự động refetch
@@ -31,7 +23,7 @@ const OrdersScreen = () => {
     }
   }, [isConnected]);
 
-  const orders = data?.data || [];
+  const orders = (data as any)?.data || [];
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -41,16 +33,77 @@ const OrdersScreen = () => {
   };
 
   const getAddressString = (address: any) => {
-    if (typeof address === 'string') return address;
-    if (typeof address === 'object' && address) {
-      const parts = [
+    if (!address) {
+      return 'Địa chỉ không xác định';
+    }
+    
+    if (typeof address === 'string') {
+      return address.trim() || 'Địa chỉ không xác định';
+    }
+    
+    if (typeof address === 'object') {
+      // Kiểm tra nếu là array rỗng hoặc null
+      if (Array.isArray(address) && address.length === 0) {
+        return 'Địa chỉ không xác định';
+      }
+      
+      // Format mới: address, ward, district, city
+      const newFormatParts = [
+        address.address,
+        address.ward,
+        address.district,
+        address.city,
+      ].filter(Boolean);
+      
+      if (newFormatParts.length > 0) {
+        return newFormatParts.join(', ');
+      }
+      
+      // Format cũ: flatNo, street, buildingName, locality
+      const oldFormatParts = [
         address.flatNo,
         address.street,
         address.buildingName,
         address.locality,
       ].filter(Boolean);
-      return parts.join(', ') || 'Địa chỉ không xác định';
+      
+      if (oldFormatParts.length > 0) {
+        return oldFormatParts.join(', ');
+      }
+      
+      // Thử các field khác có thể có
+      const alternativeParts = [
+        address.street,
+        address.houseNumber,
+        address.building,
+        address.wardName,
+        address.districtName,
+        address.cityName,
+        address.province,
+        address.fullAddress,
+      ].filter(Boolean);
+      
+      if (alternativeParts.length > 0) {
+        return alternativeParts.join(', ');
+      }
+      
+      // Nếu có bất kỳ field nào khác, thử hiển thị
+      const allKeys = Object.keys(address);
+      if (allKeys.length > 0) {
+        // Bỏ qua các field không phải địa chỉ
+        const excludeKeys = ['name', 'phone', 'latitude', 'longitude', 'lat', 'lng', 'id', '_id'];
+        const addressKeys = allKeys.filter(key => !excludeKeys.includes(key));
+        if (addressKeys.length > 0) {
+          const parts = addressKeys
+            .map(key => address[key])
+            .filter(val => val && typeof val === 'string' && val.trim().length > 0);
+          if (parts.length > 0) {
+            return parts.join(', ');
+          }
+        }
+      }
     }
+    
     return 'Địa chỉ không xác định';
   };
 
@@ -250,7 +303,7 @@ const OrdersScreen = () => {
                         Địa chỉ giao hàng
                       </Text>
                       <Text className="text-gray-900 text-sm leading-5" numberOfLines={2}>
-                        {getAddressString(order.address)}
+                        {getAddressString(order.address || order.deliveryAddress)}
                       </Text>
                     </View>
                   </View>

@@ -152,9 +152,9 @@ const HomeScreen = () => {
           useNativeDriver: true,
         }),
       ]).start(() => {
+        // Chỉ cập nhật state sau khi animation hoàn thành
+        // Không cần setValue vì animation đã đặt giá trị rồi
         setNotifications(prev => prev.filter(n => n.id !== notification.id));
-        notificationOpacity.setValue(0);
-        slideAnim.setValue(-100);
       });
     }, 3000);
   };
@@ -222,8 +222,6 @@ const HomeScreen = () => {
               <TouchableOpacity
                 onPress={() => {
                   setNotifications([]);
-                  notificationOpacity.setValue(0);
-                  slideAnim.setValue(-100);
                 }}>
                 <Ionicons name="close" size={20} color="#6B7280" />
               </TouchableOpacity>

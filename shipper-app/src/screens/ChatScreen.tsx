@@ -53,35 +53,79 @@ const ChatScreen = () => {
   } = useQuery({
     queryKey: ['messages', orderId],
     queryFn: () => fetchOrderMessages(orderId, {page: 1, limit: 100}),
-    refetchInterval: false,
-    onError: (err: any) => {
-      console.error('❌ Error fetching messages:', err);
-      console.error('Error details:', err?.response?.data || err?.message);
-    },
-    onSuccess: (response) => {
-      console.log('✅ Messages fetched:', response);
-      console.log('Messages count:', response?.data?.length || 0);
-    },
+    // Refetch mỗi 5 giây khi có socket connection (backup nếu socket miss)
+    // Khi screen không focus hoặc không có socket thì không refetch để tiết kiệm tài nguyên
+    refetchInterval: isConnected ? 5000 : false,
   });
 
-  const messages = messagesData?.data || [];
+  // Log messages when fetched
+  useEffect(() => {
+    if (messagesData) {
+      console.log('✅ Messages fetched:', messagesData);
+      console.log('Messages count:', (messagesData as any)?.data?.length || 0);
+    }
+  }, [messagesData]);
 
-  // Join order room khi mở chat
+  // Log error when fetch fails
+  useEffect(() => {
+    if (messagesError) {
+      console.error('❌ Error fetching messages:', messagesError);
+      console.error('Error details:', (messagesError as any)?.response?.data || (messagesError as any)?.message);
+    }
+  }, [messagesError]);
+
+  const messages = (messagesData as any)?.data || [];
+
+  // Join order room và setup message listener
   useEffect(() => {
     if (isConnected && socket && orderId) {
+      console.log('🔌 Joining order room:', orderId);
       socket.emit('order:join', orderId);
+
+      // Setup message listener sau khi join room
+      const handleNewMessage = (data: {message: Message}) => {
+        console.log('📨 New message received in ChatScreen:', JSON.stringify(data, null, 2));
+        const messageOrderId = data.message?.orderId;
+        console.log('🔍 Checking orderId - messageOrderId:', messageOrderId, 'current orderId:', orderId);
+        if (messageOrderId === orderId) {
+          console.log('✅ Valid message for current order, refetching messages');
+          // Invalidate và refetch ngay để đảm bảo nhận được tin nhắn
+          queryClient.invalidateQueries({queryKey: ['messages', orderId]});
+          queryClient.refetchQueries({queryKey: ['messages', orderId]});
+          // Scroll to bottom when new message arrives
+          setTimeout(() => {
+            flatListRef.current?.scrollToEnd({animated: true});
+          }, 200);
+        } else {
+          console.log('❌ Message orderId mismatch:', messageOrderId, 'vs', orderId);
+        }
+      };
+
+      socket.on('message:new', handleNewMessage);
+
+      // Listen để confirm join thành công
+      const onJoinSuccess = (data: any) => {
+        console.log('✅ Joined order room successfully:', data);
+      };
+      socket.on('order:joined', onJoinSuccess);
+
       return () => {
+        console.log('🔌 Leaving order room and removing listeners:', orderId);
+        socket.off('message:new', handleNewMessage);
+        socket.off('order:joined', onJoinSuccess);
         socket.emit('order:leave', orderId);
       };
     }
-  }, [isConnected, socket, orderId]);
+  }, [isConnected, socket, orderId, queryClient]);
 
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: (text: string) => sendMessage(orderId, text),
     onSuccess: (data) => {
       setMessageText('');
+      // Invalidate và refetch ngay để hiển thị tin nhắn vừa gửi
       queryClient.invalidateQueries({queryKey: ['messages', orderId]});
+      queryClient.refetchQueries({queryKey: ['messages', orderId]});
       // Emit qua socket để notify recipient
       if (isConnected) {
         emit('message:sent', {orderId, message: data.data});
@@ -89,7 +133,7 @@ const ChatScreen = () => {
       // Scroll to bottom
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({animated: true});
-      }, 100);
+      }, 200);
     },
     onError: (error: any) => {
       Alert.alert('Lỗi', error?.response?.data?.message || 'Không thể gửi tin nhắn');
@@ -187,7 +231,7 @@ const ChatScreen = () => {
             Không thể tải tin nhắn
           </Text>
           <Text className="text-gray-600 text-center mt-2 text-sm">
-            {messagesError?.response?.data?.message || 'Vui lòng thử lại'}
+            {(messagesError as any)?.response?.data?.message || 'Vui lòng thử lại'}
           </Text>
         </View>
       ) : messages.length === 0 ? (

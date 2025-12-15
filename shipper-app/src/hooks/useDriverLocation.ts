@@ -24,13 +24,21 @@ export const useDriverLocation = (options: UseDriverLocationOptions = {}) => {
 
     const requestPermission = async () => {
       try {
+        // Kiểm tra permission hiện tại trước
+        const {status: currentStatus} = await Location.getForegroundPermissionsAsync();
+        if (currentStatus === 'granted') {
+          return true;
+        }
+
+        // Nếu chưa có permission, request
         const {status} = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          setError('Quyền truy cập vị trí bị từ chối');
+          setError('Quyền truy cập vị trí bị từ chối. Vui lòng cấp quyền trong Cài đặt.');
           return false;
         }
         return true;
-      } catch (err) {
+      } catch (err: any) {
+        console.error('Error requesting permission:', err);
         setError('Không thể yêu cầu quyền truy cập vị trí');
         return false;
       }
@@ -43,11 +51,21 @@ export const useDriverLocation = (options: UseDriverLocationOptions = {}) => {
           return;
         }
 
+        // Kiểm tra location services có được bật không
+        const isLocationEnabled = await Location.hasServicesEnabledAsync();
+        if (!isLocationEnabled) {
+          setError('Location Services chưa được bật. Vui lòng bật Location Services trong Cài đặt.');
+          return;
+        }
+
         const currentLocation = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
+          timeout: 10000, // Timeout sau 10 giây
+          maximumAge: 60000, // Cho phép dùng location cũ trong vòng 60 giây
         });
 
         setLocation(currentLocation);
+        setError(null); // Clear error khi lấy location thành công
 
         // Cập nhật lên server
         setIsUpdating(true);
@@ -73,7 +91,14 @@ export const useDriverLocation = (options: UseDriverLocationOptions = {}) => {
         }
       } catch (err: any) {
         console.error('Error getting location:', err);
-        setError(err.message || 'Không thể lấy vị trí');
+        // Kiểm tra loại lỗi và hiển thị message phù hợp
+        if (err.code === 'E_LOCATION_SERVICES_DISABLED' || err.message?.includes('location services')) {
+          setError('Dịch vụ vị trí chưa được bật. Vui lòng bật Location Services trong Cài đặt.');
+        } else if (err.code === 'E_LOCATION_UNAVAILABLE') {
+          setError('Vị trí hiện tại không khả dụng. Vui lòng kiểm tra Location Services và thử lại.');
+        } else {
+          setError(err.message || 'Không thể lấy vị trí. Vui lòng kiểm tra Location Services.');
+        }
       }
     };
 

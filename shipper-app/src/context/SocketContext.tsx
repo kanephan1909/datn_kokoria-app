@@ -47,10 +47,11 @@ export const SocketProvider = ({children}: {children: ReactNode}) => {
 
       // Nhận message mới
       'message:new': (data: {message: any}) => {
-        console.log('📨 New message received:', data);
-        // Invalidate queries để refresh messages
+        console.log('📨 New message received in SocketContext:', data);
+        // Invalidate và refetch ngay để đảm bảo nhận được tin nhắn
         if (data.message?.orderId) {
           queryClient.invalidateQueries({queryKey: ['messages', data.message.orderId]});
+          queryClient.refetchQueries({queryKey: ['messages', data.message.orderId]});
         }
       },
 
