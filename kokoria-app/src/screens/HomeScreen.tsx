@@ -12,7 +12,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import React, {useState, useEffect, useRef} from 'react';
 import Header from '../components/dashboard/Header';
-import SearchBar from '../components/dashboard/SearchBar';
+import SearchBar, {SearchCriteria} from '../components/dashboard/SearchBar';
 import BannerCarousel from '../components/dashboard/BannerCarousel';
 import Categories from '../components/dashboard/Categories';
 import FlashSale from '../components/dashboard/FlashSale';
@@ -27,6 +27,7 @@ import {MainRoutes} from '../navigation/Routes';
 const HomeScreen = () => {
   const navigation = useNavigation<any>();
   const [query, setQuery] = useState('');
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({});
   const [flashSaleTimeLeft, setFlashSaleTimeLeft] = useState<number | null>(
     null,
   );
@@ -38,6 +39,38 @@ const HomeScreen = () => {
   const [newProductsCount, setNewProductsCount] = useState(0);
   const notificationOpacity = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-100)).current;
+  const scrollViewRef = useRef<ScrollView>(null);
+  const searchResultsMarkerRef = useRef<View>(null);
+
+  // Scroll to search results when search is performed
+  const scrollToSearchResults = () => {
+    setTimeout(() => {
+      if (searchResultsMarkerRef.current && scrollViewRef.current) {
+        searchResultsMarkerRef.current.measureLayout(
+          scrollViewRef.current as any,
+          (x, y) => {
+            scrollViewRef.current?.scrollTo({
+              y: Math.max(0, y - 80),
+              animated: true,
+            });
+          },
+          () => {
+            // Fallback: scroll to approximate position
+            scrollViewRef.current?.scrollTo({
+              y: 450,
+              animated: true,
+            });
+          },
+        );
+      } else if (scrollViewRef.current) {
+        // Fallback: scroll to approximate position
+        scrollViewRef.current.scrollTo({
+          y: 450,
+          animated: true,
+        });
+      }
+    }, 400);
+  };
 
   // Socket connection với các events
   const {isConnected, socketError, emit} = useSocket({
@@ -67,6 +100,7 @@ const HomeScreen = () => {
         orderId: string;
         status: string;
         message?: string;
+        shipperName?: string;
       }) => {
         const statusMessages: {[key: string]: string} = {
           pending: '⏳ Đơn hàng đang chờ xác nhận',
@@ -76,6 +110,8 @@ const HomeScreen = () => {
           ready_for_pickup: '📦 Đơn hàng sẵn sàng lấy hàng',
           picked_up: '🛍️ Shipper đã lấy hàng',
           delivering: '🚚 Đơn hàng đang được giao',
+          shipper_arrived: `🚚 Shipper ${data.shipperName || ''} đã đến nơi giao hàng! Vui lòng ra nhận hàng.`,
+          arrived: `🚚 Shipper ${data.shipperName || ''} đã đến nơi giao hàng! Vui lòng ra nhận hàng.`,
           completed: '🎉 Đơn hàng đã được giao thành công',
           delivered: '🎉 Đơn hàng đã được giao',
           cancelled: '❌ Đơn hàng đã bị hủy',
@@ -84,6 +120,21 @@ const HomeScreen = () => {
         showNotification(
           data.message || statusMessages[data.status] || 'Cập nhật đơn hàng',
           'order',
+        );
+      },
+
+      // Thông báo khi shipper giao hàng tới
+      'order:shipperArrived': (data: {
+        orderId: string;
+        shipperName?: string;
+        shipperPhone?: string;
+        message?: string;
+      }) => {
+        const shipperInfo = data.shipperName ? `Shipper ${data.shipperName}` : 'Shipper';
+        showNotification(
+          data.message ||
+            `🚚 ${shipperInfo} đã đến nơi giao hàng! Vui lòng ra nhận hàng ngay.`,
+          'delivery',
         );
       },
 
@@ -241,12 +292,24 @@ const HomeScreen = () => {
         </LinearGradient>
         {/* Search Bar - Overlap giữa header và content */}
         <View style={styles.searchBarWrapper}>
-          <SearchBar value={query} onChange={setQuery} />
+          <SearchBar
+            value={query}
+            onChange={(text) => {
+              setQuery(text);
+              setSearchCriteria(prev => ({...prev, text}));
+            }}
+            searchCriteria={searchCriteria}
+            onSearchCriteriaChange={(criteria) => {
+              setSearchCriteria(criteria);
+            }}
+            onSearch={scrollToSearchResults}
+          />
         </View>
       </View>
 
       {/* Scrollable Content */}
       <ScrollView
+        ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollViewContent}
         style={styles.scrollViewContainer}>
@@ -293,9 +356,12 @@ const HomeScreen = () => {
           <FlashSale />
         </View>
 
+        {/* Marker for scroll position */}
+        <View ref={searchResultsMarkerRef} style={{height: 0}} />
+
         {/* Popular Items Section */}
         <View className="pt-6 px-4 pb-6" style={styles.popularItemsContainer}>
-          {!query && (
+          {!query && !searchCriteria.categoryId && !searchCriteria.minPrice && !searchCriteria.maxPrice && !searchCriteria.minRating && (
             <View className="flex-row items-center justify-between mb-4">
               <View className="flex-row items-center">
                 <Text className="text-xl font-bold text-gray-800">
@@ -321,14 +387,46 @@ const HomeScreen = () => {
               </TouchableOpacity>
             </View>
           )}
-          {query && (
+          {(query || searchCriteria.categoryId || searchCriteria.minPrice || searchCriteria.maxPrice || searchCriteria.minRating) && (
             <View className="mb-4">
               <Text className="text-xl font-bold text-gray-800">
-                Kết quả tìm kiếm: "{query}"
+                {query ? `Kết quả tìm kiếm: "${query}"` : 'Kết quả tìm kiếm'}
               </Text>
+              {(searchCriteria.categoryId || searchCriteria.minPrice || searchCriteria.maxPrice || searchCriteria.minRating) && (
+                <View className="flex-row flex-wrap mt-2">
+                  {searchCriteria.categoryId && (
+                    <View className="bg-orange-100 px-3 py-1 rounded-full mr-2 mb-2">
+                      <Text className="text-orange-700 text-xs font-medium">
+                        Đã lọc
+                      </Text>
+                    </View>
+                  )}
+                  {(searchCriteria.minPrice || searchCriteria.maxPrice) && (
+                    <View className="bg-orange-100 px-3 py-1 rounded-full mr-2 mb-2">
+                      <Text className="text-orange-700 text-xs font-medium">
+                        {searchCriteria.minPrice && searchCriteria.maxPrice
+                          ? `${(searchCriteria.minPrice / 1000).toFixed(0)}k - ${(searchCriteria.maxPrice / 1000).toFixed(0)}k`
+                          : searchCriteria.minPrice
+                            ? `Từ ${(searchCriteria.minPrice / 1000).toFixed(0)}k`
+                            : `Đến ${(searchCriteria.maxPrice! / 1000).toFixed(0)}k`}
+                      </Text>
+                    </View>
+                  )}
+                  {searchCriteria.minRating && (
+                    <View className="bg-orange-100 px-3 py-1 rounded-full mr-2 mb-2">
+                      <Text className="text-orange-700 text-xs font-medium">
+                        {searchCriteria.minRating}+ sao
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
             </View>
           )}
-          <PopularItems searchQuery={query} />
+          <PopularItems
+            searchQuery={searchCriteria?.text || query}
+            searchCriteria={searchCriteria}
+          />
         </View>
       </ScrollView>
 

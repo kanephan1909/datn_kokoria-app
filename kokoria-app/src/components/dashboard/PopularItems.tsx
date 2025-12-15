@@ -13,6 +13,7 @@ import {useQuery} from '@tanstack/react-query';
 import {fetchProducts, fetchCategories} from '../../../api/apiClient';
 import {useNavigation} from '@react-navigation/native';
 import {MainRoutes} from '../../navigation/Routes';
+import {SearchCriteria} from './SearchBar';
 
 interface Product {
   id: string;
@@ -21,6 +22,7 @@ interface Product {
   description?: string;
   imageUrl?: string;
   categoryId?: string;
+  rating?: number;
 }
 
 interface Category {
@@ -31,7 +33,21 @@ interface Category {
 
 interface PopularItemsProps {
   searchQuery?: string;
+  searchCriteria?: SearchCriteria;
 }
+
+// Hàm xóa dấu tiếng Việt để tìm kiếm không dấu
+const removeVietnameseAccents = (str: string): string => {
+  if (!str) {
+    return '';
+  }
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Xóa dấu
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase();
+};
 
 // Product Card Component
 const ProductCard = ({
@@ -123,8 +139,16 @@ const ProductCard = ({
   );
 };
 
-const PopularItems = ({searchQuery = ''}: PopularItemsProps) => {
+const PopularItems = ({
+  searchQuery = '',
+  searchCriteria,
+}: PopularItemsProps) => {
   const navigation = useNavigation();
+
+  // Sử dụng searchCriteria nếu có, nếu không thì dùng searchQuery
+  const effectiveSearchText =
+    searchCriteria?.text || searchQuery || '';
+  const effectiveCategoryId = searchCriteria?.categoryId;
 
   // Lấy danh sách categories để tìm category "Gà"
   const {data: categoriesData} = useQuery({
@@ -138,83 +162,143 @@ const PopularItems = ({searchQuery = ''}: PopularItemsProps) => {
     },
   });
 
-  // Tìm category "Gà" hoặc "Gà rán"
+  // Tìm category "Gà" hoặc "Gà rán" (chỉ dùng khi không có category được chọn trong filter)
+  // Hỗ trợ tìm kiếm không dấu
   const chickenCategoryId = useMemo(() => {
+    if (effectiveCategoryId) {
+      return null; // Nếu có category từ filter, không dùng category gà mặc định
+    }
     if (!categoriesData) {
       return null;
     }
-    const chickenCategory = categoriesData.find(
-      cat =>
-        cat.name.toLowerCase().includes('gà') ||
-        cat.name.toLowerCase().includes('ga') ||
-        cat.name.toLowerCase().includes('chicken') ||
-        cat.name.toLowerCase().includes('gà rán') ||
-        cat.name.toLowerCase().includes('ga ran')
-    );
+    const chickenCategory = categoriesData.find(cat => {
+      const catNameNormalized = removeVietnameseAccents(cat.name);
+      return (
+        catNameNormalized.includes(removeVietnameseAccents('gà')) ||
+        catNameNormalized.includes(removeVietnameseAccents('ga')) ||
+        catNameNormalized.includes('chicken') ||
+        catNameNormalized.includes(removeVietnameseAccents('gà rán')) ||
+        catNameNormalized.includes(removeVietnameseAccents('ga ran'))
+      );
+    });
     return chickenCategory?.id || null;
-  }, [categoriesData]);
+  }, [categoriesData, effectiveCategoryId]);
 
   const {
     data: productsData,
     isLoading,
   } = useQuery({
-    queryKey: ['popularProducts', searchQuery, chickenCategoryId],
+    queryKey: [
+      'popularProducts',
+      effectiveSearchText,
+      effectiveCategoryId,
+      chickenCategoryId,
+      searchCriteria?.minPrice,
+      searchCriteria?.maxPrice,
+      searchCriteria?.minRating,
+    ],
     queryFn: async () => {
-      // Nếu có search query, search bình thường
-      if (searchQuery) {
-        const response = await fetchProducts({
-          limit: 20,
-          page: 1,
-          search: searchQuery,
-        });
-        if (response.success && response.data) {
-          const productsList = Array.isArray(response.data)
-            ? response.data
-            : response.data.products || response.data.data || [];
-          return productsList as Product[];
-        }
-        throw new Error(response.message || 'Failed to fetch products');
-      }
+      let response;
 
-      // Nếu không có search query, lấy sản phẩm từ category "Gà"
-      if (chickenCategoryId) {
-        const response = await fetchProducts({
+      // Nếu có search text, lấy tất cả để filter ở frontend (hỗ trợ tìm kiếm không dấu)
+      // Nếu chỉ có category, có thể dùng API filter
+      if (effectiveSearchText) {
+        // Lấy tất cả sản phẩm để filter ở frontend (hỗ trợ tìm kiếm không dấu tốt hơn)
+        response = await fetchProducts({
+          limit: 200, // Lấy nhiều để filter ở frontend
+          page: 1,
+          categoryId: effectiveCategoryId || undefined,
+        });
+      } else if (effectiveCategoryId) {
+        // Chỉ có category, dùng API filter
+        response = await fetchProducts({
+          limit: 100,
+          page: 1,
+          categoryId: effectiveCategoryId,
+        });
+      } else if (chickenCategoryId) {
+        // Nếu không có filter, lấy sản phẩm từ category "Gà"
+        response = await fetchProducts({
           categoryId: chickenCategoryId,
-          limit: 6,
+          limit: 100,
           page: 1,
         });
-        if (response.success && response.data) {
-          const productsList = Array.isArray(response.data)
-            ? response.data
-            : response.data.products || response.data.data || [];
-          return productsList as Product[];
-        }
-        throw new Error(response.message || 'Failed to fetch products');
+      } else {
+        // Nếu không có gì, lấy tất cả
+        response = await fetchProducts({
+          limit: 100,
+          page: 1,
+        });
       }
 
-      // Nếu không tìm thấy category gà, lấy tất cả và filter theo tên
-      const response = await fetchProducts({
-        limit: 50,
-        page: 1,
-      });
       if (response.success && response.data) {
-        const productsList = Array.isArray(response.data)
+        let productsList = Array.isArray(response.data)
           ? response.data
           : response.data.products || response.data.data || [];
-        // Filter các sản phẩm có tên chứa "gà" hoặc "chicken"
-        const filteredProducts = productsList.filter((product: Product) => {
-          const nameLower = product.name.toLowerCase();
-          return (
-            nameLower.includes('gà') ||
-            nameLower.includes('ga') ||
-            nameLower.includes('chicken')
-          );
-        });
-        return filteredProducts.slice(0, 6) as Product[];
+
+        // Filter theo category ở frontend nếu API không filter đúng
+        // (vì có thể API search chỉ tìm theo tên, không filter theo categoryId)
+        if (effectiveCategoryId && productsList.length > 0) {
+          productsList = productsList.filter((product: Product) => {
+            return product.categoryId === effectiveCategoryId;
+          });
+        }
+
+        // Filter theo các tiêu chí (price range, rating) ở frontend
+        // vì API có thể không hỗ trợ những filter này
+        if (searchCriteria) {
+          productsList = productsList.filter((product: Product) => {
+            // Filter theo giá
+            if (searchCriteria.minPrice !== undefined && product.price < searchCriteria.minPrice) {
+              return false;
+            }
+            if (searchCriteria.maxPrice !== undefined && product.price > searchCriteria.maxPrice) {
+              return false;
+            }
+
+            // Filter theo rating (tạo mock rating nếu không có)
+            if (searchCriteria.minRating !== undefined) {
+              const productHash = product.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+              const productRating = 4.5 + (productHash % 50) / 100; // 4.5-5.0
+              if (productRating < searchCriteria.minRating) {
+                return false;
+              }
+            }
+
+            return true;
+          });
+        }
+
+        // Nếu có search text, filter theo tên ở frontend để đảm bảo kết quả chính xác
+        // Hỗ trợ tìm kiếm không dấu (luôn filter theo text search ở frontend)
+        if (effectiveSearchText) {
+          const searchNormalized = removeVietnameseAccents(effectiveSearchText);
+          productsList = productsList.filter((product: Product) => {
+            const nameNormalized = removeVietnameseAccents(product.name);
+            return nameNormalized.includes(searchNormalized);
+          });
+        }
+
+        // Nếu không có search criteria, giới hạn số lượng sản phẩm
+        if (!effectiveSearchText && !effectiveCategoryId && !chickenCategoryId) {
+          // Filter các sản phẩm có tên chứa "gà" hoặc "chicken" như mặc định
+          // Hỗ trợ tìm kiếm không dấu
+          const filteredProducts = productsList.filter((product: Product) => {
+            const nameNormalized = removeVietnameseAccents(product.name);
+            return (
+              nameNormalized.includes(removeVietnameseAccents('gà')) ||
+              nameNormalized.includes(removeVietnameseAccents('ga')) ||
+              nameNormalized.includes('chicken')
+            );
+          });
+          return filteredProducts.slice(0, 6) as Product[];
+        }
+
+        return productsList as Product[];
       }
       throw new Error(response.message || 'Failed to fetch products');
     },
-    enabled: searchQuery ? true : categoriesData !== undefined,
+    enabled: true, // Luôn enabled để query chạy khi có thay đổi
   });
 
   const products = productsData || [];
@@ -250,7 +334,7 @@ const PopularItems = ({searchQuery = ''}: PopularItemsProps) => {
     return (
       <View className="pt-2">
         <Text className="text-center text-gray-500 py-4">
-          {searchQuery ? 'Không tìm thấy sản phẩm nào' : 'Chưa có sản phẩm nào'}
+          {effectiveSearchText || searchCriteria ? 'Không tìm thấy sản phẩm nào' : 'Chưa có sản phẩm nào'}
         </Text>
       </View>
     );
