@@ -759,6 +759,45 @@ export const uploadImage = async (imageUri: string) => {
   ).data;
 };
 
+// ==================== NOTIFICATIONS API ====================
+export const fetchNotifications = async (params?: {
+  page?: number;
+  limit?: number;
+  type?: string;
+  isRead?: boolean;
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params?.page) {
+    queryParams.append('page', params.page.toString());
+  }
+  if (params?.limit) {
+    queryParams.append('limit', params.limit.toString());
+  }
+  if (params?.type) {
+    queryParams.append('type', params.type);
+  }
+  if (params?.isRead !== undefined) {
+    queryParams.append('isRead', params.isRead.toString());
+  }
+  return (await api.get(`/notifications?${queryParams.toString()}`)).data;
+};
+
+export const markNotificationAsRead = async (notificationId: string) => {
+  return (await api.patch(`/notifications/${notificationId}/read`)).data;
+};
+
+export const markAllNotificationsAsRead = async () => {
+  return (await api.patch('/notifications/read-all')).data;
+};
+
+export const deleteNotification = async (notificationId: string) => {
+  return (await api.delete(`/notifications/${notificationId}`)).data;
+};
+
+export const getUnreadNotificationCount = async () => {
+  return (await api.get('/notifications/unread/count')).data;
+};
+
 export interface Category {
   id: string;
   name: string;
